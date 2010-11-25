@@ -10,7 +10,7 @@ class Data(object):
         self.rooms = {}
         self.objects = {}
         self.messages = {}
-        self.class_messages = {}
+        self.class_messages = []
         self.magic_messages = {}
 
 # Helper functions.
@@ -44,8 +44,8 @@ def section5(data, n, line, *etc):
 def section6(data, n, line, *etc):
     accumulate_message(data.messages, n, line)
 
-def section10(data, n, line, *etc):
-    accumulate_message(data.class_messages, n, line)
+def section10(data, score, line, *etc):
+    data.class_messages.append((score, line))
 
 def section12(data, n, line, *etc):
     accumulate_message(data.magic_messages, n, line)
