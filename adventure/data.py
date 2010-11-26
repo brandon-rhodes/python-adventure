@@ -1,7 +1,7 @@
 """Parse the original PDP ``advent.dat`` file."""
 
 import os
-from .model import Message, Move, Object, Room
+from .model import Message, Move, Object, Room, Word
 
 ADVENT_DAT = os.path.join(os.path.dirname(__file__), 'advent.dat')
 
@@ -13,6 +13,11 @@ class Data(object):
         self.messages = {}
         self.class_messages = []
         self.magic_messages = {}
+
+    def put_object(self, obj, location):
+        room = make_object(self.rooms, Room, location)
+        room.objects.append(obj)
+        obj.rooms.append(room)
 
 # Helper functions.
 
@@ -69,10 +74,11 @@ def section3(data, x, y, *verbs):
     move.action = action
     data.rooms[x].travel_table.append(move)
 
-def section4(data, n, word, *etc):
+def section4(data, n, text, *etc):
     m = n // 1000
     if m == 0:
-        data.vocabulary[n] = word
+        word = make_object(data.vocabulary, Word, n)
+        word.text = text
 
 def section5(data, n, line, *etc):
     global _object
@@ -87,6 +93,23 @@ def section5(data, n, line, *etc):
 def section6(data, n, line, *etc):
     message = make_object(data.messages, Message, n)
     message.text = line
+
+def section7(data, n, room_n, *etc):
+    if not room_n:
+        return
+    obj = make_object(data.objects, Object, n)
+    data.put_object(obj, room_n)
+    if len(etc):
+        obj.immovable = True
+        if etc[0] != -1:
+            data.put_object(obj, etc[0])  # exists two places, like grate
+
+def section8(data, word_n, message_n):
+    if not message_n:
+        return
+    word = make_object(data.vocabulary, Word, word_n)
+    message = make_object(data.messages, Message, message_n)
+    word.default_message = message
 
 def section10(data, score, line, *etc):
     data.class_messages.append((score, line))

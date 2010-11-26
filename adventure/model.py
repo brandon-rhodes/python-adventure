@@ -8,7 +8,7 @@ class Move(object):
         self.vocabulary = vocabulary
 
     def __repr__(self):
-        verblist = [ self.vocabulary[i] for i in self.verbs ]
+        verblist = [ self.vocabulary[i].text for i in self.verbs ]
         if not self.condition:
             condition = ''
         elif self.condition[0] == '%':
@@ -38,16 +38,25 @@ class Room(object):
         self.long_description = ''
         self.short_description = ''
         self.travel_table = []
+        self.objects = []
 
     @property
     def description(self):
         return self.short_description or self.long_description
 
+class Word(object):
+    """A word that can be used as part of a command."""
+
+    text = ''
+    default_message = None
+
 class Object(object):
     """An object in the game, like a grate, or a rod with a rusty star."""
 
     def __init__(self):
+        self.immovable = False
         self.inventory_message = ''
+        self.rooms = []
         self.prop = 0
         self.prop_messages = {}
 
