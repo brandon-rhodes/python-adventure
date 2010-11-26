@@ -19,6 +19,10 @@ class Data(object):
         room.objects.append(obj)
         obj.rooms.append(room)
 
+    def finish(self):
+        self.vocabulary_words = { word.text: word for word
+                                  in self.vocabulary.values() }
+
 # Helper functions.
 
 def make_object(dictionary, klass, n):
@@ -69,7 +73,9 @@ def section3(data, x, y, *verbs):
     else:
         action = make_object(data.messages, Message, n - 500)
 
-    move = Move(verbs, data.vocabulary)
+    word_list = [ make_object(data.vocabulary, Word, verb_n)
+                  for verb_n in verbs ]
+    move = Move(word_list)
     move.condition = condition
     move.action = action
     data.rooms[x].travel_table.append(move)
@@ -137,4 +143,5 @@ def parse():
             if fields[0] == '-1':  # end-of-section marker
                 break
             store(data, *fields)
+    data.finish()
     return data
