@@ -2,13 +2,14 @@
 
 import os
 import random
-from .model import Move, Object, Room
+from .model import Message, Move, Object, Room
 
 ADVENT_DAT = os.path.join(os.path.dirname(__file__), 'advent.dat')
 
 class Data(object):
     def __init__(self):
         self.rooms = {}
+        self.vocabulary = {}
         self.objects = {}
         self.messages = {}
         self.class_messages = []
@@ -50,16 +51,21 @@ def section3(data, x, y, *verbs):
         condition = lambda(state): state.prop[mm] != mh - 3
 
     if n <= 300:
-        action = lambda(state): state.move_to(n)
+        action = make_object(data.rooms, Room, n)
     elif 300 < n <= 500:
-        action = lambda(state): state.goto(n - 300)
+        action = n - 300
     else:
-        action = lambda(state): state.print_message(n - 500)
+        action = make_object(data.messages, Message, n - 500)
 
-    move = Move(verbs)
+    move = Move(verbs, data.vocabulary)
     move.condition = condition
     move.action = action
     data.rooms[x].travel_table.append(move)
+
+def section4(data, n, word, *etc):
+    m = n // 1000
+    if m == 0:
+        data.vocabulary[n] = word
 
 def section5(data, n, line, *etc):
     global _object
@@ -72,7 +78,8 @@ def section5(data, n, line, *etc):
         messages[n] = messages.get(n, '') + line + '\n'
 
 def section6(data, n, line, *etc):
-    accumulate_message(data.messages, n, line)
+    message = make_object(data.messages, Message, n)
+    message.text = line
 
 def section10(data, score, line, *etc):
     data.class_messages.append((score, line))
