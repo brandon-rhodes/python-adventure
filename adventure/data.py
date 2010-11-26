@@ -1,7 +1,8 @@
 """Parse the original PDP ``advent.dat`` file."""
 
 import os
-from .model import Room, Object
+import random
+from .model import Move, Object, Room
 
 ADVENT_DAT = os.path.join(os.path.dirname(__file__), 'advent.dat')
 
@@ -30,6 +31,35 @@ def section1(data, n, line, *etc):
 
 def section2(data, n, line, *etc):
     make_object(data.rooms, Room, n).short_description += line + '\n'
+
+def section3(data, x, y, *verbs):
+    m, n = divmod(y, 1000)
+    mh, mm = divmod(m, 100)
+
+    if m == 0:
+        condition = lambda(state): True
+    elif 0 < m < 100:
+        condition = lambda(state): random.randint(0, 100) < m
+    elif m == 100:
+        condition = lambda(state): not state.is_dwarf()
+    elif 100 < m <= 200:
+        condition = lambda(state): state.is_carrying(mm)
+    elif 200 < m <= 300:
+        condition = lambda(s): (s.is_carrying(mm) or s.in_room_with(mm))
+    elif 300 < m:
+        condition = lambda(state): state.prop[mm] != mh - 3
+
+    if n <= 300:
+        action = lambda(state): state.move_to(n)
+    elif 300 < n <= 500:
+        action = lambda(state): state.goto(n - 300)
+    else:
+        action = lambda(state): state.print_message(n - 500)
+
+    move = Move(verbs)
+    move.condition = condition
+    move.action = action
+    data.rooms[x].travel_table.append(move)
 
 def section5(data, n, line, *etc):
     global _object
