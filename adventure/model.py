@@ -90,3 +90,7 @@ class Hint(object):
     question = None
     message = None
     used = False
+
+    def write(self, writer):
+        writer(self.message)
+        self.used = True
