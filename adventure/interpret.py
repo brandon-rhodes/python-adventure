@@ -1,6 +1,12 @@
 """Interpret Adventure commands."""
 
+import os
 from .data import parse
+
+def read_data_from_nearby_file():
+    datapath = os.path.join(os.path.dirname(__file__), 'advent.dat')
+    datafile = open(datapath, 'r')
+    return parse(datafile)
 
 def interpret(data, words):
     if words == ['?']:
@@ -24,7 +30,7 @@ def loop(data):
         interpret(data, words)
 
 def play():
-    data = parse()
+    data = read_data_from_nearby_file()
     data.room = data.rooms[1]
     try:
         loop(data)

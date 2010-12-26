@@ -78,3 +78,6 @@ class Object(object):
 class Message(object):
     """A message for printing."""
     text = ''
+
+class Hint(object):
+    """A hint offered if the player loiters in one area too long."""

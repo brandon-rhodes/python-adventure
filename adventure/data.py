@@ -1,9 +1,6 @@
 """Parse the original PDP ``advent.dat`` file."""
 
-import os
-from .model import Message, Move, Object, Room, Word
-
-ADVENT_DAT = os.path.join(os.path.dirname(__file__), 'advent.dat')
+from .model import Hint, Message, Move, Object, Room, Word
 
 class Data(object):
     def __init__(self):
@@ -12,6 +9,7 @@ class Data(object):
         self.objects = {}
         self.messages = {}
         self.class_messages = []
+        self.hints = {}
         self.magic_messages = {}
 
     def put_object(self, obj, location):
@@ -30,13 +28,21 @@ def make_object(dictionary, klass, n):
         dictionary[n] = klass()
     return dictionary[n]
 
+def expand_tabs(segments):
+    it = iter(segments)
+    line = it.next()
+    for segment in it:
+        spaces = 8 - len(line) % 8
+        line += ' ' * spaces + segment
+    return line
+
 def accumulate_message(dictionary, n, line):
     dictionary[n] = dictionary.get(n, '') + line + '\n'
 
 # Knowledge of what each section contains.
 
-def section1(data, n, line, *etc):
-    make_object(data.rooms, Room, n).long_description += line + '\n'
+def section1(data, n, *etc):
+    make_object(data.rooms, Room, n).long_description += expand_tabs(etc) + '\n'
 
 def section2(data, n, line, *etc):
     make_object(data.rooms, Room, n).short_description += line + '\n'
@@ -96,9 +102,9 @@ def section5(data, n, line, *etc):
         messages = _object.prop_messages
         messages[n] = messages.get(n, '') + line + '\n'
 
-def section6(data, n, line, *etc):
+def section6(data, n, *etc):
     message = make_object(data.messages, Message, n)
-    message.text = line
+    message.text += expand_tabs(etc) + '\n'
 
 def section7(data, n, room_n, *etc):
     if not room_n:
@@ -117,29 +123,35 @@ def section8(data, word_n, message_n):
     message = make_object(data.messages, Message, message_n)
     word.default_message = message
 
+def section9(data, *args):
+    pass
+
 def section10(data, score, line, *etc):
     data.class_messages.append((score, line))
+
+def section11(data, n, turns, penalty, question_n, message_n):
+    hint = make_object(data.hints, Hint, n)
+    hint.turns = turns
+    hint.penalty = penalty
+    hint.question = make_object(data.messages, Message, question_n)
+    hint.message = make_object(data.messages, Message, message_n)
 
 def section12(data, n, line, *etc):
     accumulate_message(data.magic_messages, n, line)
 
-def skip(*args):
-    pass
-
 # Process every section of the file in turn.
 
-def parse():
+def parse(datafile):
     """Read the Adventure data file and return a ``Data`` object."""
     data = Data()
-    f = open(ADVENT_DAT, 'r')
     while True:
-        section_number = int(f.readline())
+        section_number = int(datafile.readline())
         if not section_number:  # no further sections
             break
-        store = globals().get('section%d' % section_number, skip)
+        store = globals().get('section%d' % section_number)
         while True:
             fields = [ (int(field) if field.isdigit() else field)
-                       for field in f.readline().strip().split('\t') ]
+                       for field in datafile.readline().strip().split('\t') ]
             if fields[0] == '-1':  # end-of-section marker
                 break
             store(data, *fields)
