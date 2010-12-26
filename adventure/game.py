@@ -2,10 +2,12 @@
 
 YESNO_ANSWERS = {'y': True, 'yes': True, 'n': False, 'no': False}
 
-class Game(object):
+from .data import Data
 
-    def __init__(self, data, writer):
-        self.data = data
+class Game(Data):
+
+    def __init__(self, writer):
+        Data.__init__(self)
         self.writer = writer
         self.yesno_callback = False
 
@@ -22,13 +24,13 @@ class Game(object):
 
     def start(self):
         """Start the game."""
-        self.yesno(self.data.messages[65], self.instruct)  # like instructions?
+        self.yesno(self.messages[65], self.instruct)  # like instructions?
 
     def instruct(self, yes):
         """Print out instructions if the user wants them."""
         if yes:
-            self.write(self.data.messages[1])
-            self.data.hints[3].used = True
+            self.write(self.messages[1])
+            self.hints[3].used = True
 
     # The central do_command() method, that should be called over and
     # over again with words supplied by the user.

@@ -4,10 +4,10 @@ import codecs
 import os
 from .data import parse
 
-def read_data_from_nearby_file():
+def read_data_from_nearby_file(data):
     datapath = os.path.join(os.path.dirname(__file__), 'advent.dat')
     datafile = codecs.open(datapath, 'r', encoding='ascii')
-    return parse(datafile)
+    parse(data, datafile)
 
 def interpret(data, words):
     if words == ['?']:

@@ -139,9 +139,8 @@ def section12(data, n, line):
 
 # Process every section of the file in turn.
 
-def parse(datafile):
+def parse(data, datafile):
     """Read the Adventure data file and return a ``Data`` object."""
-    data = Data()
     data._last_travel = [0, [0]]  # x and verbs used by section 3
     while True:
         section_number = int(datafile.readline())

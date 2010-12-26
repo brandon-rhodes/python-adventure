@@ -12,7 +12,7 @@ class ReprTriggeredIdentifier(object):
         self.function(*self.args, **self.kw)
         return u''
 
-def install_builtins(data, game):
+def install_builtins(game):
     for word in ('yes', 'no'):
         identifier = ReprTriggeredIdentifier(game.do_command, [ word ])
         setattr(__builtin__, word, identifier)
