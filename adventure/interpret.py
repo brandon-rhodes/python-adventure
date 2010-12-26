@@ -1,11 +1,12 @@
 """Interpret Adventure commands."""
 
+import codecs
 import os
 from .data import parse
 
 def read_data_from_nearby_file():
     datapath = os.path.join(os.path.dirname(__file__), 'advent.dat')
-    datafile = open(datapath, 'r')
+    datafile = codecs.open(datapath, 'r', encoding='ascii')
     return parse(datafile)
 
 def interpret(data, words):

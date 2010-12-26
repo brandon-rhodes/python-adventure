@@ -49,8 +49,8 @@ class Room(object):
     """A location in the game."""
 
     def __init__(self):
-        self.long_description = ''
-        self.short_description = ''
+        self.long_description = u''
+        self.short_description = u''
         self.travel_table = []
         self.objects = []
         self.visited = False
@@ -62,7 +62,7 @@ class Room(object):
 class Word(object):
     """A word that can be used as part of a command."""
 
-    text = ''
+    text = u''
     default_message = None
 
 class Object(object):
@@ -70,14 +70,17 @@ class Object(object):
 
     def __init__(self):
         self.immovable = False
-        self.inventory_message = ''
+        self.inventory_message = u''
         self.rooms = []
         self.prop = 0
         self.prop_messages = {}
 
 class Message(object):
     """A message for printing."""
-    text = ''
+    text = u''
+
+    def __unicode__(self):
+        return self.text
 
 class Hint(object):
     """A hint offered if the player loiters in one area too long."""

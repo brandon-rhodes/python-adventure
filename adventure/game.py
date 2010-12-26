@@ -2,10 +2,13 @@
 
 class Game(object):
 
-    def __init__(self, data, write, asker):
+    def __init__(self, data, writer, asker):
         self.data = data
-        self.write = write
+        self.writer = writer
         self.asker = asker
 
+    def write(self, s):
+        self.writer(unicode(s))
+
     def start(self):
-        self.write(self.data.messages[65].text)
+        self.write(self.data.messages[65])
