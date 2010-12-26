@@ -1,0 +1,4 @@
+>>> import adventure
+>>> adventure.play()
+WELCOME TO ADVENTURE!!  WOULD YOU LIKE INSTRUCTIONS?
+

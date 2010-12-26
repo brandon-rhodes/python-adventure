@@ -81,3 +81,9 @@ class Message(object):
 
 class Hint(object):
     """A hint offered if the player loiters in one area too long."""
+
+    turns = 0
+    penalty = 0
+    question = None
+    message = None
+    used = False

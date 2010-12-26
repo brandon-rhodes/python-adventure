@@ -7,9 +7,10 @@ class FooTest(unittest.TestCase):
         self.data = read_data_from_nearby_file()
 
     def test_long_description(self):
-        self.assertEqual(self.data.rooms[4].long_description,
-                         "YOU ARE IN A VALLEY IN THE FOREST BESIDE A STREAM"
-                         " TUMBLING ALONG A\nROCKY BED.\n")
+        self.assertEqual(self.data.rooms[4].long_description, """\
+YOU ARE IN A VALLEY IN THE FOREST BESIDE A STREAM TUMBLING ALONG A
+ROCKY BED.
+""")
 
     def test_long_descriptions_expands_tabs(self):
         self.assertIn("ALMOST AS IF ALIVE.  A COLD WIND BLOWS",
@@ -20,9 +21,9 @@ class FooTest(unittest.TestCase):
                          "YOU'RE IN VALLEY.\n")
 
     def test_object_prop_message_expands_tabs(self):
-        self.assertEqual(self.data.objects[24].prop_messages[5],
-                         "YOU'VE OVER-WATERED THE PLANT!  IT'S SHRIVELING UP!"
-                         "  IT'S, IT'S...\n")
+        self.assertEqual(self.data.objects[24].prop_messages[5], """\
+YOU'VE OVER-WATERED THE PLANT!  IT'S SHRIVELING UP!  IT'S, IT'S...
+""")
 
     def test_hint(self):
         hint = self.data.hints[4]
