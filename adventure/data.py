@@ -45,17 +45,15 @@ def section1(data, n, *etc):
     room = make_object(data.rooms, Room, n)
     room.long_description += expand_tabs(etc) + '\n'
 
-def section2(data, n, line, *etc):
+def section2(data, n, line):
     make_object(data.rooms, Room, n).short_description += line + '\n'
 
-_last_travel = [0, [0]]  # x and verbs
-
 def section3(data, x, y, *verbs):
-    global _last_travel
-    if _last_travel[0] == x and _last_travel[1][0] == verbs[0]:
-        verbs = _last_travel[1]  # same first verb implies use whole list
+    last_travel = data._last_travel
+    if last_travel[0] == x and last_travel[1][0] == verbs[0]:
+        verbs = last_travel[1]  # same first verb implies use whole list
     else:
-        _last_travel = [x, verbs]
+        last_travel = [x, verbs]
 
     m, n = divmod(y, 1000)
     mh, mm = divmod(m, 100)
@@ -94,13 +92,12 @@ def section4(data, n, text, *etc):
         word.text = text
 
 def section5(data, n, *etc):
-    global _object
     if 1 <= n <= 99:
-        _object = make_object(data.objects, Object, n)
-        _object.inventory_message = expand_tabs(etc)
+        data._object = make_object(data.objects, Object, n)
+        data._object.inventory_message = expand_tabs(etc)
     else:
         n /= 100
-        messages = _object.prop_messages
+        messages = data._object.prop_messages
         messages[n] = messages.get(n, '') + expand_tabs(etc) + '\n'
 
 def section6(data, n, *etc):
@@ -145,6 +142,7 @@ def section12(data, n, line):
 def parse(datafile):
     """Read the Adventure data file and return a ``Data`` object."""
     data = Data()
+    data._last_travel = [0, [0]]  # x and verbs used by section 3
     while True:
         section_number = int(datafile.readline())
         if not section_number:  # no further sections
@@ -157,4 +155,6 @@ def parse(datafile):
                 break
             store(data, *fields)
     data.finish()
+    del data._last_travel  # state used by section 3
+    del data._object       # state used by section 5
     return data
