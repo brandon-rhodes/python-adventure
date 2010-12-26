@@ -42,7 +42,8 @@ def accumulate_message(dictionary, n, line):
 # Knowledge of what each section contains.
 
 def section1(data, n, *etc):
-    make_object(data.rooms, Room, n).long_description += expand_tabs(etc) + '\n'
+    room = make_object(data.rooms, Room, n)
+    room.long_description += expand_tabs(etc) + '\n'
 
 def section2(data, n, line, *etc):
     make_object(data.rooms, Room, n).short_description += line + '\n'
@@ -92,15 +93,15 @@ def section4(data, n, text, *etc):
         word = make_object(data.vocabulary, Word, n)
         word.text = text
 
-def section5(data, n, line, *etc):
+def section5(data, n, *etc):
     global _object
     if 1 <= n <= 99:
         _object = make_object(data.objects, Object, n)
-        _object.inventory_message = line
+        _object.inventory_message = expand_tabs(etc)
     else:
         n /= 100
         messages = _object.prop_messages
-        messages[n] = messages.get(n, '') + line + '\n'
+        messages[n] = messages.get(n, '') + expand_tabs(etc) + '\n'
 
 def section6(data, n, *etc):
     message = make_object(data.messages, Message, n)
@@ -136,7 +137,7 @@ def section11(data, n, turns, penalty, question_n, message_n):
     hint.question = make_object(data.messages, Message, question_n)
     hint.message = make_object(data.messages, Message, message_n)
 
-def section12(data, n, line, *etc):
+def section12(data, n, line):
     accumulate_message(data.magic_messages, n, line)
 
 # Process every section of the file in turn.

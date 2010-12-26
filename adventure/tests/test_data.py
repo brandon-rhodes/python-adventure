@@ -19,6 +19,11 @@ class FooTest(unittest.TestCase):
         self.assertEqual(self.data.rooms[4].short_description,
                          "YOU'RE IN VALLEY.\n")
 
+    def test_object_prop_message_expands_tabs(self):
+        self.assertEqual(self.data.objects[24].prop_messages[5],
+                         "YOU'VE OVER-WATERED THE PLANT!  IT'S SHRIVELING UP!"
+                         "  IT'S, IT'S...\n")
+
     def test_hint(self):
         hint = self.data.hints[4]
         self.assertEqual(hint.turns, 4)
