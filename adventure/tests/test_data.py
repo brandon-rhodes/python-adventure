@@ -14,7 +14,7 @@ YOU ARE IN A VALLEY IN THE FOREST BESIDE A STREAM TUMBLING ALONG A
 ROCKY BED.
 """)
 
-    def test_long_descriptions_expands_tabs(self):
+    def test_long_description_expands_tabs(self):
         self.assertIn(u"ALMOST AS IF ALIVE.  A COLD WIND BLOWS",
                       self.data.rooms[15].long_description)
 

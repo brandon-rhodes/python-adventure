@@ -48,6 +48,8 @@ class Move(object):
 class Room(object):
     """A location in the game."""
 
+    times_described = 0
+
     def __init__(self):
         self.long_description = u''
         self.short_description = u''
