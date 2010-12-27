@@ -58,6 +58,10 @@ class Room(object):
         self.visited = False
 
     @property
+    def is_aboveground(self):
+        return 1 <= self.n <= 8
+
+    @property
     def description(self):
         return self.visited and self.short_description or self.long_description
 
@@ -67,6 +71,9 @@ class Word(object):
     kind = None
     text = u''
     default_message = None
+
+    def __eq__(self, other):
+        return self.text == other
 
 class Object(object):
     """An object in the game, like a grate, or a rod with a rusty star."""
