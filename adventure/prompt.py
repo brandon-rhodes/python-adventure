@@ -19,6 +19,11 @@ class ReprTriggeredIdentifier(object):
         return v
 
 def install_builtins(game):
-    for word in ('yes', 'no'):
+    words = [ k for k in game.vocabulary if isinstance(k, unicode) ]
+    words.append('yes')
+    words.append('no')
+    for word in words:
+        if word in ('exit', 'help', 'open', 'quit'):
+            continue
         identifier = ReprTriggeredIdentifier(game, [ word ])
         setattr(__builtin__, word, identifier)

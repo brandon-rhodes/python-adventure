@@ -17,15 +17,12 @@ class Data(object):
         room.objects.append(obj)
         obj.rooms.append(room)
 
-    def finish(self):
-        self.vocabulary_words = { word.text: word for word
-                                  in self.vocabulary.values() }
-
 # Helper functions.
 
 def make_object(dictionary, klass, n):
     if n not in dictionary:
-        dictionary[n] = klass()
+        dictionary[n] = obj = klass()
+        obj.n = n
     return dictionary[n]
 
 def expand_tabs(segments):
@@ -86,10 +83,11 @@ def section3(data, x, y, *verbs):
     data.rooms[x].travel_table.append(move)
 
 def section4(data, n, text, *etc):
-    m = n // 1000
-    if m == 0:
-        word = make_object(data.vocabulary, Word, n)
-        word.text = text
+    text = text.lower()
+    word = make_object(data.vocabulary, Word, n)
+    word.text = text
+    word.kind = ['motion', 'object', 'verb', 'random_message'][n // 1000]
+    data.vocabulary[text] = word
 
 def section5(data, n, *etc):
     if 1 <= n <= 99:
@@ -142,6 +140,7 @@ def section12(data, n, line):
 def parse(data, datafile):
     """Read the Adventure data file and return a ``Data`` object."""
     data._last_travel = [0, [0]]  # x and verbs used by section 3
+
     while True:
         section_number = int(datafile.readline())
         if not section_number:  # no further sections
@@ -153,7 +152,7 @@ def parse(data, datafile):
             if fields[0] == '-1':  # end-of-section marker
                 break
             store(data, *fields)
-    data.finish()
+
     del data._last_travel  # state used by section 3
     del data._object       # state used by section 5
     return data

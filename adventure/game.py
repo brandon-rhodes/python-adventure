@@ -49,7 +49,9 @@ class Game(Data):
             if answer is None:
                 self.write('Please answer the question.')
             else:
-                self.yesno_callback(answer)
+                callback = self.yesno_callback
+                self.yesno_callback = None
+                callback(answer)
             return
 
         here = self.here
@@ -57,11 +59,12 @@ class Game(Data):
         if not here:
             raise NotImplemented('death not yet implemented')
 
-        if words == ['look']:
-            if self.look_complaints > 0:
-                self.write(self.messages[15])
-                self.look_complaints -= 1
-            here.times_described = 0
+        word = self.vocabulary[words[0]]
+        if word.kind == 'motion':
+            if word.text in ('cave', 'look'):
+                getattr(self, word.text)()
+
+    # Helpful routines.
 
     def describe_location(self):
         here = self.here
@@ -71,3 +74,14 @@ class Game(Data):
         else:
             self.write(here.long_description)
         here.times_described += 1
+
+    # Specific intransitive commands.
+
+    def look(self):
+        if self.look_complaints > 0:
+            self.write(self.messages[15])
+            self.look_complaints -= 1
+        self.here.times_described = 0
+
+    def cave(self):
+        self.write(self.messages[57 if (self.here.n < 8) else 58])

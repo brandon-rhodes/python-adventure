@@ -64,6 +64,7 @@ class Room(object):
 class Word(object):
     """A word that can be used as part of a command."""
 
+    kind = None
     text = u''
     default_message = None
 
