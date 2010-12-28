@@ -15,7 +15,8 @@ class Game(Data):
         self.writer = writer
         self.yesno_callback = False
 
-        self.is_closing = False          # is the cave closing?
+        self.is_closing = False         # is the cave closing?
+        self.is_closed = False          # is the cave closed?
         self.could_fall_in_pit = False  # could the player fall into a pit?
 
     def write(self, s):
@@ -127,10 +128,13 @@ class Game(Data):
 
     def finish_turn(self):  #2600
         # put hints here
-        # put closing-time "prop" special case here
-        self.could_fall_in_pit = self.loc.is_dark
-        # knfloc?
-        pass
+        if self.is_closed:
+            if self.oyste.prop < 0: # and toting it
+                self.write(self.oyste.messages[1])
+            # put closing-time "prop" special case here
+
+        self.could_fall_in_pit = self.loc.is_dark  #2605
+        # remove knife from cave if they moved away from it
 
     # The central do_command() method, that should be called over and
     # over again with words supplied by the user.
@@ -160,13 +164,17 @@ class Game(Data):
 
     #
 
-    def do_motion(self, verb):  #8
+    def do_motion(self, word):  #8
 
-        if verb == u'back':  #20
+        if word == u'null':
+            self.move_to()
+            return
+
+        elif word == u'back':  #20
             #todo
             return
 
-        elif verb == u'look':  #30
+        elif word == u'look':  #30
             if self.look_complaints > 0:
                 self.write_message(15)
                 self.look_complaints -= 1
@@ -175,18 +183,33 @@ class Game(Data):
             self.could_fall_in_pit = False
             return
 
-        elif verb == u'cave':  #40
+        elif word == u'cave':  #40
             self.write(self.messages[57 if self.loc.is_aboveground else 58])
             self.move_to()
             return
 
         for move in self.loc.travel_table:
-            if verb in move.verbs: # == 1?
+            if move.always or word in move.verbs:
                 # if action is a room:
                 self.move_to(move.action)
                 return
 
         # todo #50
+        n = word.n
+        if 29 <= n <= 30 or 43 <= n <= 50:
+            self.write_message(9)
+        elif n in (7, 36, 37):
+            self.write_message(10)
+        elif n in (11, 19):
+            self.write_message(11)
+        elif word == u'find' or word == u'invent':  # ? this might be wrong
+            self.write_message(59)
+        elif n in (62, 65):
+            self.write_message(42)
+        elif n == 17:
+            self.write_message(80)
+        else:
+            self.write_message(12)
         self.move_to()
         return
 

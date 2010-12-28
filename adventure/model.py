@@ -3,8 +3,10 @@
 class Move(object):
     """An entry in the travel table."""
 
-    def __init__(self, verbs):
-        self.verbs = verbs
+    always = False
+    verbs = []
+    condition = None
+    action = None
 
     def __repr__(self):
         verblist = [ verb.text for verb in self.verbs ]

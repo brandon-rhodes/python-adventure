@@ -75,9 +75,12 @@ def section3(data, x, y, *verbs):
     else:
         action = make_object(data.messages, Message, n - 500)
 
-    word_list = [ make_object(data.vocabulary, Word, verb_n)
-                  for verb_n in verbs ]
-    move = Move(word_list)
+    move = Move()
+    if len(verbs) == 1 and verbs[0] == 1:
+        move.always = True
+    else:
+        move.verbs = [ make_object(data.vocabulary, Word, verb_n)
+                       for verb_n in verbs ]
     move.condition = condition
     move.action = action
     data.rooms[x].travel_table.append(move)
