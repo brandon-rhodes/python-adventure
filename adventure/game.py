@@ -1,8 +1,9 @@
 """How we keep track of the state of the game."""
 
-YESNO_ANSWERS = {'y': True, 'yes': True, 'n': False, 'no': False}
-
+from random import random
 from .data import Data
+
+YESNO_ANSWERS = {'y': True, 'yes': True, 'n': False, 'no': False}
 
 class Game(Data):
 
@@ -13,7 +14,9 @@ class Game(Data):
         Data.__init__(self)
         self.writer = writer
         self.yesno_callback = False
-        self.closing = False
+
+        self.is_closing = False          # is the cave closing?
+        self.dark_and_dangerous = False  # could the player fall into a pit?
 
     def write(self, s):
         """Output the Unicode representation of `s`."""
@@ -27,6 +30,10 @@ class Game(Data):
         """Ask a question and prepare to receive a yes-or-no answer."""
         self.write(s)
         self.yesno_callback = yesno_callback
+
+    @property
+    def is_dark(self):
+        return self.loc.is_dark  # and also check for lamp!
 
     # Game startup
 
@@ -42,14 +49,17 @@ class Game(Data):
         self.loc = self.rooms[1]
         self.describe_location()
 
-    # Routines that handle the aftermath of "big" commands like movement.
+    # Routines that handle the aftermath of "big" actions like movement.
+    # Although these are called at the end of each `do_command()` cycle,
+    # we place here at the top of `game.py` to mirror the order in the
+    # advent.for file.
 
     def move_to(self, newloc=None):  #2
         loc = self.loc
         if newloc is None:
             newloc = loc
 
-        if self.closing and newloc.is_aboveground:
+        if self.is_closing and newloc.is_aboveground:
             self.write_message(130)
             newloc = loc
             if not self.panic:
@@ -58,30 +68,52 @@ class Game(Data):
 
         # put dwarf stuff here
 
-        loc = self.loc = newloc
-        self.describe_location()
-
-    def say_okay(self):  #2012
-        self.write_message(54)
+        self.loc = newloc
         self.describe_location()
 
     def describe_location(self):  #2000
+
+        # check for whether they already have died? or do as sep func?
+
         loc = self.loc
-        short = loc.times_described % self.full_description_period
-        if short and loc.short_description:
-            self.write(loc.short_description)
+
+        # possibly kill the player if they are moving around in the dark
+        if self.dark_and_dangerous and random() < 0.35: # ...and NOT forced location!
+            self.die()
+            return
+
+        # if self.toting(bear):
+        #     self.write_message(141)
+
+        if self.is_dark: # ...and NOT forced location!
+            self.write_message(16)
         else:
-            self.write(loc.long_description)
-        loc.times_described += 1
+            do_short = loc.times_described % self.full_description_period
+            loc.times_described += 1
+            if do_short and loc.short_description:
+                self.write(loc.short_description)
+            else:
+                self.write(loc.long_description)
 
+        #
+
+        self.finish_turn()
+
+    def say_okay(self):  #2012
+        self.write_message(54)
+        self.finish_turn()
+
+    def finish_turn(self):
         # put hints here
-
         # put closing-time "prop" special case here
+        self.dark_and_dangerous = self.loc.is_dark
+        # knfloc?
+        pass
 
     # The central do_command() method, that should be called over and
     # over again with words supplied by the user.
 
-    def do_command(self, words):
+    def do_command(self, words):  #2608
         """Parse and act upon the command in the list of strings `words`."""
 
         if self.yesno_callback is not None:
@@ -101,26 +133,27 @@ class Game(Data):
 
         word = self.vocabulary[words[0]]
 
-        if word.kind == 'motion': #8
+        if word.kind == 'motion':
             self.do_motion(word)
 
     #
 
-    def do_motion(self, verb):
+    def do_motion(self, verb):  #8
 
-        if verb == u'back':
+        if verb == u'back':  #20
             #todo
             return
 
-        elif verb == u'look':
+        elif verb == u'look':  #30
             if self.look_complaints > 0:
                 self.write_message(15)
                 self.look_complaints -= 1
             self.loc.times_described = 0
             self.move_to()
+            self.dark_and_dangerous = False  # don't make them fall into pit
             return
 
-        elif verb == u'cave':
+        elif verb == u'cave':  #40
             self.write(self.messages[57 if self.loc.is_aboveground else 58])
             self.move_to()
             return
@@ -134,3 +167,6 @@ class Game(Data):
         # todo #50
         self.move_to()
         return
+
+    def die(self):  #90
+        self.write_message(23)

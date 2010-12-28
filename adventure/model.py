@@ -48,18 +48,33 @@ class Move(object):
 class Room(object):
     """A location in the game."""
 
+    long_description = u''
+    short_description = u''
     times_described = 0
+    visited = False
+
+    is_light = False
+    has_water = False
+    has_oil = False
+    is_avoided_by_pirate = False
+    trying_to_get_into_cave = False
+    trying_to_catch_bird = False
+    trying_to_deal_with_snake = False
+    lost_in_maze = False
+    pondering_dark_room = False
+    at_witts_end = False
 
     def __init__(self):
-        self.long_description = u''
-        self.short_description = u''
         self.travel_table = []
         self.objects = []
-        self.visited = False
 
     @property
     def is_aboveground(self):
         return 1 <= self.n <= 8
+
+    @property
+    def is_dark(self):
+        return not self.is_light
 
     @property
     def description(self):
