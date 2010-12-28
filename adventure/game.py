@@ -163,6 +163,34 @@ class Game(Data):
 
         if word.kind == 'motion':
             self.do_motion(word)
+            return
+
+        elif word == u'inven':
+            first = True
+            for obj in self.objects.values():
+                if obj.toting: # ...and is not bear
+                    if first:
+                        self.write_message(99)
+                        first = False
+                    self.write(obj.inventory_message)
+            # ... and do bear too
+            self.finish_turn()
+            return
+
+        elif word == u'get':
+            # if toting obj: goto 2011 and actspeak thing
+            word2 = self.vocabulary[words[1]]
+            obj = self.objects[word2.n % 1000]
+            obj.toting = True
+            del obj.rooms[:]
+            return
+
+        elif word == u'unloc':
+            word2 = self.vocabulary[words[1]]
+            # TODO
+            return
+
+        raise NotImplementedError('cannot do word: %r' % word)
 
     #
 

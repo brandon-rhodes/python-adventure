@@ -88,7 +88,7 @@ def section3(data, x, y, *verbs):
 def section4(data, n, text, *etc):
     text = text.lower()
     word = make_object(data.vocabulary, Word, n)
-    word.text = text
+    word.texts.append(text)
     word.kind = ['motion', 'object', 'verb', 'random_message'][n // 1000]
     data.vocabulary[text] = word
 

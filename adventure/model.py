@@ -88,14 +88,19 @@ class Room(object):
         return self.visited and self.short_description or self.long_description
 
 class Word(object):
-    """A word that can be used as part of a command."""
+    """A set of synonyms that can be used as part of a command."""
 
     kind = None
-    text = u''
     default_message = None
 
+    def __init__(self):
+        self.texts = []
+
+    def __repr__(self):
+        return '<Word %s>' % '/'.join(self.texts)
+
     def __eq__(self, other):
-        return self.text == other
+        return any( text == other for text in self.texts )
 
 class Object(object):
     """An object in the game, like a grate, or a rod with a rusty star."""
@@ -103,6 +108,7 @@ class Object(object):
     def __init__(self):
         self.immovable = False
         self.inventory_message = u''
+        self.toting = False
         self.rooms = []
         self.prop = 0
         self.messages = {}
