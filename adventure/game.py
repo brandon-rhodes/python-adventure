@@ -1,6 +1,6 @@
 """How we keep track of the state of the game."""
 
-from random import random
+from random import random, choice
 from .data import Data
 from .model import Message, Room
 
@@ -10,6 +10,7 @@ class Game(Data):
 
     look_complaints = 3  # how many times to "SORRY, BUT I AM NOT ALLOWED..."
     full_description_period = 5  # how often we use a room's full description
+    full_wests = 0  # how many times they have typed "west" instead of "w"
 
     def __init__(self, writer):
         Data.__init__(self)
@@ -104,7 +105,7 @@ class Game(Data):
             self.speak_message(8)
 
         if not self.is_dark:
-            for obj in self.objects.values():
+            for n, obj in sorted(self.objects.items()):
 
                 if loc not in obj.rooms:
                     continue
@@ -124,7 +125,7 @@ class Game(Data):
 
         self.finish_turn()
 
-    def say_okay(self):  #2012
+    def say_okay(self):  #2009
         self.write_message(54)
         self.finish_turn()
 
@@ -162,37 +163,71 @@ class Game(Data):
         word = self.vocabulary[words[0]]
 
         if word.kind == 'motion':
+            if words[0] == 'west':
+                self.full_wests += 1
+                if self.full_wests == 10:
+                    self.write_message(17)
             self.do_motion(word)
-            return
 
-        elif word == u'inven':
-            first = True
-            for obj in self.objects.values():
-                if obj.toting: # ...and is not bear
-                    if first:
-                        self.write_message(99)
-                        first = False
-                    self.write(obj.inventory_message)
-            # ... and do bear too
-            self.finish_turn()
-            return
+        elif word.kind == 'verb':
+            prefix = 't_' if len(words) == 2 else 'i_'  # (in)transitive
+            if len(words) == 2:
+                word2 = self.vocabulary[words[1]]
+                obj = self.objects[word2.n % 1000]
+                args = (word, obj)
+            else:
+                args = (word,)
+            getattr(self, prefix + word.names[0])(*args)
 
-        elif word == u'get':
-            # if toting obj: goto 2011 and actspeak thing
-            word2 = self.vocabulary[words[1]]
-            obj = self.objects[word2.n % 1000]
-            obj.toting = True
-            del obj.rooms[:]
-            return
+    # Verbs.
 
-        elif word == u'unloc':
-            word2 = self.vocabulary[words[1]]
-            # TODO
-            return
+    def t_carry(self, verb, obj):  #9010
+        # if toting obj: goto 2011 and actspeak thing
+        obj.toting = True
+        del obj.rooms[:]
+        return
 
-        raise NotImplementedError('cannot do word: %r' % word)
+    def t_unloc(self, verb, obj):  #8040
+        if obj == u'clam' or obj == u'oyste':
+            raise NotImplementedError()  #9046
+        elif obj == u'door':
+            if obj.prop == 1:
+                self.write_message(54)
+            else:
+                self.write_message(111)
+        elif obj == u'cage':
+            self.write_message(32)
+        elif obj == u'keys':
+            self.write_message(55)
+        elif obj == u'grate' or obj == u'chain':
+            # if keys are not here, write message 31 and give up
+            if obj == u'chain':
+                raise NotImplementedError()  #9048
+            else:
+                if self.is_closing:
+                    raise NotImplementedError()  # set panic clock etc
+                else:
+                    oldprop = obj.prop
+                    obj.prop = 0 if verb == u'lock' else 1
+                    self.write_message(34 + oldprop + 2 * obj.prop)
+        else:
+            self.write(verb.names)
+            self.write(obj.names)
+            self.write(verb.default_message)
+        self.finish_turn()
 
-    #
+    def i_inven(self, verb):  #8200
+        first = True
+        for n, obj in sorted(self.objects.items()):
+            if obj.toting: # ...and is not bear
+                if first:
+                    self.write_message(99)
+                    first = False
+                self.write(obj.inventory_message)
+        # ... and do bear too
+        self.finish_turn()
+
+    # Motion.
 
     def do_motion(self, word):  #8
 

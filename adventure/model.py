@@ -94,13 +94,13 @@ class Word(object):
     default_message = None
 
     def __init__(self):
-        self.texts = []
+        self.names = []
 
     def __repr__(self):
-        return '<Word %s>' % '/'.join(self.texts)
+        return '<Word %s>' % '/'.join(self.names)
 
     def __eq__(self, other):
-        return any( text == other for text in self.texts )
+        return any( text == other for text in self.names )
 
 class Object(object):
     """An object in the game, like a grate, or a rod with a rusty star."""
@@ -108,10 +108,17 @@ class Object(object):
     def __init__(self):
         self.immovable = False
         self.inventory_message = u''
-        self.toting = False
-        self.rooms = []
-        self.prop = 0
         self.messages = {}
+        self.names = []
+        self.prop = 0
+        self.rooms = []
+        self.toting = False
+
+    def __repr__(self):
+        return '<Object %s>' % '/'.join(self.names)
+
+    def __eq__(self, other):
+        return any( text == other for text in self.names )
 
 class Message(object):
     """A message for printing."""

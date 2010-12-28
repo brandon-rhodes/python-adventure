@@ -85,12 +85,15 @@ def section3(data, x, y, *verbs):
     move.action = action
     data.rooms[x].travel_table.append(move)
 
-def section4(data, n, text, *etc):
-    text = text.lower()
+def section4(data, n, name, *etc):
+    name = name.lower()
     word = make_object(data.vocabulary, Word, n)
-    word.texts.append(text)
+    word.names.append(name)
     word.kind = ['motion', 'object', 'verb', 'random_message'][n // 1000]
-    data.vocabulary[text] = word
+    if word.kind == 'object':
+        obj = make_object(data.objects, Object, n % 1000)
+        obj.names.append(name)
+    data.vocabulary[name] = word
 
 def section5(data, n, *etc):
     if 1 <= n <= 99:
