@@ -16,7 +16,7 @@ class Game(Data):
         self.yesno_callback = False
 
         self.is_closing = False          # is the cave closing?
-        self.dark_and_dangerous = False  # could the player fall into a pit?
+        self.could_fall_in_pit = False  # could the player fall into a pit?
 
     def write(self, s):
         """Output the Unicode representation of `s`."""
@@ -78,7 +78,7 @@ class Game(Data):
         loc = self.loc
 
         # possibly kill the player if they are moving around in the dark
-        if self.dark_and_dangerous and random() < 0.35: # ...and NOT forced location!
+        if self.could_fall_in_pit and random() < .35: # ...and NOT forced location!
             self.die()
             return
 
@@ -95,7 +95,29 @@ class Game(Data):
             else:
                 self.write(loc.long_description)
 
-        #
+        # do forced location here
+
+        if loc.n == 33 and random() < .25 and not self.is_closing:
+            self.speak_message(8)
+
+        if not self.is_dark:
+            for obj in self.objects.values():
+
+                if loc not in obj.rooms:
+                    continue
+
+                #IF(OBJ.GT.100)OBJ=OBJ-100
+                if obj == u'steps': #...and toting nugget
+                    continue
+
+                if obj.prop < 0:  # finding a treasure the first time
+                    if self.is_closing:
+                        continue
+                    obj.prop = 1 if (obj == u'rug' or obj == u'chain') else 0
+                    #IF(TALLY.EQ.TALLY2.AND.TALLY.NE.0)LIMIT=MIN0(35,LIMIT)
+
+                #if obj == u'steps' and AND.LOC.EQ.FIXED(STEPS))prop=1
+                self.write(obj.messages[obj.prop])
 
         self.finish_turn()
 
@@ -103,10 +125,10 @@ class Game(Data):
         self.write_message(54)
         self.finish_turn()
 
-    def finish_turn(self):
+    def finish_turn(self):  #2600
         # put hints here
         # put closing-time "prop" special case here
-        self.dark_and_dangerous = self.loc.is_dark
+        self.could_fall_in_pit = self.loc.is_dark
         # knfloc?
         pass
 
@@ -150,7 +172,7 @@ class Game(Data):
                 self.look_complaints -= 1
             self.loc.times_described = 0
             self.move_to()
-            self.dark_and_dangerous = False  # don't make them fall into pit
+            self.could_fall_in_pit = False
             return
 
         elif verb == u'cave':  #40

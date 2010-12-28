@@ -98,7 +98,7 @@ class Object(object):
         self.inventory_message = u''
         self.rooms = []
         self.prop = 0
-        self.prop_messages = {}
+        self.messages = {}
 
 class Message(object):
     """A message for printing."""

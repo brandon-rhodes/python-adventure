@@ -22,8 +22,8 @@ ROCKY BED.
         self.assertEqual(self.data.rooms[4].short_description,
                          u"YOU'RE IN VALLEY.\n")
 
-    def test_object_prop_message_expands_tabs(self):
-        self.assertEqual(self.data.objects[24].prop_messages[5], u"""\
+    def test_object_message_expands_tabs(self):
+        self.assertEqual(self.data.objects[24].messages[5], u"""\
 YOU'VE OVER-WATERED THE PLANT!  IT'S SHRIVELING UP!  IT'S, IT'S...
 """)
 

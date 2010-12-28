@@ -95,7 +95,7 @@ def section5(data, n, *etc):
         data._object.inventory_message = expand_tabs(etc)
     else:
         n /= 100
-        messages = data._object.prop_messages
+        messages = data._object.messages
         messages[n] = messages.get(n, '') + expand_tabs(etc) + '\n'
 
 def section6(data, n, *etc):
