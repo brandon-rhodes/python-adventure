@@ -2,6 +2,7 @@
 
 from random import random
 from .data import Data
+from .model import Message, Room
 
 YESNO_ANSWERS = {'y': True, 'yes': True, 'n': False, 'no': False}
 
@@ -190,11 +191,33 @@ class Game(Data):
 
         for move in self.loc.travel_table:
             if move.always or word in move.verbs:
-                # if action is a room:
-                self.move_to(move.action)
-                return
+                c = move.condition
 
-        # todo #50
+                if c[0] is None:
+                    go = True
+                elif c[0] == '%':
+                    go = 100 * random() < c[1]
+                elif c[0] == 'carrying':
+                    go = True # TODO: test if carrying object c[1]
+                elif c[0] == 'carrying_or_in_room_with':
+                    go = True # TODO: test this too
+                elif c[0] == 'prop!=':
+                    go = self.objects[c[1]].prop != c[2]
+
+                if not go:
+                    continue
+
+                if isinstance(move.action, Room):
+                    self.move_to(move.action)
+                    return
+                elif isinstance(move.action, Message):
+                    self.write(move.action)
+                    self.move_to()
+                    return
+                else:
+                    raise NotImplemented
+
+        #50
         n = word.n
         if 29 <= n <= 30 or 43 <= n <= 50:
             self.write_message(9)

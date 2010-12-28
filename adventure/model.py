@@ -11,17 +11,18 @@ class Move(object):
     def __repr__(self):
         verblist = [ verb.text for verb in self.verbs ]
 
-        if not self.condition:
+        c = self.condition[0]
+        if c is None:
             condition = ''
-        elif self.condition[0] == '%':
+        elif c == '%':
             condition = ' %d%% of the time' % self.condition[1]
-        elif self.condition[0] == 'not_dwarf':
+        elif c == 'not_dwarf':
             condition = ' if not a dwarf'
-        elif self.condition[0] == 'carrying':
+        elif c == 'carrying':
             condition = ' if carrying %s'
-        elif self.condition[0] == 'carrying_or_in_room_with':
+        elif c == 'carrying_or_in_room_with':
             condition = ' if carrying or in room with %s'
-        elif self.condition[0] == 'prop!=':
+        elif c == 'prop!=':
             condition = ' if prop %d != %d' % self.condition[1:]
         else:
             condition = ' if X'

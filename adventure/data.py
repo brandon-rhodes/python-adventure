@@ -56,11 +56,11 @@ def section3(data, x, y, *verbs):
     mh, mm = divmod(m, 100)
 
     if m == 0:
-        condition = None
+        condition = (None,)
     elif 0 < m < 100:
         condition = ('%', m)
     elif m == 100:
-        condition = ('not_dwarf')
+        condition = ('not_dwarf',)
     elif 100 < m <= 200:
         condition = ('carrying', mm)
     elif 200 < m <= 300:
