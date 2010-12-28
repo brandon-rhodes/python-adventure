@@ -79,15 +79,14 @@ class Game(Data):
 
         loc = self.loc
 
-        # possibly kill the player if they are moving around in the dark
-        if self.could_fall_in_pit and random() < .35: # ...and NOT forced location!
+        if self.could_fall_in_pit and not loc.forced_move and random() < .35:
             self.die()
             return
 
         # if self.toting(bear):
         #     self.write_message(141)
 
-        if self.is_dark: # ...and NOT forced location!
+        if self.is_dark and not loc.forced_move:
             self.write_message(16)
         else:
             do_short = loc.times_described % self.full_description_period
@@ -97,7 +96,9 @@ class Game(Data):
             else:
                 self.write(loc.long_description)
 
-        # do forced location here
+        if loc.forced_move:
+            self.do_motion(self.vocabulary[2])
+            return
 
         if loc.n == 33 and random() < .25 and not self.is_closing:
             self.speak_message(8)
@@ -190,7 +191,7 @@ class Game(Data):
             return
 
         for move in self.loc.travel_table:
-            if move.always or word in move.verbs:
+            if move.forced or word in move.verbs:
                 c = move.condition
 
                 if c[0] is None:
