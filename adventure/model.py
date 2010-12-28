@@ -120,6 +120,14 @@ class Object(object):
     def __eq__(self, other):
         return any( text == other for text in self.names )
 
+    def carry(self):
+        self.rooms[:] = []
+        self.toting = True
+
+    def drop(self, room):
+        self.rooms[:] = [ room ]
+        self.toting = False
+
 class Message(object):
     """A message for printing."""
     text = u''

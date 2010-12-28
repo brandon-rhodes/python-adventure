@@ -38,7 +38,13 @@ class Game(Data):
 
     @property
     def is_dark(self):
-        return self.loc.is_dark  # and also check for lamp!
+        lamp = self.objects['lamp']
+        if self.is_here(lamp) and lamp.prop:
+            return False
+        return self.loc.is_dark
+
+    def is_here(self, obj):
+        return obj.toting or (self.loc in obj.rooms)
 
     # Game startup
 
@@ -51,7 +57,7 @@ class Game(Data):
         if yes:
             self.write_message(1)
             self.hints[3].used = True
-        self.loc = self.rooms[1]
+        self.oldloc = self.loc = self.rooms[1]
         self.describe_location()
 
     # Routines that handle the aftermath of "big" actions like movement.
@@ -83,7 +89,7 @@ class Game(Data):
         loc = self.loc
 
         if self.could_fall_in_pit and not loc.forced_move and random() < .35:
-            self.die()
+            self.die_here()
             return
 
         # if self.toting(bear):
@@ -107,7 +113,7 @@ class Game(Data):
             self.speak_message(8)
 
         if not self.is_dark:
-            for n, obj in sorted(self.objects.items()):
+            for obj in self.object_list:
 
                 if loc not in obj.rooms:
                     continue
@@ -131,6 +137,9 @@ class Game(Data):
         self.write_message(54)
         self.finish_turn()
 
+    #2009 sets SPK="OK" then...
+    #2011 speaks SPK then...
+    #2012 blanks VERB and OBJ and calls:
     def finish_turn(self):  #2600
         # put hints here
         if self.is_closed:
@@ -138,7 +147,7 @@ class Game(Data):
                 self.write(self.oyste.messages[1])
             # put closing-time "prop" special case here
 
-        self.could_fall_in_pit = self.loc.is_dark  #2605
+        self.could_fall_in_pit = self.is_dark  #2605
         # remove knife from cave if they moved away from it
 
     # The central do_command() method, that should be called over and
@@ -207,6 +216,8 @@ class Game(Data):
             self.move_to()
             return
 
+        self.oldloc2, self.oldloc = self.oldloc, self.loc
+
         for move in self.loc.travel_table:
             if move.forced or word in move.verbs:
                 c = move.condition
@@ -256,8 +267,12 @@ class Game(Data):
 
     # Death and reincarnation.
 
-    def die(self):  #90
+    def die_here(self):  #90
         self.write_message(23)
+        self.oldloc2 = self.loc
+        self.die()
+
+    def die(self):  #99
         self.deaths += 1
         if self.is_closing:
             self.write_message(131)
@@ -268,8 +283,16 @@ class Game(Data):
                     self.write_message(80 + self.deaths * 2)
                     if self.deaths < self.max_deaths:
                         # do water and oil thing
-                        # turn off lamp
+                        # turn off lamp if carrying it
                         # drop all objects in oldloc2
+                        # but lamp goes in location 1
+                        for obj in self.object_list:
+                            if not obj.toting:
+                                continue
+                            if obj == u'lamp':
+                                obj.drop(self.rooms[1])
+                            else:
+                                obj.drop(self.oldloc2)
                         self.loc = self.rooms[3]
                         self.describe_location()
                         return
@@ -315,9 +338,19 @@ class Game(Data):
             self.write(verb.default_message)
         self.finish_turn()
 
+    def t_light(self, verb, obj):  #9070
+        # if not here lamp: 2011
+        # if lamp out: 2011
+        self.objects['lamp'].prop = 1
+        self.write_message(39)
+        if self.loc.is_dark:
+            self.describe_location()
+        else:
+            self.finish_turn()
+
     def i_inven(self, verb):  #8200
         first = True
-        for n, obj in sorted(self.objects.items()):
+        for obj in self.object_list:
             if obj.toting: # ...and is not bear
                 if first:
                     self.write_message(99)

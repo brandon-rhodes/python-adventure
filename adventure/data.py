@@ -1,5 +1,6 @@
 """Parse the original PDP ``advent.dat`` file."""
 
+from operator import attrgetter
 from .model import Hint, Message, Move, Object, Room, Word
 
 class Data(object):
@@ -11,11 +12,6 @@ class Data(object):
         self.class_messages = []
         self.hints = {}
         self.magic_messages = {}
-
-    def put_object(self, obj, location):
-        room = make_object(self.rooms, Room, location)
-        room.objects.append(obj)
-        obj.rooms.append(room)
 
 # Helper functions.
 
@@ -93,6 +89,7 @@ def section4(data, n, name, *etc):
     if word.kind == 'object':
         obj = make_object(data.objects, Object, n % 1000)
         obj.names.append(name)
+        data.objects[name] = obj
     data.vocabulary[name] = word
 
 def section5(data, n, *etc):
@@ -112,11 +109,13 @@ def section7(data, n, room_n, *etc):
     if not room_n:
         return
     obj = make_object(data.objects, Object, n)
-    data.put_object(obj, room_n)
+    room = make_object(data.rooms, Room, room_n)
+    obj.drop(room)
     if len(etc):
         obj.immovable = True
         if etc[0] != -1:
-            data.put_object(obj, etc[0])  # exists two places, like grate
+            room2 = make_object(data.rooms, Room, etc[0])
+            obj.rooms.append(room2)  # exists two places, like grate
 
 def section8(data, word_n, message_n):
     if not message_n:
@@ -167,4 +166,7 @@ def parse(data, datafile):
 
     del data._last_travel  # state used by section 3
     del data._object       # state used by section 5
+
+    data.object_list = sorted(set(data.objects.values()), key=attrgetter('n'))
+
     return data
