@@ -6,7 +6,7 @@ from .model import Hint, Message, Move, Object, Room, Word
 # The Adventure data file knows only the first five characters of each
 # word in the game, so we have to know the full verion of each word.
 
-long_words = dict((w[:5], w) for w in u"""upstream downstream forest
+long_words = { w[:5]: w for w in u"""upstream downstream forest
 forward continue onward return retreat valley stairs outside stream
 cobble inward inside surface nowhere passage tunnel canyon awkward
 upward ascend downward descend outdoors barren across debris broken
@@ -14,12 +14,12 @@ examine describe slabroom depression entrance secret bedquilt plover
 oriental cavern reservoir office headlamp lantern pillow velvet fissure
 oyster magazine spelunker dwarves knives rations bottle mirror beanstalk
 stalactite shadow figure drawings pirate dragon message volcano geyser
-machine vending battery carpet nugget diamond silver treasure trident
+machine vending battery carpet nugget diamond silver jewelry treasure trident
 shards pottery emerald platinum pyramid pearl persian spices capture
 release discard mumble unlock nothing extinguish placate travel proceed
 continue explore follow attack strike devour inventory detonate ignite
 blowup peruse shatter disturb suspend sesame opensesame abracadabra
-shazam excavate information""".split())
+shazam excavate information""".split() }
 
 class Data(object):
     def __init__(self):

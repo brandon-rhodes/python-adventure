@@ -11,9 +11,13 @@ class Game(Data):
     look_complaints = 3  # how many times to "SORRY, BUT I AM NOT ALLOWED..."
     full_description_period = 5  # how often we use a room's full description
     full_wests = 0  # how many times they have typed "west" instead of "w"
+    dwarf_flag = 0  # how active the dwarves are
     gave_up = False
-    impossibles = 0  # how many treasures can never be retrieved
+    treasures_not_found = 0  # how many treasures have not yet been seen
+    impossible_treasures = 0  # how many treasures can never be retrieved
+    lamp_turns = 330
     warned_about_dim_lamp = False
+    bonus = 0  # how they exited the final bonus round
     deaths = 0  # how many times the player has died
     max_deaths = 4  # how many times the player can die
 
@@ -54,10 +58,18 @@ class Game(Data):
 
     @property
     def inventory(self):
-        return [ obj for obj in self.object_list if obj.toting ]
+        return [ obj for obj in self.object_list if obj.is_toting ]
+
+    @property
+    def treasures(self):
+        return [ obj for obj in self.object_list if obj.n >= 50 ]
+
+    @property
+    def objects_here(self):
+        return [ obj for obj in self.object_list if self.loc in obj.rooms ]
 
     def is_here(self, obj):
-        return obj.toting or (self.loc in obj.rooms)
+        return obj.is_toting or (self.loc in obj.rooms)
 
     # Game startup
 
@@ -71,11 +83,14 @@ class Game(Data):
             self.write_message(1)
             self.hints[3].used = True
             self.lamp_turns = 1000
-        else:
-            self.lamp_turns = 330
         self.turns = 0
         self.oldloc = self.loc = self.rooms[1]
         self.describe_location()
+
+        treasures = self.treasures
+        self.treasures_not_found = len(treasures)
+        for treasure in treasures:
+            treasure.prop = -1
 
     # Routines that handle the aftermath of "big" actions like movement.
     # Although these are called at the end of each `do_command()` cycle,
@@ -109,8 +124,8 @@ class Game(Data):
             self.die_here()
             return
 
-        # if self.toting(bear):
-        #     self.write_message(141)
+        if self.bear.is_toting:
+            self.write_message(141)
 
         if self.is_dark and not loc.is_forced:
             self.write_message(16)
@@ -130,23 +145,26 @@ class Game(Data):
             self.speak_message(8)
 
         if not self.is_dark:
-            for obj in self.object_list:
+            for obj in self.objects_here:
 
-                if loc not in obj.rooms:
-                    continue
-
-                #IF(OBJ.GT.100)OBJ=OBJ-100
-                if obj == u'steps': #...and toting nugget
+                if obj is self.steps and self.gold.is_toting:
                     continue
 
                 if obj.prop < 0:  # finding a treasure the first time
-                    if self.is_closing:
+                    if self.is_closed:
                         continue
-                    obj.prop = 1 if (obj == u'rug' or obj == u'chain') else 0
-                    #IF(TALLY.EQ.TALLY2.AND.TALLY.NE.0)LIMIT=MIN0(35,LIMIT)
+                    obj.prop = 1 if obj in (self.rug, self.chain) else 0
+                    self.treasures_not_found -= 1
+                    if (self.treasures_not_found > 0 and
+                        self.treasures_not_found == self.impossible_treasures):
+                        self.lamp_turns = min(35, self.lamp_turns)
 
-                #if obj == u'steps' and AND.LOC.EQ.FIXED(STEPS))prop=1
-                self.write(obj.messages[obj.prop])
+                if obj is self.steps and self.loc is self.steps.rooms[1]:
+                    prop = 1
+                else:
+                    prop = obj.prop
+
+                self.write(obj.messages[prop])
 
         self.finish_turn()
 
@@ -196,7 +214,7 @@ class Game(Data):
                 and self.battery.prop == 0 and self.is_here(self.lamp):
             self.write_message(188)
             self.battery.prop = 1
-            if self.battery.toting:
+            if self.battery.is_toting:
                 self.battery.drop(self.loc)
             self.lamp_turns += 2500
             self.warned_about_dim_lamp = False
@@ -278,18 +296,18 @@ class Game(Data):
             if move.forced or word in move.verbs:
                 c = move.condition
 
-                if c[0] is None:
-                    go = True
+                if c[0] is None or c[0] == 'not_dwarf':
+                    allowed = True
                 elif c[0] == '%':
-                    go = 100 * random() < c[1]
+                    allowed = 100 * random() < c[1]
                 elif c[0] == 'carrying':
-                    go = self.objects[c[1]].toting
+                    allowed = self.objects[c[1]].is_toting
                 elif c[0] == 'carrying_or_in_room_with':
-                    go = self.is_here(self.objects[c[1]])
+                    allowed = self.is_here(self.objects[c[1]])
                 elif c[0] == 'prop!=':
-                    go = self.objects[c[1]].prop != c[2]
+                    allowed = self.objects[c[1]].prop != c[2]
 
-                if not go:
+                if not allowed:
                     continue
 
                 if isinstance(move.action, Room):
@@ -343,7 +361,7 @@ class Game(Data):
                         # drop all objects in oldloc2
                         # but lamp goes in location 1
                         for obj in self.object_list:
-                            if not obj.toting:
+                            if not obj.is_toting:
                                 continue
                             if obj == u'lamp':
                                 obj.drop(self.rooms[1])
@@ -360,7 +378,7 @@ class Game(Data):
     # Verbs.
 
     def t_carry(self, verb, obj):  #9010
-        if obj.toting:
+        if obj.is_toting:
             self.write_message(verb.default_message or 54)
             self.finish_turn()
             return
@@ -380,11 +398,11 @@ class Game(Data):
             self.write_message(92)
             self.finish_turn()
         if obj is self.bird and obj.prop == 0:
-            if self.rod.toting:
+            if self.rod.is_toting:
                 self.write_message(26)
                 self.finish_turn()
                 return
-            if not self.cage.toting:
+            if not self.cage.is_toting:
                 self.write_message(27)
                 self.finish_turn()
                 return
@@ -398,9 +416,9 @@ class Game(Data):
         self.say_okay_and_finish()
 
     def t_drop(self, verb, obj):  #9020
-        if obj is self.rod and not self.rod.toting and self.rod2.toting:
+        if obj is self.rod and not self.rod.is_toting and self.rod2.is_toting:
             obj = self.rod2
-        if not obj.toting:
+        if not obj.is_toting:
             self.write_message(verb.default_message)
             self.finish_turn()
             return
@@ -428,7 +446,7 @@ class Game(Data):
             bird.destroy()
             bird.prop = 0
             if snake.rooms:
-                self.impossibles += 1
+                self.impossible_treasures += 1
 
         elif obj is bear and troll.is_at(self.loc):
             self.write_message(163)
@@ -492,7 +510,7 @@ class Game(Data):
         else:
             self.finish_turn()
 
-    def t_attack(self, verb, obj):
+    def t_attack(self, verb, obj):  #9120
         if obj is self.bird:
             if self.is_closed:
                 self.write_message(137)
@@ -500,7 +518,7 @@ class Game(Data):
                 obj.destroy()
                 obj.prop = 0
                 if self.snake.rooms:
-                    self.impossibles += 1
+                    self.impossible_treasures += 1
                 self.write_message(45)
         elif obj is self.clam or obj is self.oyster:
             self.write_message(150)
@@ -509,6 +527,7 @@ class Game(Data):
         elif obj is self.dwarf:
             if self.is_closed:
                 die
+                return
             self.write_message(49)
         elif obj is self.dragon:
             if self.dragon.prop != 0:
@@ -549,8 +568,72 @@ class Game(Data):
                 self.write_message(99)
                 first = False
             self.write(obj.inventory_message)
-        if self.bear.toting:
+        if self.bear.is_toting:
             self.write_message(141)
         if not objs:
             self.write_message(98)
         self.finish_turn()
+
+    def i_score(self, verb):  #8240
+        score, max_score = self.compute_score(for_score_command=True)
+        self.write('If you were to quit now, you would score %d'
+                   ' out of a possible %d.' % (score, max_score))
+        def callback(yes):
+            self.write_message(54)
+            if yes:
+                self.score_and_exit()
+                return
+	self.yesno(self.messages[143], callback)
+
+    def compute_score(self, for_score_command=False):  #20000
+        score = maxscore = 2
+
+        for treasure in self.treasures:
+            # if ptext(0) is zero?
+            if treasure.n > self.chest.n:
+                value = 16
+            elif treasure is self.chest:
+                value = 14
+            else:
+                value = 12
+
+            maxscore += value
+
+            if treasure.prop >= 0:
+                score += 2
+            if treasure.rooms and treasure.rooms[0].n == 3 \
+                    and treasure.prop == 0:
+                score += value - 2
+
+        maxscore += self.max_deaths * 10
+        score += (self.max_deaths - self.deaths) * 10
+
+        maxscore += 4
+        if not for_score_command and not self.gave_up:
+            score += 4
+
+        maxscore += 25
+        if self.dwarf_flag:
+            score += 25
+
+        maxscore += 25
+        if self.is_closing:
+            maxscore += 25
+
+        maxscore += 45
+        if self.is_closed:
+            score += {0: 10, 135: 25, 134: 30, 133: 45}[self.bonus]
+
+        maxscore += 1
+        if self.magazine.rooms[0].n == 108:
+            score += 1
+
+        for hint in self.hints.values():
+            if hint.used:
+                score -= hint.penalty
+
+        return score, maxscore
+
+    def score_and_exit(self):
+        self.compute_score()
+        # then do exit messages

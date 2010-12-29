@@ -112,7 +112,7 @@ class Object(object):
         self.names = []
         self.prop = 0
         self.rooms = []
-        self.toting = False
+        self.is_toting = False
 
     def __repr__(self):
         return '<Object %d %s %x>' % (self.n, '/'.join(self.names), id(self))
@@ -125,15 +125,15 @@ class Object(object):
 
     def carry(self):
         self.rooms[:] = []
-        self.toting = True
+        self.is_toting = True
 
     def drop(self, room):
         self.rooms[:] = [ room ]
-        self.toting = False
+        self.is_toting = False
 
     def destroy(self):
         self.rooms[:] = []
-        self.toting = False
+        self.is_toting = False
 
 class Message(object):
     """A message for printing."""
