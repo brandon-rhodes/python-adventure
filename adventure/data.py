@@ -154,7 +154,7 @@ def section8(data, word_n, message_n):
     word.default_message = message
 
 def section9(data, bit, *nlist):
-    name = ['is_light', 'has_water', 'has_oil', 'is_avoided_by_pirate',
+    name = ['is_light', 'has_water', 'has_oil', 'is_forbidden_to_pirate',
             'trying_to_get_into_cave', 'trying_to_catch_bird',
             'trying_to_deal_with_snake', 'lost_in_maze',
             'pondering_dark_room', 'at_witts_end'][bit]

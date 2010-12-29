@@ -397,7 +397,7 @@ DIRECTIONS.
 A CHEERFUL LITTLE BIRD IS SITTING HERE SINGING.
 <BLANKLINE>
 >>> score
-If you were to quit now, you would score 27 out of a possible 360.
+If you were to quit now, you would score 52 out of a possible 360.
 DO YOU INDEED WISH TO QUIT NOW?
 <BLANKLINE>
 >>> no
@@ -409,7 +409,7 @@ YOU ARE IN THE SOUTH SIDE CHAMBER.
 THERE IS PRECIOUS JEWELRY HERE!
 <BLANKLINE>
 >>> score
-If you were to quit now, you would score 29 out of a possible 360.
+If you were to quit now, you would score 54 out of a possible 360.
 DO YOU INDEED WISH TO QUIT NOW?
 <BLANKLINE>
 >>> no
@@ -430,7 +430,7 @@ A PASSAGE CONTINUES WEST AND UP HERE.
 THERE ARE MANY COINS HERE!
 <BLANKLINE>
 >>> score
-If you were to quit now, you would score 31 out of a possible 360.
+If you were to quit now, you would score 56 out of a possible 360.
 DO YOU INDEED WISH TO QUIT NOW?
 <BLANKLINE>
 >>> no

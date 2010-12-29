@@ -2,7 +2,7 @@
 
 from random import random, choice
 from .data import Data
-from .model import Message, Room
+from .model import Dwarf, Message, Room
 
 YESNO_ANSWERS = {'y': True, 'yes': True, 'n': False, 'no': False}
 
@@ -11,7 +11,8 @@ class Game(Data):
     look_complaints = 3  # how many times to "SORRY, BUT I AM NOT ALLOWED..."
     full_description_period = 5  # how often we use a room's full description
     full_wests = 0  # how many times they have typed "west" instead of "w"
-    dwarf_flag = 0  # how active the dwarves are
+    dwarf_stage = 0  # how active the dwarves are
+    dwarves_killed = 0
     gave_up = False
     treasures_not_found = 0  # how many treasures have not yet been seen
     impossible_treasures = 0  # how many treasures can never be retrieved
@@ -20,6 +21,7 @@ class Game(Data):
     bonus = 0  # how they exited the final bonus round
     deaths = 0  # how many times the player has died
     max_deaths = 4  # how many times the player can die
+    turns = 0
 
     def __init__(self, writer):
         Data.__init__(self)
@@ -83,14 +85,16 @@ class Game(Data):
             self.write_message(1)
             self.hints[3].used = True
             self.lamp_turns = 1000
-        self.turns = 0
+
         self.oldloc2 = self.oldloc = self.loc = self.rooms[1]
-        self.describe_location()
+        self.dwarves = [ Dwarf(self.rooms[n]) for n in (19, 27, 33, 44, 64) ]
 
         treasures = self.treasures
         self.treasures_not_found = len(treasures)
         for treasure in treasures:
             treasure.prop = -1
+
+        self.describe_location()
 
     # Routines that handle the aftermath of "big" actions like movement.
     # Although these are called at the end of each `do_command()` cycle,
@@ -109,9 +113,29 @@ class Game(Data):
                 self.clock2 = 15
                 self.panic = True
 
-        # put dwarf stuff here
+        must_allow_move = ((newloc is loc) or (loc.is_forced)
+                           or (loc.is_forbidden_to_pirate))
 
-        self.loc = newloc
+        dwarf_blocking_the_way = any(
+            dwarf.old_room is newloc and dwarf.has_seen_adventurer
+            for dwarf in self.dwarves
+            )
+
+        if not must_allow_move and dwarf_blocking_the_way:
+            newloc = loc
+            self.write_message(2)
+
+        self.loc = loc = newloc  #74
+
+        is_dwarf_area = not loc.is_forced and not loc.is_forbidden_to_pirate
+        if is_dwarf_area and self.dwarf_stage > 0:
+            self.move_dwarves()
+        else:
+            if is_dwarf_area and loc.n >= 15:  # past Hall of Mists
+                self.dwarf_stage = 1
+            self.describe_location()
+
+    def move_dwarves(self):
         self.describe_location()
 
     def describe_location(self):  #2000
@@ -633,7 +657,7 @@ class Game(Data):
             score += 4
 
         maxscore += 25
-        if self.dwarf_flag:
+        if self.dwarf_stage:
             score += 25
 
         maxscore += 25

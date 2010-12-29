@@ -59,7 +59,7 @@ class Room(object):
     is_light = False
     has_water = False
     has_oil = False
-    is_avoided_by_pirate = False
+    is_forbidden_to_pirate = False
     trying_to_get_into_cave = False
     trying_to_catch_bird = False
     trying_to_deal_with_snake = False
@@ -157,3 +157,10 @@ class Hint(object):
     def write(self, writer):
         writer(self.message)
         self.used = True
+
+class Dwarf(object):
+
+    def __init__(self, room):
+        self.room = room
+        self.old_room = None
+        self.has_seen_adventurer = False
