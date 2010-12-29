@@ -3,6 +3,24 @@
 from operator import attrgetter
 from .model import Hint, Message, Move, Object, Room, Word
 
+# The Adventure data file knows only the first five characters of each
+# word in the game, so we have to know the full verion of each word.
+
+long_words = dict((w[:5], w) for w in """upstream downstream forest
+forward continue onward return retreat valley stairs outside stream
+cobble inward inside surface nowhere passage tunnel canyon awkward
+upward ascend downward descend outdoors barren across debris broken
+examine describe slabroom depression entrance secret bedquilt plover
+oriental cavern reservoir office headlamp lantern pillow velvet fissure
+oyster magazine spelunker dwarves knives rations bottle mirror beanstalk
+stalactite shadow figure drawings pirate dragon message volcano geyser
+machine vending battery carpet nugget diamond silver treasure trident
+shards pottery emerald platinum pyramid pearl persian spices capture
+release discard mumble unlock nothing extinguish placate travel proceed
+continue explore follow attack strike devour inventory detonate ignite
+blowup peruse shatter disturb suspend sesame opensesame abracadabra
+shazam excavate information""".split())
+
 class Data(object):
     def __init__(self):
         self.rooms = {}
@@ -83,12 +101,16 @@ def section3(data, x, y, *verbs):
 
 def section4(data, n, name, *etc):
     name = name.lower()
+    if name in long_words:
+        names = [ long_words[name], name ]
+    else:
+        names = [ name ]
     word = make_object(data.vocabulary, Word, n)
     word.names.append(name)
     word.kind = ['motion', 'object', 'verb', 'random_message'][n // 1000]
     if word.kind == 'object':
         obj = make_object(data.objects, Object, n % 1000)
-        obj.names.append(name)
+        obj.names.extend(names)
         data.objects[name] = obj
     if name not in data.vocabulary:  # since there are several duplicate names
         data.vocabulary[name] = word
@@ -175,9 +197,9 @@ def parse(data, datafile):
 
     data.object_list = sorted(set(data.objects.values()), key=attrgetter('n'))
     for obj in data.object_list:
-        upname = obj.names[0].upper()
-        if hasattr(data, upname):
-            upname = upname + '2'  # create identifiers like ROD2, PLANT2
-        setattr(data, upname, obj)
+        name = obj.names[0]
+        if hasattr(data, name):
+            name = name + '2'  # create identifiers like ROD2, PLANT2
+        setattr(data, name, obj)
 
     return data

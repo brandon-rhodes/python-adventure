@@ -183,22 +183,22 @@ class Game(Data):
 
         self.turns += 1
 
-        if self.LAMP.prop:
+        if self.lamp.prop:
             self.lamp_turns -= 1
 
-        if self.lamp_turns <= 30 and self.is_here(self.BATTE) \
-                and self.BATTE.prop == 0 and self.is_here(self.LAMP):
+        if self.lamp_turns <= 30 and self.is_here(self.battery) \
+                and self.battery.prop == 0 and self.is_here(self.lamp):
             self.write_message(188)
-            self.BATTE.prop = 1
-            if self.BATTE.toting:
-                self.BATTE.drop(self.loc)
+            self.battery.prop = 1
+            if self.battery.toting:
+                self.battery.drop(self.loc)
             self.lamp_turns += 2500
             self.warned_about_dim_lamp = False
 
         if self.lamp_turns == 0:
             self.lamp_turns = -1
-            self.LAMP.prop = 0
-            if self.is_here(self.LAMP):
+            self.lamp.prop = 0
+            if self.is_here(self.lamp):
                 self.write_message(184)
         elif self.lamp_turns < 0 and self.loc.is_aboveground:
             self.write_message(185)
@@ -206,11 +206,11 @@ class Game(Data):
             self.score_and_exit()
             return
         elif self.lamp_turns <= 30 and not self.warned_about_dim_lamp \
-                and self.is_here(self.LAMP):
+                and self.is_here(self.lamp):
             self.warned_about_dim_lamp = True
-            if self.BATTE.prop == 1:
+            if self.battery.prop == 1:
                 self.write_message(189)
-            elif not self.BATTE.rooms:
+            elif not self.battery.rooms:
                 self.write_message(183)
             else:
                 self.write_message(187)
@@ -359,11 +359,11 @@ class Game(Data):
             self.finish_turn()
             return
         if obj.is_fixed or len(obj.rooms) > 1:
-            if obj is self.PLANT and obj.prop <= 0:
+            if obj is self.plant and obj.prop <= 0:
                 self.write_message(115)
-            elif obj is self.BEAR and obj.prop == 1:
+            elif obj is self.bear and obj.prop == 1:
                 self.write_message(169)
-            elif obj is self.CHAIN and self.CHAIN.prop != 0:
+            elif obj is self.chain and self.chain.prop != 0:
                 self.write_message(170)
             else:
                 self.write_message(25)
@@ -373,34 +373,34 @@ class Game(Data):
         if len(self.inventory) >= 7:
             self.write_message(92)
             self.finish_turn()
-        if obj is self.BIRD and obj.prop == 0:
-            if self.ROD.toting:
+        if obj is self.bird and obj.prop == 0:
+            if self.rod.toting:
                 self.write_message(26)
                 self.finish_turn()
                 return
-            if not self.CAGE.toting:
+            if not self.cage.toting:
                 self.write_message(27)
                 self.finish_turn()
                 return
-            self.BIRD.prop = 1
-        if (obj is self.BIRD or obj is self.CAGE) and self.BIRD.prop != 0:
-            self.BIRD.carry()
-            self.CAGE.carry()
+            self.bird.prop = 1
+        if (obj is self.bird or obj is self.cage) and self.bird.prop != 0:
+            self.bird.carry()
+            self.cage.carry()
         else:
             obj.carry()
         # one last liquid thing
         self.say_okay_and_finish()
 
     def t_drop(self, verb, obj):  #9020
-        if obj is self.ROD and not self.ROD.toting and self.ROD2.toting:
-            obj = self.ROD2
+        if obj is self.rod and not self.rod.toting and self.rod2.toting:
+            obj = self.rod2
         if not obj.toting:
             self.write_message(verb.default_message)
             self.finish_turn()
             return
 
-        bird, snake, dragon, bear, troll = self.BIRD, self.SNAKE, self.DRAGO, \
-            self.BEAR, self.TROLL
+        bird, snake, dragon, bear, troll = self.bird, self.snake, self.dragon, \
+            self.bear, self.troll
 
         if obj is bird and self.is_here(snake):
             self.write_message(30)
@@ -412,10 +412,10 @@ class Game(Data):
             bird.prop = 0
             bird.drop(self.loc)
 
-        elif obj is self.COINS and self.is_here(self.VENDI):
+        elif obj is self.coins and self.is_here(self.vending):
             obj.destroy()
-            self.BATTER.drop(self.loc)
-            self.write(self.BATTER.messages[0])
+            self.battery.drop(self.loc)
+            self.write(self.battery.messages[0])
 
         elif obj is bird and self.is_here(dragon) and dragon.prop == 0:
             self.write_message(154)
@@ -432,8 +432,8 @@ class Game(Data):
             troll.prop = 2
             bear.drop(self.loc)
 
-        elif obj is self.VASE and not self.is_here(self.PILLO):
-            self.VASE.prop = 2
+        elif obj is self.vase and not self.is_here(self.pillo):
+            self.vase.prop = 2
             # and more
 
         else:
@@ -484,13 +484,13 @@ class Game(Data):
 
     def i_inven(self, verb):  #8200
         first = True
-        objs = [ obj for obj in self.inventory if obj is not self.BEAR ]
+        objs = [ obj for obj in self.inventory if obj is not self.bear ]
         for obj in objs:
             if first:
                 self.write_message(99)
                 first = False
             self.write(obj.inventory_message)
-        if self.BEAR.toting:
+        if self.bear.toting:
             self.write_message(141)
         if not objs:
             self.write_message(98)
