@@ -117,8 +117,9 @@ def section7(data, n, room_n, *etc):
     room = make_object(data.rooms, Room, room_n)
     obj.drop(room)
     if len(etc):
-        obj.immovable = True
-        if etc[0] != -1:
+        if etc[0] == -1:
+            obj.is_fixed = True
+        else:
             room2 = make_object(data.rooms, Room, etc[0])
             obj.rooms.append(room2)  # exists two places, like grate
 

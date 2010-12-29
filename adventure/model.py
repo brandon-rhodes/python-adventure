@@ -106,7 +106,7 @@ class Object(object):
     """An object in the game, like a grate, or a rod with a rusty star."""
 
     def __init__(self):
-        self.immovable = False
+        self.is_fixed = False
         self.inventory_message = u''
         self.messages = {}
         self.names = []

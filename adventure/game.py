@@ -323,14 +323,37 @@ class Game(Data):
             self.write_message(verb.default_message or 54)
             self.finish_turn()
             return
-        # add many more tests here
-        if obj is self.BIRD and self.BIRD.prop == 0:
+        if obj.is_fixed or len(obj.rooms) > 1:
+            if obj is self.PLANT and obj.prop <= 0:
+                self.write_message(115)
+            elif obj is self.BEAR and obj.prop == 1:
+                self.write_message(169)
+            elif obj is self.CHAIN and self.CHAIN.prop != 0:
+                self.write_message(170)
+            else:
+                self.write_message(25)
+            self.finish_turn()
+            return
+        # do liquids here
+        if len(self.inventory) >= 7:
+            self.write_message(92)
+            self.finish_turn()
+        if obj is self.BIRD and obj.prop == 0:
             if self.ROD.toting:
                 self.write_message(26)
                 self.finish_turn()
                 return
-        obj.toting = True
-        del obj.rooms[:]
+            if not self.CAGE.toting:
+                self.write_message(27)
+                self.finish_turn()
+                return
+            self.BIRD.prop = 1
+        if (obj is self.BIRD or obj is self.CAGE) and self.BIRD.prop != 0:
+            self.BIRD.carry()
+            self.CAGE.carry()
+        else:
+            obj.carry()
+        # one last liquid thing
         self.say_okay_and_finish()
 
     def t_drop(self, verb, obj):  #9020
