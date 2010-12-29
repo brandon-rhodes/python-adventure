@@ -443,6 +443,10 @@ class Game(Data):
             # and more
 
         else:
+            if obj is self.cage and self.bird.prop != 0:
+                bird.drop(self.loc)
+            elif obj is self.bird:
+                obj.prop = 0
             self.write_message(54)
             obj.drop(self.loc)
 
