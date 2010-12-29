@@ -1,0 +1,2 @@
+
+* Test whether climbing down the dome with the gold nugget breaks your neck.

@@ -90,7 +90,8 @@ def section4(data, n, name, *etc):
         obj = make_object(data.objects, Object, n % 1000)
         obj.names.append(name)
         data.objects[name] = obj
-    data.vocabulary[name] = word
+    if name not in data.vocabulary:  # since there are several duplicate names
+        data.vocabulary[name] = word
 
 def section5(data, n, *etc):
     if 1 <= n <= 99:
@@ -99,7 +100,11 @@ def section5(data, n, *etc):
     else:
         n /= 100
         messages = data._object.messages
-        messages[n] = messages.get(n, '') + expand_tabs(etc) + '\n'
+        if etc[0].startswith('>$<'):
+            more = ''
+        else:
+            more = expand_tabs(etc) + '\n'
+        messages[n] = messages.get(n, '') + more
 
 def section6(data, n, *etc):
     message = make_object(data.messages, Message, n)
@@ -168,5 +173,10 @@ def parse(data, datafile):
     del data._object       # state used by section 5
 
     data.object_list = sorted(set(data.objects.values()), key=attrgetter('n'))
+    for obj in data.object_list:
+        upname = obj.names[0].upper()
+        if hasattr(data, upname):
+            upname = upname + '2'  # create identifiers like ROD2, PLANT2
+        setattr(data, upname, obj)
 
     return data

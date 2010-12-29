@@ -11,6 +11,7 @@ class Game(Data):
     look_complaints = 3  # how many times to "SORRY, BUT I AM NOT ALLOWED..."
     full_description_period = 5  # how often we use a room's full description
     full_wests = 0  # how many times they have typed "west" instead of "w"
+    impossibles = 0  # how many treasures can never be retrieved
     deaths = 0  # how many times the player has died
     max_deaths = 4  # how many times the player can die
 
@@ -25,8 +26,10 @@ class Game(Data):
 
     def write(self, s):
         """Output the Unicode representation of `s`."""
-        self.writer(unicode(s))
-        self.writer('\n')
+        s = unicode(s)
+        if s:
+            self.writer(s)
+            self.writer('\n')
 
     def write_message(self, n):
         self.write(self.messages[n])
@@ -36,12 +39,18 @@ class Game(Data):
         self.write(s)
         self.yesno_callback = yesno_callback
 
+    # Properties of the cave.
+
     @property
     def is_dark(self):
         lamp = self.objects['lamp']
         if self.is_here(lamp) and lamp.prop:
             return False
         return self.loc.is_dark
+
+    @property
+    def inventory(self):
+        return [ obj for obj in self.object_list if obj.toting ]
 
     def is_here(self, obj):
         return obj.toting or (self.loc in obj.rooms)
@@ -88,14 +97,14 @@ class Game(Data):
 
         loc = self.loc
 
-        if self.could_fall_in_pit and not loc.forced_move and random() < .35:
+        if self.could_fall_in_pit and not loc.is_forced and random() < .35:
             self.die_here()
             return
 
         # if self.toting(bear):
         #     self.write_message(141)
 
-        if self.is_dark and not loc.forced_move:
+        if self.is_dark and not loc.is_forced:
             self.write_message(16)
         else:
             do_short = loc.times_described % self.full_description_period
@@ -105,8 +114,8 @@ class Game(Data):
             else:
                 self.write(loc.long_description)
 
-        if loc.forced_move:
-            self.do_motion(self.vocabulary[2])
+        if loc.is_forced:
+            self.do_motion(self.vocabulary[2])  # dummy motion verb
             return
 
         if loc.n == 33 and random() < .25 and not self.is_closing:
@@ -133,7 +142,7 @@ class Game(Data):
 
         self.finish_turn()
 
-    def say_okay(self):  #2009
+    def say_okay_and_finish(self):  #2009
         self.write_message(54)
         self.finish_turn()
 
@@ -185,6 +194,12 @@ class Game(Data):
             if len(words) == 2:
                 word2 = self.vocabulary[words[1]]
                 obj = self.objects[word2.n % 1000]
+                #5000
+                if not self.is_here(obj):
+                    self.write('I see no %s here.'
+                               % obj.name)
+                    self.finish_turn()
+                    return
                 args = (word, obj)
             else:
                 args = (word,)
@@ -227,9 +242,9 @@ class Game(Data):
                 elif c[0] == '%':
                     go = 100 * random() < c[1]
                 elif c[0] == 'carrying':
-                    go = True # TODO: test if carrying object c[1]
+                    go = self.objects[c[1]].toting
                 elif c[0] == 'carrying_or_in_room_with':
-                    go = True # TODO: test this too
+                    go = self.is_here(self.objects[c[1]])
                 elif c[0] == 'prop!=':
                     go = self.objects[c[1]].prop != c[2]
 
@@ -304,10 +319,71 @@ class Game(Data):
     # Verbs.
 
     def t_carry(self, verb, obj):  #9010
-        # if toting obj: goto 2011 and actspeak thing
+        if obj.toting:
+            self.write_message(verb.default_message or 54)
+            self.finish_turn()
+            return
+        # add many more tests here
+        if obj is self.BIRD and self.BIRD.prop == 0:
+            if self.ROD.toting:
+                self.write_message(26)
+                self.finish_turn()
+                return
         obj.toting = True
         del obj.rooms[:]
-        self.say_okay()
+        self.say_okay_and_finish()
+
+    def t_drop(self, verb, obj):  #9020
+        if obj is self.ROD and not self.ROD.toting and self.ROD2.toting:
+            obj = self.ROD2
+        if not obj.toting:
+            self.write_message(verb.default_message)
+            self.finish_turn()
+            return
+
+        bird, snake, dragon, bear, troll = self.BIRD, self.SNAKE, self.DRAGO, \
+            self.BEAR, self.TROLL
+
+        if obj is bird and self.is_here(snake):
+            self.write_message(30)
+            if self.is_closed:
+                self.write_message(136)
+                self.score_and_exit()
+            snake.prop = 1
+            snake.destroy()
+            bird.prop = 0
+            bird.drop(self.loc)
+
+        elif obj is self.COINS and self.is_here(self.VENDI):
+            obj.destroy()
+            self.BATTER.drop(self.loc)
+            self.write(self.BATTER.messages[0])
+
+        elif obj is bird and self.is_here(dragon) and dragon.prop == 0:
+            self.write_message(154)
+            bird.destroy()
+            bird.prop = 0
+            if snake.rooms:
+                self.impossibles += 1
+
+        elif obj is bear and troll.is_at(self.loc):
+            self.write_message(163)
+            troll.destroy()  # and something about fixed?
+            # something else about fixed and troll2
+            # juggle?
+            troll.prop = 2
+            bear.drop(self.loc)
+
+        elif obj is self.VASE and not self.is_here(self.PILLO):
+            self.VASE.prop = 2
+            # and more
+
+        else:
+            self.write_message(54)
+            obj.drop(self.loc)
+
+        self.finish_turn()
+        return
 
     def t_unloc(self, verb, obj):  #8040
         if obj == u'clam' or obj == u'oyste':
@@ -350,11 +426,14 @@ class Game(Data):
 
     def i_inven(self, verb):  #8200
         first = True
-        for obj in self.object_list:
-            if obj.toting: # ...and is not bear
-                if first:
-                    self.write_message(99)
-                    first = False
-                self.write(obj.inventory_message)
-        # ... and do bear too
+        objs = [ obj for obj in self.inventory if obj is not self.BEAR ]
+        for obj in objs:
+            if first:
+                self.write_message(99)
+                first = False
+            self.write(obj.inventory_message)
+        if self.BEAR.toting:
+            self.write_message(141)
+        if not objs:
+            self.write_message(98)
         self.finish_turn()

@@ -72,8 +72,8 @@ class Room(object):
         self.objects = []
 
     @property
-    def forced_move(self):
-        return self.travel_table[0].forced
+    def is_forced(self):
+        return self.travel_table and self.travel_table[0].forced
 
     @property
     def is_aboveground(self):
@@ -115,10 +115,13 @@ class Object(object):
         self.toting = False
 
     def __repr__(self):
-        return '<Object %s>' % '/'.join(self.names)
+        return '<Object %d %s %x>' % (self.n, '/'.join(self.names), id(self))
 
     def __eq__(self, other):
         return any( text == other for text in self.names )
+
+    def is_at(self, room):
+        return room in self.rooms
 
     def carry(self):
         self.rooms[:] = []
@@ -126,6 +129,10 @@ class Object(object):
 
     def drop(self, room):
         self.rooms[:] = [ room ]
+        self.toting = False
+
+    def destroy(self):
+        self.rooms[:] = []
         self.toting = False
 
 class Message(object):
