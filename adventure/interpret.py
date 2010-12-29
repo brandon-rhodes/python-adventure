@@ -6,8 +6,8 @@ from .data import parse
 
 def read_data_from_nearby_file(data):
     datapath = os.path.join(os.path.dirname(__file__), 'advent.dat')
-    datafile = codecs.open(datapath, 'r', encoding='ascii')
-    parse(data, datafile)
+    with codecs.open(datapath, 'r', encoding='ascii') as datafile:
+        parse(data, datafile)
 
 def interpret(data, words):
     if words == ['?']:
