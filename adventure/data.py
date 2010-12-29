@@ -91,7 +91,7 @@ def section3(data, x, y, *verbs):
 
     move = Move()
     if len(verbs) == 1 and verbs[0] == 1:
-        move.forced = True
+        move.is_forced = True
     else:
         move.verbs = [ make_object(data.vocabulary, Word, verb_n)
                        for verb_n in verbs ]

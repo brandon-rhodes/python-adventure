@@ -3,7 +3,7 @@
 class Move(object):
     """An entry in the travel table."""
 
-    forced = False
+    is_forced = False
     verbs = []
     condition = None
     action = None
@@ -73,7 +73,7 @@ class Room(object):
 
     @property
     def is_forced(self):
-        return self.travel_table and self.travel_table[0].forced
+        return self.travel_table and self.travel_table[0].is_forced
 
     @property
     def is_aboveground(self):

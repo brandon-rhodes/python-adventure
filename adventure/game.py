@@ -84,7 +84,7 @@ class Game(Data):
             self.hints[3].used = True
             self.lamp_turns = 1000
         self.turns = 0
-        self.oldloc = self.loc = self.rooms[1]
+        self.oldloc2 = self.oldloc = self.loc = self.rooms[1]
         self.describe_location()
 
         treasures = self.treasures
@@ -273,8 +273,28 @@ class Game(Data):
             return
 
         elif word == 'back':  #20
-            #todo
-            return
+            dest = self.oldloc2 if self.oldloc.is_forced else self.oldloc
+            self.oldloc2, self.oldloc = self.oldloc, self.loc
+            if dest is self.loc:
+                self.write_message(91)
+                self.move_to()
+                return
+            alt = None
+            for move in self.loc.travel_table:
+                if move.action is dest:
+                    word = move.verbs[0]  # arbitrary verb going to `dest`
+                    break # Fall through, to attempt the move.
+                elif (isinstance(move.action, Room)
+                      and move.action.is_forced
+                      and move.action.travel_table[0].action is dest):
+                    alt = move.verbs[0]
+            else:  # no direct route is available
+                if alt is not None:
+                    word = alt  # take a forced move if it's the only option
+                else:
+                    self.write_message(140)
+                    self.move_to()
+                    return
 
         elif word == 'look':  #30
             if self.look_complaints > 0:
@@ -293,7 +313,7 @@ class Game(Data):
         self.oldloc2, self.oldloc = self.oldloc, self.loc
 
         for move in self.loc.travel_table:
-            if move.forced or word in move.verbs:
+            if move.is_forced or word in move.verbs:
                 c = move.condition
 
                 if c[0] is None or c[0] == 'not_dwarf':
