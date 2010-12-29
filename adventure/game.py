@@ -163,7 +163,8 @@ class Game(Data):
 
         loc = self.loc
 
-        if self.could_fall_in_pit and not loc.is_forced and random() < .35:
+        could_fall = self.is_dark and self.could_fall_in_pit
+        if could_fall and not loc.is_forced and random() < .35:
             self.die_here()
             return
 
@@ -226,7 +227,11 @@ class Game(Data):
             # put closing-time "prop" special case here
 
         self.could_fall_in_pit = self.is_dark  #2605
+
         # remove knife from cave if they moved away from it
+
+        # Advance random number generator so each input affects future.
+        random()
 
     # The central do_command() method, that should be called over and
     # over again with words supplied by the user.
@@ -411,40 +416,50 @@ class Game(Data):
 
     def die(self):  #99
         self.deaths += 1
+
         if self.is_closing:
             self.write_message(131)
             self.score_and_exit()
-        else:
-            def callback(yes):
-                if yes:
-                    self.write_message(80 + self.deaths * 2)
-                    if self.deaths < self.max_deaths:
-                        # do water and oil thing
-                        # turn off lamp if carrying it
-                        # drop all objects in oldloc2
-                        # but lamp goes in location 1
-                        for obj in self.object_list:
-                            if not obj.is_toting:
-                                continue
-                            if obj == 'lamp':
-                                obj.drop(self.rooms[1])
-                            else:
-                                obj.drop(self.oldloc2)
-                        self.loc = self.rooms[3]
-                        self.describe_location()
-                        return
-                else:
-                    self.write_message(54)
-                self.score_and_exit()
-            self.yesno(self.messages[79 + self.deaths * 2], callback)
+            return
+
+        def callback(yes):
+            if yes:
+                self.write_message(80 + self.deaths * 2)
+                if self.deaths < self.max_deaths:
+                    # do water and oil thing
+                    # turn off lamp if carrying it
+                    # drop all objects in oldloc2
+                    # but lamp goes in location 1
+                    for obj in self.inventory:
+                        if obj == 'lamp':
+                            obj.drop(self.rooms[1])
+                        else:
+                            obj.drop(self.oldloc2)
+                    self.loc = self.rooms[3]
+                    self.describe_location()
+                    return
+            else:
+                self.write_message(54)
+            self.score_and_exit()
+
+        self.yesno(self.messages[79 + self.deaths * 2], callback)
 
     # Verbs.
 
-    def print_do_what(self, verb, *args):
+    def print_do_what(self, verb, *args):  #8000
         self.write('%s What?' % verb.names[0])
         self.finish_turn()
 
+    i_drop = print_do_what
+    i_say = print_do_what
     i_wave = print_do_what
+    i_calm = print_do_what
+    i_rub = print_do_what
+    i_toss = print_do_what
+    i_find = print_do_what
+    i_feed = print_do_what
+    i_break = print_do_what
+    i_wake = print_do_what
 
     def t_carry(self, verb, obj):  #9010
         if obj.is_toting:

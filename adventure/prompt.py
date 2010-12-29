@@ -15,7 +15,7 @@ class ReprTriggeredIdentifier(object):
         self.game.do_command([ self.word ])
         self.game.writer = old_writer
         v = s.getvalue()
-        if v[-1] == '\n':
+        if len(v) and v[-1] == '\n':
             v = v[:-1]  # since Python eval loop will add its own newline
         return v
 
