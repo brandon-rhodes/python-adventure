@@ -33,7 +33,7 @@ class Game(Data):
 
     def write(self, s):
         """Output the Unicode representation of `s`."""
-        s = unicode(s)
+        s = str(s)
         if s:
             self.writer(s)
             self.writer('\n')
@@ -268,15 +268,15 @@ class Game(Data):
 
     def do_motion(self, word):  #8
 
-        if word == u'null':
+        if word == 'null':
             self.move_to()
             return
 
-        elif word == u'back':  #20
+        elif word == 'back':  #20
             #todo
             return
 
-        elif word == u'look':  #30
+        elif word == 'look':  #30
             if self.look_complaints > 0:
                 self.write_message(15)
                 self.look_complaints -= 1
@@ -285,7 +285,7 @@ class Game(Data):
             self.could_fall_in_pit = False
             return
 
-        elif word == u'cave':  #40
+        elif word == 'cave':  #40
             self.write(self.messages[57 if self.loc.is_aboveground else 58])
             self.move_to()
             return
@@ -328,7 +328,7 @@ class Game(Data):
             self.write_message(10)
         elif n in (11, 19):
             self.write_message(11)
-        elif word == u'find' or word == u'invent':  # ? this might be wrong
+        elif word == 'find' or word == 'invent':  # ? this might be wrong
             self.write_message(59)
         elif n in (62, 65):
             self.write_message(42)
@@ -363,7 +363,7 @@ class Game(Data):
                         for obj in self.object_list:
                             if not obj.is_toting:
                                 continue
-                            if obj == u'lamp':
+                            if obj == 'lamp':
                                 obj.drop(self.rooms[1])
                             else:
                                 obj.drop(self.oldloc2)
@@ -472,27 +472,27 @@ class Game(Data):
         return
 
     def t_unlock(self, verb, obj):  #8040
-        if obj == u'clam' or obj == u'oyste':
+        if obj == 'clam' or obj == 'oyste':
             raise NotImplementedError()  #9046
-        elif obj == u'door':
+        elif obj == 'door':
             if obj.prop == 1:
                 self.write_message(54)
             else:
                 self.write_message(111)
-        elif obj == u'cage':
+        elif obj == 'cage':
             self.write_message(32)
-        elif obj == u'keys':
+        elif obj == 'keys':
             self.write_message(55)
-        elif obj == u'grate' or obj == u'chain':
+        elif obj == 'grate' or obj == 'chain':
             # if keys are not here, write message 31 and give up
-            if obj == u'chain':
+            if obj == 'chain':
                 raise NotImplementedError()  #9048
             else:
                 if self.is_closing:
                     raise NotImplementedError()  # set panic clock etc
                 else:
                     oldprop = obj.prop
-                    obj.prop = 0 if verb == u'lock' else 1
+                    obj.prop = 0 if verb == 'lock' else 1
                     self.write_message(34 + oldprop + 2 * obj.prop)
         else:
             self.write(verb.names)
@@ -583,7 +583,7 @@ class Game(Data):
             if yes:
                 self.score_and_exit()
                 return
-	self.yesno(self.messages[143], callback)
+        self.yesno(self.messages[143], callback)
 
     def compute_score(self, for_score_command=False):  #20000
         score = maxscore = 2
@@ -628,7 +628,7 @@ class Game(Data):
         if self.magazine.rooms[0].n == 108:
             score += 1
 
-        for hint in self.hints.values():
+        for hint in list(self.hints.values()):
             if hint.used:
                 score -= hint.penalty
 

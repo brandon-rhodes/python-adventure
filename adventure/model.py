@@ -42,17 +42,17 @@ class Move(object):
     def take_action(self, data):
         if isinstance(self.action, Room):
             data.room = self.action
-            print data.room.description
+            print(data.room.description)
         elif isinstance(self.action, Message):
-            print self.action.text
+            print(self.action.text)
         else:
-            print 'special %d' % self.action
+            print('special %d' % self.action)
 
 class Room(object):
     """A location in the game."""
 
-    long_description = u''
-    short_description = u''
+    long_description = ''
+    short_description = ''
     times_described = 0
     visited = False
 
@@ -107,7 +107,7 @@ class Object(object):
 
     def __init__(self):
         self.is_fixed = False
-        self.inventory_message = u''
+        self.inventory_message = ''
         self.messages = {}
         self.names = []
         self.prop = 0
@@ -116,6 +116,9 @@ class Object(object):
 
     def __repr__(self):
         return '<Object %d %s %x>' % (self.n, '/'.join(self.names), id(self))
+
+    def __hash__(self):
+        return self.n
 
     def __eq__(self, other):
         return any( text == other for text in self.names )
@@ -137,9 +140,9 @@ class Object(object):
 
 class Message(object):
     """A message for printing."""
-    text = u''
+    text = ''
 
-    def __unicode__(self):
+    def __str__(self):
         return self.text
 
 class Hint(object):

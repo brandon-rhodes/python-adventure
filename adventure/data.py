@@ -6,7 +6,7 @@ from .model import Hint, Message, Move, Object, Room, Word
 # The Adventure data file knows only the first five characters of each
 # word in the game, so we have to know the full verion of each word.
 
-long_words = { w[:5]: w for w in u"""upstream downstream forest
+long_words = { w[:5]: w for w in """upstream downstream forest
 forward continue onward return retreat valley stairs outside stream
 cobble inward inside surface nowhere passage tunnel canyon awkward
 upward ascend downward descend outdoors barren across debris broken
@@ -41,7 +41,7 @@ def make_object(dictionary, klass, n):
 
 def expand_tabs(segments):
     it = iter(segments)
-    line = it.next()
+    line = next(it)
     for segment in it:
         spaces = 8 - len(line) % 8
         line += ' ' * spaces + segment

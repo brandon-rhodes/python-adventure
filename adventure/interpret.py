@@ -11,7 +11,7 @@ def read_data_from_nearby_file(data):
 
 def interpret(data, words):
     if words == ['?']:
-        print data.room.travel_table
+        print(data.room.travel_table)
         return
     if len(words):
         word = data.vocabulary_words.get(words[0])
@@ -23,10 +23,10 @@ def interpret(data, words):
                 break
 
 def loop(data):
-    print data.room.description
+    print(data.room.description)
     while True:
         data.room.visited = True
-        line = raw_input('>')
+        line = input('>')
         words = line.strip().upper().split()
         interpret(data, words)
 

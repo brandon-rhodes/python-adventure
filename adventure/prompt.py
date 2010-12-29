@@ -1,7 +1,6 @@
 """Routines that install Adventure commands for the Python prompt."""
 
-import __builtin__
-from StringIO import StringIO
+from io import StringIO
 
 class ReprTriggeredIdentifier(object):
     def __init__(self, game, word):
@@ -25,11 +24,13 @@ class ReprTriggeredIdentifier(object):
         self.game.do_command([ self.word, arg.word ])
 
 def install_builtins(game):
-    words = [ k for k in game.vocabulary if isinstance(k, unicode) ]
+    import sys
+    module = sys.modules['builtins']
+    words = [ k for k in game.vocabulary if isinstance(k, str) ]
     words.append('yes')
     words.append('no')
     for word in words:
         if word in ('exit', 'help', 'open', 'quit'):
             continue
         identifier = ReprTriggeredIdentifier(game, word)
-        setattr(__builtin__, word, identifier)
+        setattr(module, word, identifier)
