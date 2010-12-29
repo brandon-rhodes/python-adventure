@@ -11,7 +11,9 @@ class Game(Data):
     look_complaints = 3  # how many times to "SORRY, BUT I AM NOT ALLOWED..."
     full_description_period = 5  # how often we use a room's full description
     full_wests = 0  # how many times they have typed "west" instead of "w"
+    gave_up = False
     impossibles = 0  # how many treasures can never be retrieved
+    warned_about_dim_lamp = False
     deaths = 0  # how many times the player has died
     max_deaths = 4  # how many times the player can die
 
@@ -66,6 +68,10 @@ class Game(Data):
         if yes:
             self.write_message(1)
             self.hints[3].used = True
+            self.lamp_turns = 1000
+        else:
+            self.lamp_turns = 330
+        self.turns = 0
         self.oldloc = self.loc = self.rooms[1]
         self.describe_location()
 
@@ -175,10 +181,39 @@ class Game(Data):
                 callback(answer)
             return
 
-        loc = self.loc
+        self.turns += 1
 
-        if not loc:
-            raise NotImplemented('death not yet implemented')
+        if self.LAMP.prop:
+            self.lamp_turns -= 1
+
+        if self.lamp_turns <= 30 and self.is_here(self.BATTE) \
+                and self.BATTE.prop == 0 and self.is_here(self.LAMP):
+            self.write_message(188)
+            self.BATTE.prop = 1
+            if self.BATTE.toting:
+                self.BATTE.drop(self.loc)
+            self.lamp_turns += 2500
+            self.warned_about_dim_lamp = False
+
+        if self.lamp_turns == 0:
+            self.lamp_turns = -1
+            self.LAMP.prop = 0
+            if self.is_here(self.LAMP):
+                self.write_message(184)
+        elif self.lamp_turns < 0 and self.loc.is_aboveground:
+            self.write_message(185)
+            self.gave_up = True
+            self.score_and_exit()
+            return
+        elif self.lamp_turns <= 30 and not self.warned_about_dim_lamp \
+                and self.is_here(self.LAMP):
+            self.warned_about_dim_lamp = True
+            if self.BATTE.prop == 1:
+                self.write_message(189)
+            elif not self.BATTE.rooms:
+                self.write_message(183)
+            else:
+                self.write_message(187)
 
         word = self.vocabulary[words[0]]
 
