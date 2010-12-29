@@ -21,6 +21,7 @@ class Game(Data):
         Data.__init__(self)
         self.writer = writer
         self.yesno_callback = False
+        self.yesno_casual = False       # whether to insist they answer
 
         self.is_closing = False         # is the cave closing?
         self.is_closed = False          # is the cave closed?
@@ -36,10 +37,11 @@ class Game(Data):
     def write_message(self, n):
         self.write(self.messages[n])
 
-    def yesno(self, s, yesno_callback):
+    def yesno(self, s, yesno_callback, casual=False):
         """Ask a question and prepare to receive a yes-or-no answer."""
         self.write(s)
         self.yesno_callback = yesno_callback
+        self.yesno_casual = casual
 
     # Properties of the cave.
 
@@ -174,12 +176,16 @@ class Game(Data):
         if self.yesno_callback is not None:
             answer = YESNO_ANSWERS.get(words[0], None)
             if answer is None:
-                self.write('Please answer the question.')
+                if self.yesno_casual:
+                    self.yesno_callback = None
+                else:
+                    self.write('Please answer the question.')
+                    return
             else:
                 callback = self.yesno_callback
                 self.yesno_callback = None
                 callback(answer)
-            return
+                return
 
         self.turns += 1
 
@@ -443,7 +449,7 @@ class Game(Data):
         self.finish_turn()
         return
 
-    def t_unloc(self, verb, obj):  #8040
+    def t_unlock(self, verb, obj):  #8040
         if obj == u'clam' or obj == u'oyste':
             raise NotImplementedError()  #9046
         elif obj == u'door':
@@ -482,7 +488,56 @@ class Game(Data):
         else:
             self.finish_turn()
 
-    def i_inven(self, verb):  #8200
+    def t_attack(self, verb, obj):
+        if obj is self.bird:
+            if self.is_closed:
+                self.write_message(137)
+            else:
+                obj.destroy()
+                obj.prop = 0
+                if self.snake.rooms:
+                    self.impossibles += 1
+                self.write_message(45)
+        elif obj is self.clam or obj is self.oyster:
+            self.write_message(150)
+        elif obj is self.snake:
+            self.write_message(46)
+        elif obj is self.dwarf:
+            if self.is_closed:
+                die
+            self.write_message(49)
+        elif obj is self.dragon:
+            if self.dragon.prop != 0:
+                self.write_message(167)
+            else:
+                self.write_message(49)
+                def callback(yes):
+                    self.write(obj.messages[1])
+                    obj.prop = 2
+                    obj.is_fixed = True
+                    oldroom1 = obj.rooms[0]
+                    oldroom2 = obj.rooms[1]
+                    newroom = self.rooms[ (oldroom1.n + oldroom2.n) // 2 ]
+                    obj.drop(newroom)
+                    self.rug.prop = 0
+                    self.rug.is_fixed = False
+                    self.rug.drop(newroom)
+                    for obj2 in self.object_list:
+                        for i, r in enumerate(obj2.rooms):
+                            if r is oldroom1 or r is oldroom2:
+                                obj2.rooms[i] = newroom
+                    self.move_to()
+                self.yesno(self.messages[49], callback)
+                return
+        elif obj is self.troll:
+            self.write_message(157)
+        elif obj is self.bear:
+            self.write_message(165 + (self.bear.prop + 1) // 2)
+        else:
+            self.write_message(44)
+        self.finish_turn()
+
+    def i_inventory(self, verb):  #8200
         first = True
         objs = [ obj for obj in self.inventory if obj is not self.bear ]
         for obj in objs:

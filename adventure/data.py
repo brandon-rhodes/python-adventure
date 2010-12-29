@@ -6,7 +6,7 @@ from .model import Hint, Message, Move, Object, Room, Word
 # The Adventure data file knows only the first five characters of each
 # word in the game, so we have to know the full verion of each word.
 
-long_words = dict((w[:5], w) for w in """upstream downstream forest
+long_words = dict((w[:5], w) for w in u"""upstream downstream forest
 forward continue onward return retreat valley stairs outside stream
 cobble inward inside surface nowhere passage tunnel canyon awkward
 upward ascend downward descend outdoors barren across debris broken
@@ -106,14 +106,15 @@ def section4(data, n, name, *etc):
     else:
         names = [ name ]
     word = make_object(data.vocabulary, Word, n)
-    word.names.append(name)
+    word.names.extend(names)
     word.kind = ['motion', 'object', 'verb', 'random_message'][n // 1000]
     if word.kind == 'object':
         obj = make_object(data.objects, Object, n % 1000)
         obj.names.extend(names)
         data.objects[name] = obj
-    if name not in data.vocabulary:  # since there are several duplicate names
-        data.vocabulary[name] = word
+    for name in names:
+        if name not in data.vocabulary:  # since duplicate names exist
+            data.vocabulary[name] = word
 
 def section5(data, n, *etc):
     if 1 <= n <= 99:
