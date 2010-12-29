@@ -35,7 +35,7 @@ class Game(Data):
 
     def write(self, s):
         """Output the Unicode representation of `s`."""
-        s = str(s)
+        s = str(s).upper()
         if s:
             self.writer(s)
             self.writer('\n')
@@ -440,6 +440,12 @@ class Game(Data):
 
     # Verbs.
 
+    def print_do_what(self, verb, *args):
+        self.write('%s What?' % verb.names[0])
+        self.finish_turn()
+
+    i_wave = print_do_what
+
     def t_carry(self, verb, obj):  #9010
         if obj.is_toting:
             self.write_message(verb.default_message or 54)
@@ -573,6 +579,22 @@ class Game(Data):
             self.describe_location()
         else:
             self.finish_turn()
+
+    def t_swing(self, verb, obj):  #9090
+        fissure = self.fissure
+        not_rod = obj is not self.rod
+        not_toting = not obj.toting
+
+        if (not_rod or not_toting or not self.is_here(fissure)):
+            if (not_toting and (not_rod or not self.rod2.toting)):
+                self.write_message(29)
+            else:
+                self.write_message(verb.default_message)
+        else:
+            fissure.prop = fissure.prop - 1  # toggle its value
+            self.write_message(fissure.messages[2 - fissure.prop])
+
+        self.finish_turn()
 
     def t_attack(self, verb, obj):  #9120
         if obj is self.bird:
