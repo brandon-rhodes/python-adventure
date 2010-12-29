@@ -80,6 +80,10 @@ class Room(object):
         return 1 <= self.n <= 8
 
     @property
+    def is_before_hall_of_mists(self):
+        return self.n < 15
+
+    @property
     def is_dark(self):
         return not self.is_light
 
@@ -162,5 +166,5 @@ class Dwarf(object):
 
     def __init__(self, room):
         self.room = room
-        self.old_room = None
+        self.old_room = room
         self.has_seen_adventurer = False

@@ -1,6 +1,6 @@
 """How we keep track of the state of the game."""
 
-from random import random, choice
+from random import random, randint, choice
 from .data import Data
 from .model import Dwarf, Message, Room
 
@@ -122,7 +122,7 @@ class Game(Data):
             )
 
         if not must_allow_move and dwarf_blocking_the_way:
-            newloc = loc
+            newloc = loc  # cancel move they were going to make
             self.write_message(2)
 
         self.loc = loc = newloc  #74
@@ -131,12 +131,31 @@ class Game(Data):
         if is_dwarf_area and self.dwarf_stage > 0:
             self.move_dwarves()
         else:
-            if is_dwarf_area and loc.n >= 15:  # past Hall of Mists
+            if is_dwarf_area and not loc.is_before_hall_of_mists:
                 self.dwarf_stage = 1
             self.describe_location()
 
     def move_dwarves(self):
-        self.describe_location()
+
+        if self.dwarf_stage == 1:  # 5% chance per turn of meeting first dwarf
+
+            r = random()
+            #print(r)
+            if self.loc.is_before_hall_of_mists or r < .95:
+                self.describe_location()
+                return
+            self.dwarf_stage = 2
+            for i in range(2):  # randomly kill 0, 1, or 2 dwarves
+                if random() < .5:
+                    kill_dwarf_number = randint(0, len(self.dwarves))
+                    del self.dwarves[kill_dwarf_number]
+            for dwarf in self.dwarves:
+                if dwarf.room is self.loc:
+                    dwarf.room = self.rooms[18]  # move dwarf away
+            self.write_message(3)
+            self.axe.drop(self.loc)
+            self.describe_location()
+            return
 
     def describe_location(self):  #2000
 
@@ -166,7 +185,7 @@ class Game(Data):
             return
 
         if loc.n == 33 and random() < .25 and not self.is_closing:
-            self.speak_message(8)
+            self.write_message(8)
 
         if not self.is_dark:
             for obj in self.objects_here:
@@ -441,6 +460,7 @@ class Game(Data):
         if len(self.inventory) >= 7:
             self.write_message(92)
             self.finish_turn()
+            return
         if obj is self.bird and obj.prop == 0:
             if self.rod.is_toting:
                 self.write_message(26)
@@ -480,7 +500,7 @@ class Game(Data):
             bird.prop = 0
             bird.drop(self.loc)
 
-        elif obj is self.coins and self.is_here(self.vending):
+        elif obj is self.coins and self.is_here(self.machine):
             obj.destroy()
             self.battery.drop(self.loc)
             self.write(self.battery.messages[0])
