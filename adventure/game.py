@@ -141,7 +141,7 @@ class Game(Data):
         if is_dwarf_area and self.dwarf_stage > 0:
             self.move_dwarves()
         else:
-            if is_dwarf_area and not loc.is_before_hall_of_mists:
+            if is_dwarf_area and loc.is_after_hall_of_mists:
                 self.dwarf_stage = 1
             self.describe_location()
 
@@ -161,7 +161,7 @@ class Game(Data):
             for dwarf in self.dwarves:
                 if dwarf.room is self.loc:
                     dwarf.room = self.rooms[18]  # move dwarf away
-            self.write_message(3)
+            self.write_message(3)  # dwarf throws axe and curses
             self.axe.drop(self.loc)
             self.describe_location()
             return
@@ -250,7 +250,7 @@ class Game(Data):
             self.write_message(4)
         elif dwarf_count:
             self.write('There are %d threatening little dwarves in the'
-                       ' room with you.' % dwarf_count)
+                       ' room with you.\n' % dwarf_count)
 
         if dwarf_attacks and self.dwarf_stage == 2:
             self.dwarf_stage = 3
@@ -259,7 +259,7 @@ class Game(Data):
             self.write_message(5)
             k = 52
         elif dwarf_attacks:
-            self.write('%d of them throw knives at you!' % dwarf_attacks)
+            self.write('%d of them throw knives at you!\n' % dwarf_attacks)
             k = 6
 
         if not dwarf_attacks:
@@ -270,7 +270,7 @@ class Game(Data):
             if knife_wounds == 1:
                 self.write_message(k + 1)
             else:
-                self.write('%d of them get you!' % knife_wounds)
+                self.write('%d of them get you!\n' % knife_wounds)
             self.die()
             return
 
@@ -422,8 +422,7 @@ class Game(Data):
                 obj = self.objects[word2.n % 1000]
                 #5000
                 if not self.is_here(obj):
-                    self.write('I see no %s here.'
-                               % obj.names[0])
+                    self.write('I see no %s here.\n' % obj.names[0])
                     self.finish_turn()
                     return
                 args = (word, obj)
@@ -546,9 +545,8 @@ class Game(Data):
                 self.write_message(80 + self.deaths * 2)
                 if self.deaths < self.max_deaths:
                     # do water and oil thing
-                    # turn off lamp if carrying it
-                    # drop all objects in oldloc2
-                    # but lamp goes in location 1
+                    if self.lamp.is_toting:
+                        self.lamp.prop = 0
                     for obj in self.inventory:
                         if obj == 'lamp':
                             obj.drop(self.rooms[1])
@@ -566,7 +564,7 @@ class Game(Data):
     # Verbs.
 
     def print_do_what(self, verb, *args):  #8000
-        self.write('%s What?' % verb.names[0])
+        self.write('%s What?\n' % verb.names[0])
         self.finish_turn()
 
     i_drop = print_do_what
@@ -862,7 +860,7 @@ class Game(Data):
     def i_score(self, verb):  #8240
         score, max_score = self.compute_score(for_score_command=True)
         self.write('If you were to quit now, you would score %d'
-                   ' out of a possible %d.' % (score, max_score))
+                   ' out of a possible %d.\n' % (score, max_score))
         def callback(yes):
             self.write_message(54)
             if yes:

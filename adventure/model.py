@@ -181,7 +181,7 @@ class Dwarf(object):
         if not isinstance(move.action, Room):
             return False
         room = move.action
-        return (move.action.is_before_hall_of_mists
+        return (room.is_after_hall_of_mists
                 and not room.is_forced
                 and not move.condition == ('%', 100))
 
