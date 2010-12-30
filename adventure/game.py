@@ -928,17 +928,17 @@ class Game(Data):
 
     def score_and_exit(self):
         score, maxscore = self.compute_score()
-        self.write('\n\n\nYou scored %d out of a possible %d using %d turns.'
+        self.write('\nYou scored %d out of a possible %d using %d turns.'
                    % (score, maxscore, self.turns))
-        for i, minimum, text in enumerate(self.class_messages):
+        for i, (minimum, text) in enumerate(self.class_messages):
             if minimum >= score:
                 break
         self.write('\n%s\n' % text)
         if i < len(self.class_messages) - 1:
-            d = self.class_messages[i+1].minimum + 1 - score
-            self.write('\nTo achieve the next higher rating, you need'
+            d = self.class_messages[i+1][0] + 1 - score
+            self.write('To achieve the next higher rating, you need'
                        ' %s more point%s\n' % (d, 's' if d > 1 else ''))
         else:
-            self.write('\nTo achieve the next higher rating '
+            self.write('To achieve the next higher rating '
                        'would be a neat trick!\n\nCongratulations!!\n')
         self.end_game()
