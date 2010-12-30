@@ -187,9 +187,9 @@ def parse(data, datafile):
             break
         store = globals().get('section%d' % section_number)
         while True:
-            fields = [ (int(field) if field.isdigit() else field)
+            fields = [ (int(field) if field.lstrip('-').isdigit() else field)
                        for field in datafile.readline().strip().split('\t') ]
-            if fields[0] == '-1':  # end-of-section marker
+            if fields[0] == -1:  # end-of-section marker
                 break
             store(data, *fields)
 
@@ -197,6 +197,7 @@ def parse(data, datafile):
     del data._object       # state used by section 5
 
     data.object_list = sorted(set(data.objects.values()), key=attrgetter('n'))
+    #data.room_list = sorted(set(data.rooms.values()), key=attrgetter('n'))
     for obj in data.object_list:
         name = obj.names[0]
         if hasattr(data, name):

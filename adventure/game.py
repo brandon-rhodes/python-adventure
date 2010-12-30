@@ -1,6 +1,7 @@
 """How we keep track of the state of the game."""
 
 import random
+from operator import attrgetter
 from .data import Data
 from .model import Room, Message, Dwarf, Pirate
 
@@ -36,6 +37,7 @@ class Game(Data):
         self.random_instance = random.Random()
         if seed is not None:
             self.random_instance.seed(seed)
+
         self.random = self.random_instance.random
         self.randint = self.random_instance.randint
         self.choice = self.random_instance.choice
@@ -173,8 +175,9 @@ class Game(Data):
                           if dwarf.can_move(move)
                           and move.action is not dwarf.old_room
                           and move.action is not dwarf.room }
+            locations = sorted(locations, key=attrgetter('n'))  # stabilize
             if locations:
-                new_room = self.choice(list(locations))  # choice needs list
+                new_room = self.choice(locations)
             else:
                 new_room = dwarf.old_room
             dwarf.old_room, dwarf.room = dwarf.room, new_room
@@ -807,8 +810,7 @@ class Game(Data):
 
         dwarves_here = [ d for d in self.dwarves if d.room is self.loc ]
         if dwarves_here:
-            #if self.randint(0, 2):  # 1/3rd chance of killing a dwarf
-            if self.random() < .333333:  # 1/3rd chance of killing a dwarf
+            if self.randint(0, 2):  # 1/3rd chance of killing a dwarf
                 self.write_message(48)  # Miss
             else:
                 self.dwarves.remove(dwarves_here[0])
