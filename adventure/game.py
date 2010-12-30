@@ -1,6 +1,6 @@
 """How we keep track of the state of the game."""
 
-from random import random, randint, choice
+import random
 from .data import Data
 from .model import Room, Message, Dwarf, Pirate
 
@@ -23,7 +23,7 @@ class Game(Data):
     max_deaths = 4  # how many times the player can die
     turns = 0
 
-    def __init__(self, writer):
+    def __init__(self, writer, seed=None):
         Data.__init__(self)
         self.writer = writer
         self.yesno_callback = False
@@ -32,6 +32,13 @@ class Game(Data):
         self.is_closing = False         # is the cave closing?
         self.is_closed = False          # is the cave closed?
         self.could_fall_in_pit = False  # could the player fall into a pit?
+
+        self.random_instance = random.Random()
+        if seed is not None:
+            self.random_instance.seed(seed)
+        self.random = self.random_instance.random
+        self.randint = self.random_instance.randint
+        self.choice = self.random_instance.choice
 
     def write(self, s):
         """Output the Unicode representation of `s`."""
@@ -142,13 +149,13 @@ class Game(Data):
         if self.dwarf_stage == 1:
 
             # 5% chance per turn of meeting first dwarf
-            if self.loc.is_before_hall_of_mists or random() < .95:
+            if self.loc.is_before_hall_of_mists or self.random() < .95:
                 self.describe_location()
                 return
             self.dwarf_stage = 2
             for i in range(2):  # randomly remove 0, 1, or 2 dwarves
-                if random() < .5:
-                    del self.dwarves[randint(0, len(self.dwarves))]
+                if self.random() < .5:
+                    del self.dwarves[self.randint(0, len(self.dwarves) - 1)]
             for dwarf in self.dwarves:
                 if dwarf.room is self.loc:
                     dwarf.room = self.rooms[18]  # move dwarf away
@@ -167,7 +174,7 @@ class Game(Data):
                           and move.action is not dwarf.old_room
                           and move.action is not dwarf.room }
             if locations:
-                new_room = choice(list(locations))  # choice needs list
+                new_room = self.choice(list(locations))  # choice needs list
             else:
                 new_room = dwarf.old_room
             dwarf.old_room, dwarf.room = dwarf.room, new_room
@@ -187,7 +194,7 @@ class Game(Data):
                 if dwarf.room is dwarf.old_room:
                     dwarf_attacks += 1
                     #knfloc here
-                    if random() < .095 * (self.dwarf_stage - 2):
+                    if self.random() < .095 * (self.dwarf_stage - 2):
                         knife_wounds += 1
 
             else:  # the pirate
@@ -212,7 +219,8 @@ class Game(Data):
                         )
 
                     if not shiver_me_timbers:
-                        if (pirate.old_room != pirate.room) and random() < .2:
+                        if (pirate.old_room != pirate.room
+                            and self.random() < .2):
                             self.write_message(127)
                         continue  # proceed to the next character? aren't any!
 
@@ -272,7 +280,7 @@ class Game(Data):
         loc = self.loc
 
         could_fall = self.is_dark and self.could_fall_in_pit
-        if could_fall and not loc.is_forced and random() < .35:
+        if could_fall and not loc.is_forced and self.random() < .35:
             self.die_here()
             return
 
@@ -293,7 +301,7 @@ class Game(Data):
             self.do_motion(self.vocabulary[2])  # dummy motion verb
             return
 
-        if loc.n == 33 and random() < .25 and not self.is_closing:
+        if loc.n == 33 and self.random() < .25 and not self.is_closing:
             self.write_message(8)
 
         if not self.is_dark:
@@ -339,7 +347,7 @@ class Game(Data):
         # remove knife from cave if they moved away from it
 
         # Advance random number generator so each input affects future.
-        random()
+        self.random()
 
     # The central do_command() method, that should be called over and
     # over again with words supplied by the user.
@@ -475,7 +483,7 @@ class Game(Data):
                 if c[0] is None or c[0] == 'not_dwarf':
                     allowed = True
                 elif c[0] == '%':
-                    allowed = 100 * random() < c[1]
+                    allowed = 100 * self.random() < c[1]
                 elif c[0] == 'carrying':
                     allowed = self.objects[c[1]].is_toting
                 elif c[0] == 'carrying_or_in_room_with':
@@ -799,7 +807,8 @@ class Game(Data):
 
         dwarves_here = [ d for d in self.dwarves if d.room is self.loc ]
         if dwarves_here:
-            if randint(0, 2):  # 1/3rd chance of killing a dwarf
+            #if self.randint(0, 2):  # 1/3rd chance of killing a dwarf
+            if self.random() < .333333:  # 1/3rd chance of killing a dwarf
                 self.write_message(48)  # Miss
             else:
                 self.dwarves.remove(dwarves_here[0])
