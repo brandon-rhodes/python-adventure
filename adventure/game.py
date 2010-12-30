@@ -280,6 +280,7 @@ class Game(Data):
                 self.write_message(k + 1)
             else:
                 self.write('%d of them get you!\n' % knife_wounds)
+            self.oldloc2 = self.loc
             self.die()
             return
 
@@ -557,7 +558,7 @@ class Game(Data):
                     if self.lamp.is_toting:
                         self.lamp.prop = 0
                     for obj in self.inventory:
-                        if obj == 'lamp':
+                        if obj is self.lamp:
                             obj.drop(self.rooms[1])
                         else:
                             obj.drop(self.oldloc2)
