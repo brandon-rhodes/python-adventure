@@ -173,9 +173,12 @@ class Hint(object):
 class Dwarf(object):
 
     def __init__(self, room):
+        self.start_at(room)
+        self.has_seen_adventurer = False
+
+    def start_at(self, room):
         self.room = room
         self.old_room = room
-        self.has_seen_adventurer = False
 
     def can_move(self, move):
         if not isinstance(move.action, Room):

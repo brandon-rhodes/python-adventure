@@ -31,6 +31,7 @@ class Game(Data):
         self.yesno_casual = False       # whether to insist they answer
 
         self.is_closing = False         # is the cave closing?
+        self.panic = False              # they tried to leave during closing?
         self.is_closed = False          # is the cave closed?
         self.could_fall_in_pit = False  # could the player fall into a pit?
 
@@ -86,6 +87,7 @@ class Game(Data):
 
     def start(self):
         """Start the game."""
+        self.chest_room = self.rooms[114]
         self.yesno(self.messages[65], self.start2)  # want instructions?
 
     def start2(self, yes):
@@ -97,7 +99,7 @@ class Game(Data):
 
         self.oldloc2 = self.oldloc = self.loc = self.rooms[1]
         self.dwarves = [ Dwarf(self.rooms[n]) for n in (19, 27, 33, 44, 64) ]
-        self.pirate = Pirate(self.rooms[114])
+        self.pirate = Pirate(self.chest_room)
 
         treasures = self.treasures
         self.treasures_not_found = len(treasures)
@@ -118,7 +120,7 @@ class Game(Data):
 
         if self.is_closing and newloc.is_aboveground:
             self.write_message(130)
-            newloc = loc
+            newloc = loc  # cancel move and put him back underground
             if not self.panic:
                 self.clock2 = 15
                 self.panic = True
@@ -133,11 +135,12 @@ class Game(Data):
 
         if not must_allow_move and dwarf_blocking_the_way:
             newloc = loc  # cancel move they were going to make
-            self.write_message(2)
+            self.write_message(2)  # dwarf is blocking the way
 
         self.loc = loc = newloc  #74
 
-        is_dwarf_area = not loc.is_forced and not loc.is_forbidden_to_pirate
+        # IF LOC.EQ.0 ?
+        is_dwarf_area = not (loc.is_forced or loc.is_forbidden_to_pirate)
         if is_dwarf_area and self.dwarf_stage > 0:
             self.move_dwarves()
         else:
@@ -159,8 +162,8 @@ class Game(Data):
                 if self.random() < .5:
                     del self.dwarves[self.randint(0, len(self.dwarves) - 1)]
             for dwarf in self.dwarves:
-                if dwarf.room is self.loc:
-                    dwarf.room = self.rooms[18]  # move dwarf away
+                if dwarf.room is self.loc:  # move dwarf away from our loc
+                    dwarf.start_at(self.rooms[18])
             self.write_message(3)  # dwarf throws axe and curses
             self.axe.drop(self.loc)
             self.describe_location()
@@ -175,16 +178,21 @@ class Game(Data):
                           if dwarf.can_move(move)
                           and move.action is not dwarf.old_room
                           and move.action is not dwarf.room }
-            locations = sorted(locations, key=attrgetter('n'))  # stabilize
+            # Without stabilizing the order with a sort, the room chosen
+            # would depend on how the Room addresses in memory happen to
+            # order the rooms in the set() - and make it impossible to
+            # test the game by setting the random number generator seed
+            # and then playing through the game.
+            locations = sorted(locations, key=attrgetter('n'))
             if locations:
                 new_room = self.choice(locations)
             else:
                 new_room = dwarf.old_room
             dwarf.old_room, dwarf.room = dwarf.room, new_room
-            dwarf.has_seen_adventurer = (
-                (dwarf.has_seen_adventurer and self.loc.is_after_hall_of_mists)
-                or dwarf.room is self.loc or dwarf.old_room is self.loc
-                )
+            if self.loc in (dwarf.room, dwarf.old_room):
+                dwarf.has_seen_adventurer = True
+            elif self.loc.is_before_hall_of_mists:
+                dwarf.has_seen_adventurer = False
 
             if not dwarf.has_seen_adventurer:
                 continue
@@ -203,7 +211,7 @@ class Game(Data):
             else:  # the pirate
                 pirate = dwarf
 
-                if self.loc.n == 114 or self.chest.prop >= 0:
+                if self.loc is self.chest_room or self.chest.prop >= 0:
                     continue  # decide that the pirate is not really here
 
                 treasures = self.treasures
@@ -228,20 +236,20 @@ class Game(Data):
                         continue  # proceed to the next character? aren't any!
 
                     self.write_message(186)
-                    self.chest.drop(self.rooms[114])
+                    self.chest.drop(self.chest_room)
                     self.message.drop(self.rooms[140])
 
                 else:
                     #6022  I'll just take all this booty
                     self.write_message(128)
                     if self.message.room.n == 0:
-                        self.chest.move_to(self.rooms[114])
+                        self.chest.move_to(self.chest_room)
                     self.message.move_to(self.rooms[140])
                     for treasure in treasures_toted:
-                        treasure.drop(self.rooms[114])
+                        treasure.drop(self.chest_room)
 
                 #6024
-                pirate.old_room = pirate.room = self.rooms[114]
+                pirate.old_room = pirate.room = self.chest_room
                 pirate.has_seen_adventurer = False  # free to move
 
         # Report what has happened.
