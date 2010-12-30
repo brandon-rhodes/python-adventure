@@ -24,9 +24,10 @@ class Game(Data):
     max_deaths = 4  # how many times the player can die
     turns = 0
 
-    def __init__(self, writer, seed=None):
+    def __init__(self, writer, end_game, seed=None):
         Data.__init__(self)
         self.writer = writer
+        self.end_game = end_game  # function to call to end us
         self.yesno_callback = False
         self.yesno_casual = False       # whether to insist they answer
 
@@ -926,5 +927,18 @@ class Game(Data):
         return score, maxscore
 
     def score_and_exit(self):
-        self.compute_score()
-        # then do exit messages
+        score, maxscore = self.compute_score()
+        self.write('\n\n\nYou scored %d out of a possible %d using %d turns.'
+                   % (score, maxscore, self.turns))
+        for i, minimum, text in enumerate(self.class_messages):
+            if minimum >= score:
+                break
+        self.write('\n%s\n' % text)
+        if i < len(self.class_messages) - 1:
+            d = self.class_messages[i+1].minimum + 1 - score
+            self.write('\nTo achieve the next higher rating, you need'
+                       ' %s more point%s\n' % (d, 's' if d > 1 else ''))
+        else:
+            self.write('\nTo achieve the next higher rating '
+                       'would be a neat trick!\n\nCongratulations!!\n')
+        self.end_game()
