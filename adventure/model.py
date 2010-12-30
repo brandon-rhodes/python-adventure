@@ -131,6 +131,10 @@ class Object(object):
     def __eq__(self, other):
         return any( text == other for text in self.names )
 
+    @property
+    def is_treasure(self):
+        return self.n >= 50
+
     def is_at(self, room):
         return room in self.rooms
 

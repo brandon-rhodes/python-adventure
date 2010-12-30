@@ -243,6 +243,7 @@ class Game(Data):
 
         if dwarf_attacks and self.dwarf_stage == 2:
             self.dwarf_stage = 3
+
         if dwarf_attacks == 1:
             self.write_message(5)
             k = 52
@@ -711,7 +712,7 @@ class Game(Data):
             if (not_toting and (not_rod or not self.rod2.toting)):
                 self.write_message(29)
             else:
-                self.write_message(verb.default_message)
+                self.write(verb.default_message)
         else:
             fissure.prop = fissure.prop - 1  # toggle its value
             self.write_message(fissure.messages[2 - fissure.prop])
@@ -719,6 +720,8 @@ class Game(Data):
         self.finish_turn()
 
     def t_attack(self, verb, obj):  #9120
+        if obj is None:
+            raise NotImplementedError()
         if obj is self.bird:
             if self.is_closed:
                 self.write_message(137)
@@ -767,6 +770,69 @@ class Game(Data):
         else:
             self.write_message(44)
         self.finish_turn()
+
+    def t_throw(self, verb, obj):  #9170
+        if obj is self.rod and not self.rod.is_toting and self.rod2.is_toting:
+            obj = self.rod2
+
+        if not obj.is_toting:
+            self.write(verb.default_message)
+            self.finish_turn()
+            return
+
+        if obj.is_treasure and self.is_here(self.troll):
+            # Pay the troll toll
+            self.write_message(159)
+            obj.destroy()
+            self.troll2.rooms = self.troll.rooms
+            self.troll.destroy()
+            self.finish_turn()
+            return
+
+        if obj is self.food and self.is_here(self.bear):
+            self.t_feed(self.bear)
+            return
+
+        if obj is not self.axe:
+            self.t_drop(verb, obj)
+            return
+
+        dwarves_here = [ d for d in self.dwarves if d.room is self.loc ]
+        if dwarves_here:
+            if randint(0, 2):  # 1/3rd chance of killing a dwarf
+                self.write_message(48)  # Miss
+            else:
+                self.dwarves.remove(dwarves_here[0])
+                self.dwarves_killed += 1
+                if self.dwarves_killed == 1:
+                    self.write_message(149)
+                else:
+                    self.write_message(47)
+            self.axe.drop(self.loc)
+            self.do_motion(self.vocabulary['null'])
+            return
+
+        if self.is_here(self.dragon) and self.dragon.prop == 0:
+            self.write_message(152)
+            self.axe.drop(self.loc)
+            self.do_motion(self.vocabulary['null'])
+            return
+
+        if self.is_here(self.troll):
+            self.write_message(156)
+            self.axe.drop(self.loc)
+            self.do_motion(self.vocabulary['null'])
+            return
+
+        if self.is_here(self.bear) and self.bear.prop == 0:
+            self.write_message(164)
+            self.axe.drop(self.loc)
+            self.axe.is_fixed = True
+            self.axe.prop = 1
+            self.finish_turn()
+            return
+
+        self.t_attack(verb, None)
 
     def i_inventory(self, verb):  #8200
         first = True
