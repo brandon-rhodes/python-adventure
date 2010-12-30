@@ -84,6 +84,10 @@ class Room(object):
         return self.n < 15
 
     @property
+    def is_after_hall_of_mists(self):
+        return self.n >= 15
+
+    @property
     def is_dark(self):
         return not self.is_light
 
@@ -168,3 +172,16 @@ class Dwarf(object):
         self.room = room
         self.old_room = room
         self.has_seen_adventurer = False
+
+    def can_move(self, move):
+        if not isinstance(move.action, Room):
+            return False
+        room = move.action
+        return (move.action.is_before_hall_of_mists
+                and not room.is_forced
+                and not move.condition == ('%', 100))
+
+class Pirate(Dwarf):
+
+    def can_enter(self, room):
+        return Dwarf.can_enter(room) and not room.is_forbidden_to_pirate

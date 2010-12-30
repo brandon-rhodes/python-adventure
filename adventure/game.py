@@ -2,7 +2,7 @@
 
 from random import random, randint, choice
 from .data import Data
-from .model import Dwarf, Message, Room
+from .model import Room, Message, Dwarf, Pirate
 
 YESNO_ANSWERS = {'y': True, 'yes': True, 'n': False, 'no': False}
 
@@ -88,6 +88,7 @@ class Game(Data):
 
         self.oldloc2 = self.oldloc = self.loc = self.rooms[1]
         self.dwarves = [ Dwarf(self.rooms[n]) for n in (19, 27, 33, 44, 64) ]
+        self.pirate = Pirate(self.rooms[114])
 
         treasures = self.treasures
         self.treasures_not_found = len(treasures)
@@ -137,18 +138,17 @@ class Game(Data):
 
     def move_dwarves(self):
 
-        if self.dwarf_stage == 1:  # 5% chance per turn of meeting first dwarf
+        #6000
+        if self.dwarf_stage == 1:
 
-            r = random()
-            #print(r)
-            if self.loc.is_before_hall_of_mists or r < .95:
+            # 5% chance per turn of meeting first dwarf
+            if self.loc.is_before_hall_of_mists or random() < .95:
                 self.describe_location()
                 return
             self.dwarf_stage = 2
-            for i in range(2):  # randomly kill 0, 1, or 2 dwarves
+            for i in range(2):  # randomly remove 0, 1, or 2 dwarves
                 if random() < .5:
-                    kill_dwarf_number = randint(0, len(self.dwarves))
-                    del self.dwarves[kill_dwarf_number]
+                    del self.dwarves[randint(0, len(self.dwarves))]
             for dwarf in self.dwarves:
                 if dwarf.room is self.loc:
                     dwarf.room = self.rooms[18]  # move dwarf away
@@ -156,6 +156,113 @@ class Game(Data):
             self.axe.drop(self.loc)
             self.describe_location()
             return
+
+        #6010
+        dwarf_count = dwarf_attacks = knife_wounds = 0
+
+        for dwarf in self.dwarves + [ self.pirate ]:
+
+            locations = { move.action for move in dwarf.room.travel_table 
+                          if dwarf.can_move(move)
+                          and move.action is not dwarf.old_room
+                          and move.action is not dwarf.room }
+            if locations:
+                new_room = choice(list(locations))  # choice needs list
+            else:
+                new_room = dwarf.old_room
+            dwarf.old_room, dwarf.room = dwarf.room, new_room
+            dwarf.has_seen_adventurer = (
+                (dwarf.has_seen_adventurer and self.loc.is_after_hall_of_mists)
+                or dwarf.room is self.loc or dwarf.old_room is self.loc
+                )
+
+            if not dwarf.has_seen_adventurer:
+                continue
+
+            dwarf.room = self.loc
+
+            if isinstance(dwarf, Dwarf):
+                dwarf_count += 1
+                # A dwarf cannot walk and attack at the same time.
+                if dwarf.room is dwarf.old_room:
+                    dwarf_attacks += 1
+                    #knfloc here
+                    if random() < .095 * (self.dwarf_stage - 2):
+                        knife_wounds += 1
+
+            else:  # the pirate
+                pirate = dwarf
+
+                if self.loc.n == 114 or self.chest.prop >= 0:
+                    continue  # decide that the pirate is not really here
+
+                treasures = self.treasures
+                treasures_toted = [ t for t in self.treasures if t.toted ]
+                if (self.pyramid in treasures_toted
+                    and self.loc.n in (100, 101)):
+                    treasures.toted.remove(self.pyramid)
+
+                if not treasures_toted:
+                    h = any( t for t in self.treasures if self.is_here(t) )
+                    one_treasure_left = (self.treasures_not_found ==
+                                         self.impossible_treasures + 1)
+                    shiver_me_timbers = (
+                        one_treasure_left and not h and self.chest.room.n == 0
+                        and self.is_here(self.lamp) and self.lamp.prop == 1
+                        )
+
+                    if not shiver_me_timbers:
+                        if (pirate.old_room != pirate.room) and random() < .2:
+                            self.write_message(127)
+                        continue  # proceed to the next character? aren't any!
+
+                    self.write_message(186)
+                    self.chest.drop(self.rooms[114])
+                    self.message.drop(self.rooms[140])
+
+                else:
+                    #6022  I'll just take all this booty
+                    self.write_message(128)
+                    if self.message.room.n == 0:
+                        self.chest.move_to(self.rooms[114])
+                    self.message.move_to(self.rooms[140])
+                    for treasure in treasures_toted:
+                        treasure.drop(self.rooms[114])
+
+                #6024
+                pirate.old_room = pirate.room = self.rooms[114]
+                pirate.has_seen_adventurer = False  # free to move
+
+        # Report what has happened.
+
+        if dwarf_count == 1:
+            self.write_message(4)
+        elif dwarf_count:
+            self.write('There are %d threatening little dwarves in the'
+                       ' room with you.' % dwarf_count)
+
+        if dwarf_attacks and self.dwarf_stage == 2:
+            self.dwarf_stage = 3
+        if dwarf_attacks == 1:
+            self.write_message(5)
+            k = 52
+        elif dwarf_attacks:
+            self.write('%d of them throw knives at you!' % dwarf_attacks)
+            k = 6
+
+        if not dwarf_attacks:
+            pass
+        elif not knife_wounds:
+            self.write_message(k)
+        else:
+            if knife_wounds == 1:
+                self.write_message(k + 1)
+            else:
+                self.write('%d of them get you!' % knife_wounds)
+            self.die()
+            return
+
+        self.describe_location()
 
     def describe_location(self):  #2000
 
@@ -304,7 +411,7 @@ class Game(Data):
                 #5000
                 if not self.is_here(obj):
                     self.write('I see no %s here.'
-                               % obj.name)
+                               % obj.names[0])
                     self.finish_turn()
                     return
                 args = (word, obj)
