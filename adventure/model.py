@@ -171,6 +171,8 @@ class Hint(object):
         self.used = True
 
 class Dwarf(object):
+    is_dwarf = True
+    is_pirate = False
 
     def __init__(self, room):
         self.start_at(room)
@@ -189,6 +191,8 @@ class Dwarf(object):
                 and not move.condition == ('%', 100))
 
 class Pirate(Dwarf):
+    is_dwarf = False
+    is_pirate = True
 
     def can_enter(self, room):
         return Dwarf.can_enter(room) and not room.is_forbidden_to_pirate

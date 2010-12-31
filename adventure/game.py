@@ -200,7 +200,7 @@ class Game(Data):
 
             dwarf.room = self.loc
 
-            if isinstance(dwarf, Dwarf):
+            if dwarf.is_dwarf:
                 dwarf_count += 1
                 # A dwarf cannot walk and attack at the same time.
                 if dwarf.room is dwarf.old_room:
@@ -215,13 +215,11 @@ class Game(Data):
                 if self.loc is self.chest_room or self.chest.prop >= 0:
                     continue  # decide that the pirate is not really here
 
-                treasures = self.treasures
-                treasures_toted = [ t for t in self.treasures if t.toted ]
-                if (self.pyramid in treasures_toted
-                    and self.loc.n in (100, 101)):
-                    treasures.toted.remove(self.pyramid)
+                treasures = [ t for t in self.treasures if t.is_toting ]
+                if (self.platinum in treasures and self.loc.n in (100, 101)):
+                    treasures.remove(self.pyramid)
 
-                if not treasures_toted:
+                if not treasures:
                     h = any( t for t in self.treasures if self.is_here(t) )
                     one_treasure_left = (self.treasures_not_found ==
                                          self.impossible_treasures + 1)
@@ -243,10 +241,10 @@ class Game(Data):
                 else:
                     #6022  I'll just take all this booty
                     self.write_message(128)
-                    if self.message.room.n == 0:
-                        self.chest.move_to(self.chest_room)
-                    self.message.move_to(self.rooms[140])
-                    for treasure in treasures_toted:
+                    if not self.message.rooms:
+                        self.chest.drop(self.chest_room)
+                    self.message.drop(self.rooms[140])
+                    for treasure in treasures:
                         treasure.drop(self.chest_room)
 
                 #6024
