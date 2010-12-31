@@ -717,21 +717,34 @@ class Game(Data):
         self.finish_turn()
         return
 
-    def t_unlock(self, verb, obj):  #8040
-        if obj == 'clam' or obj == 'oyste':
-            raise NotImplementedError()  #9046
-        elif obj == 'door':
+    def t_unlock(self, verb, obj):  #9040
+        if obj is self.clam or obj is self.oyster:
+            oy = 1 if (obj is self.oyster) else 0
+            if verb == 'lock':
+                self.write_message(61)
+            elif not self.trident.is_toting:
+                self.write_message(122 + oy)
+            elif obj.is_toting:
+                self.write_message(120 + oy)
+            elif obj is self.oyster:
+                self.write_message(125)
+            else:
+                self.write_message(124)
+                self.clam.destroy()
+                self.oyster.drop(self.loc)
+                self.pearl.drop(self.rooms[105])
+        elif obj is self.door:
             if obj.prop == 1:
                 self.write_message(54)
             else:
                 self.write_message(111)
-        elif obj == 'cage':
+        elif obj is self.cage:
             self.write_message(32)
-        elif obj == 'keys':
+        elif obj is self.keys:
             self.write_message(55)
-        elif obj == 'grate' or obj == 'chain':
+        elif obj is self.grate or obj is self.chain:
             # if keys are not here, write message 31 and give up
-            if obj == 'chain':
+            if obj is self.chain:
                 raise NotImplementedError()  #9048
             else:
                 if self.is_closing:
