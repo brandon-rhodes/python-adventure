@@ -414,6 +414,17 @@ class Game(Data):
             else:
                 self.write_message(187)
 
+        if words[0] not in self.vocabulary:
+            n = self.randint(1, 5)
+            if n == 1:
+                self.write_message(61)
+            elif n == 2:
+                self.write_message(13)
+            else:
+                self.write_message(60)
+            self.finish_turn()
+            return
+
         word = self.vocabulary[words[0]]
 
         if word.kind == 'motion':
@@ -760,7 +771,6 @@ class Game(Data):
             if self.dragon.prop != 0:
                 self.write_message(167)
             else:
-                self.write_message(49)
                 def callback(yes):
                     self.write(obj.messages[1])
                     obj.prop = 2
@@ -777,7 +787,7 @@ class Game(Data):
                             if r is oldroom1 or r is oldroom2:
                                 obj2.rooms[i] = newroom
                     self.move_to()
-                self.yesno(self.messages[49], callback)
+                self.yesno(self.messages[49], callback, casual=True)
                 return
         elif obj is self.troll:
             self.write_message(157)
