@@ -807,11 +807,10 @@ class Game(Data):
                     self.rug.prop = 0
                     self.rug.is_fixed = False
                     self.rug.drop(newroom)
-                    for obj2 in self.object_list:
-                        for i, r in enumerate(obj2.rooms):
-                            if r is oldroom1 or r is oldroom2:
-                                obj2.rooms[i] = newroom
-                    self.move_to()
+                    for oldroom in (oldroom1, oldroom2):
+                        for o in self.objects_at(oldroom):
+                            o.drop(newroom)
+                    self.move_to(newroom)
                 self.yesno(self.messages[49], callback, casual=True)
                 return
         elif obj is self.troll:
