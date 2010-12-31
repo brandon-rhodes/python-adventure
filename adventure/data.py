@@ -64,7 +64,7 @@ def section3(data, x, y, *verbs):
     if last_travel[0] == x and last_travel[1][0] == verbs[0]:
         verbs = last_travel[1]  # same first verb implies use whole list
     else:
-        last_travel = [x, verbs]
+        data._last_travel = [x, verbs]
 
     m, n = divmod(y, 1000)
     mh, mm = divmod(m, 100)

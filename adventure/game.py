@@ -722,19 +722,18 @@ class Game(Data):
         else:
             self.finish_turn()
 
-    def t_swing(self, verb, obj):  #9090
+    def t_wave(self, verb, obj):  #9090
         fissure = self.fissure
-        not_rod = obj is not self.rod
-        not_toting = not obj.toting
 
-        if (not_rod or not_toting or not self.is_here(fissure)):
-            if (not_toting and (not_rod or not self.rod2.toting)):
-                self.write_message(29)
-            else:
-                self.write(verb.default_message)
+        if (obj is self.rod and obj.is_toting and self.is_here(fissure)
+            and not self.is_closing):
+            fissure.prop = 0 if fissure.prop else 1
+            self.write(fissure.messages[2 - fissure.prop])
         else:
-            fissure.prop = fissure.prop - 1  # toggle its value
-            self.write_message(fissure.messages[2 - fissure.prop])
+            if obj.is_toting or (obj is self.rod and self.rod2.is_toting):
+                self.write(verb.default_message)
+            else:
+                self.write_message(29)
 
         self.finish_turn()
 
