@@ -160,11 +160,15 @@ class Message(object):
 class Hint(object):
     """A hint offered if the player loiters in one area too long."""
 
-    turns = 0
+    turns_needed = 0
+    turn_counter = 0
     penalty = 0
     question = None
     message = None
     used = False
+
+    def __init__(self):
+        self.rooms = []
 
     def write(self, writer):
         writer(self.message)

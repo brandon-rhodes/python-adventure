@@ -154,20 +154,24 @@ def section8(data, word_n, message_n):
     word.default_message = message
 
 def section9(data, bit, *nlist):
-    name = ['is_light', 'has_water', 'has_oil', 'is_forbidden_to_pirate',
-            'trying_to_get_into_cave', 'trying_to_catch_bird',
-            'trying_to_deal_with_snake', 'lost_in_maze',
-            'pondering_dark_room', 'at_witts_end'][bit]
-    for n in nlist:
-        obj = make_object(data.rooms, Room, n)
-        setattr(obj, name, True)
+    if bit > 3:
+        hint = make_object(data.hints, Hint, bit)
+        for n in nlist:
+            room = make_object(data.rooms, Room, n)
+            hint.rooms.append(room)
+    else:
+        attrname = ['is_light', 'has_water', 'has_oil',
+                    'is_forbidden_to_pirate'][bit]
+        for n in nlist:
+            room = make_object(data.rooms, Room, n)
+            setattr(room, attrname, True)
 
 def section10(data, score, line, *etc):
     data.class_messages.append((score, line))
 
-def section11(data, n, turns, penalty, question_n, message_n):
+def section11(data, n, turns_needed, penalty, question_n, message_n):
     hint = make_object(data.hints, Hint, n)
-    hint.turns = turns
+    hint.turns_needed = turns_needed
     hint.penalty = penalty
     hint.question = make_object(data.messages, Message, question_n)
     hint.message = make_object(data.messages, Message, message_n)

@@ -79,7 +79,10 @@ class Game(Data):
 
     @property
     def objects_here(self):
-        return [ obj for obj in self.object_list if self.loc in obj.rooms ]
+        return self.objects_at(self.loc)
+
+    def objects_at(self, room):
+        return [ obj for obj in self.object_list if room in obj.rooms ]
 
     def is_here(self, obj):
         return obj.is_toting or (self.loc in obj.rooms)
@@ -346,8 +349,30 @@ class Game(Data):
     #2009 sets SPK="OK" then...
     #2011 speaks SPK then...
     #2012 blanks VERB and OBJ and calls:
-    def finish_turn(self):  #2600
-        # put hints here
+    def finish_turn(self, obj=None):  #2600
+
+        for hint in self.hints.values():
+            if hint.turns_needed == 9999 or hint.used:
+                continue
+            if self.loc in hint.rooms:
+                hint.turn_counter += 1
+                if hint.turn_counter >= hint.turns_needed:
+                    if hint.n != 5:  # hint 5 counter does not get reset
+                        hint.turn_counter = 0
+                    if self.should_offer_hint(hint, obj):
+                        hint.turn_counter = 0
+
+                        def callback(yes):
+                            if yes:
+                                self.write(hint.message)
+                            else:
+                                self.write_message(54)
+
+                        self.yesno(hint.question, callback)
+                        return
+            else:
+                hint.turn_counter = 0
+
         if self.is_closed:
             if self.oyste.prop < 0: # and toting it
                 self.write(self.oyste.messages[1])
@@ -442,7 +467,7 @@ class Game(Data):
                 #5000
                 if not self.is_here(obj):
                     self.write('I see no %s here.\n' % obj.names[0])
-                    self.finish_turn()
+                    self.finish_turn(obj)
                     return
                 args = (word, obj)
             else:
@@ -884,6 +909,29 @@ class Game(Data):
                 self.score_and_exit()
                 return
         self.yesno(self.messages[143], callback)
+
+    def should_offer_hint(self, hint, obj): #40000
+        if hint == 4:  # cave
+            return self.grate.prop == 0 and not self.is_here(self.keys)
+
+        elif hint == 5:  # bird
+            bird = self.bird
+            return self.is_here(bird) and self.rod.is_toting and obj is bird
+
+        elif hint == 6:  # snake
+            return self.is_here(self.snake) and not self.is_here(bird)
+
+        elif hint == 7:  # maze
+            return (not len(self.objects_here) and
+                    not len(self.objects_at(self.oldloc)) and
+                    not len(self.objects_at(self.oldloc2)) and
+                    len(self.inventory) > 1)
+
+        elif hint == 8:  # dark
+            return self.emerald.prop != 1 and self.pyramid.prop != 1
+
+        elif hint == 9:  # witt
+            return True
 
     def compute_score(self, for_score_command=False):  #20000
         score = maxscore = 2

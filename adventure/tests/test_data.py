@@ -29,7 +29,7 @@ YOU'VE OVER-WATERED THE PLANT!  IT'S SHRIVELING UP!  IT'S, IT'S...
 
     def test_hint(self):
         hint = self.data.hints[4]
-        self.assertEqual(hint.turns, 4)
+        self.assertEqual(hint.turns_needed, 4)
         self.assertEqual(hint.penalty, 2)
         self.assertEqual(hint.question.text,
                          "ARE YOU TRYING TO GET INTO THE CAVE?\n")
