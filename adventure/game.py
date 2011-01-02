@@ -720,9 +720,13 @@ class Game(Data):
             troll.prop = 2
             bear.drop(self.loc)
 
-        elif obj is self.vase and not self.is_here(self.pillo):
-            self.vase.prop = 2
-            # and more
+        elif obj is self.vase and self.loc is not self.rooms[96]:
+            if self.pillow.is_at(self.loc):
+                self.vase.prop = 0
+            else:
+                self.vase.prop = 2
+                self.vase.is_fixed = True
+            self.write(self.vase.messages[self.vase.prop + 1])
 
         else:
             if obj is self.cage and self.bird.prop != 0:
