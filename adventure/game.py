@@ -478,7 +478,7 @@ class Game(Data):
 
     def do_motion(self, word):  #8
 
-        if word == 'null':
+        if word == 'null': #2
             self.move_to()
             return
 
@@ -543,12 +543,30 @@ class Game(Data):
                 if isinstance(move.action, Room):
                     self.move_to(move.action)
                     return
+
                 elif isinstance(move.action, Message):
                     self.write(move.action)
                     self.move_to()
                     return
+
+                elif move.action == 301:  #30100
+                    inv = self.inventory
+                    if len(inv) != 0 and inv != [ self.emerald ]:
+                        self.write_message(117)
+                        self.move_to()
+                    elif self.loc.n == 100:
+                        self.move_to(self.rooms[99])
+                    else:
+                        self.move_to(self.rooms[100])
+                    return
+
+                elif move.action == 302:  #30200
+                    self.emerald.drop(self.loc)
+                    self.do_motion(word)
+                    return
+
                 else:
-                    raise NotImplemented
+                    raise NotImplementedError(move.action)
 
         #50
         n = word.n

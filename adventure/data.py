@@ -85,7 +85,7 @@ def section3(data, x, y, *verbs):
     if n <= 300:
         action = make_object(data.rooms, Room, n)
     elif 300 < n <= 500:
-        action = n - 300  # special computed goto?
+        action = n  # special computed goto
     else:
         action = make_object(data.messages, Message, n - 500)
 
