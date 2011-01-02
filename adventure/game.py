@@ -727,6 +727,7 @@ class Game(Data):
                 self.vase.prop = 2
                 self.vase.is_fixed = True
             self.write(self.vase.messages[self.vase.prop + 1])
+            obj.drop(self.loc)
 
         else:
             if obj is self.cage and self.bird.prop != 0:
