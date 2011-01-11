@@ -121,6 +121,7 @@ class Object(object):
         self.prop = 0
         self.rooms = []
         self.is_toting = False
+        self.contents = None  # so the bottle can hold things
 
     def __repr__(self):
         return '<Object %d %s %x>' % (self.n, '/'.join(self.names), id(self))
@@ -146,9 +147,12 @@ class Object(object):
         self.rooms[:] = [ room ]
         self.is_toting = False
 
-    def destroy(self):
+    def hide(self):
         self.rooms[:] = []
         self.is_toting = False
+
+    def destroy(self):
+        self.hide()
 
 class Message(object):
     """A message for printing."""

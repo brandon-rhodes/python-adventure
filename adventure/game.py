@@ -656,7 +656,23 @@ class Game(Data):
                 self.write_message(25)
             self.finish_turn()
             return
-        # do liquids here
+        if obj is self.water or obj is self.oil:
+            if self.is_here(self.bottle) and self.bottle.contents is obj:
+                # They want to carry the filled bottle.
+                obj = self.bottle
+            else:
+                # They must mean they want to fill the bottle.
+                if self.bottle.is_toting and self.bottle.contents is None:
+                    self.t_fill(self.bottle)  # hand off control to "fill"
+                    return
+                elif self.bottle.contents is not None:
+                    self.write_message(105)
+                elif not self.bottle.is_toting:
+                    self.write_message(104)
+                else:
+                    self.write_message(verb.default_message)
+                self.finish_turn()
+                return
         if len(self.inventory) >= 7:
             self.write_message(92)
             self.finish_turn()
@@ -676,7 +692,8 @@ class Game(Data):
             self.cage.carry()
         else:
             obj.carry()
-        # one last liquid thing
+            if obj is self.bottle and self.bottle.contents is not None:
+                self.bottle.contents.hide()
         self.say_okay_and_finish()
 
     def t_drop(self, verb, obj):  #9020
