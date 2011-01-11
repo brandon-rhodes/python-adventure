@@ -92,6 +92,7 @@ class Game(Data):
     def start(self):
         """Start the game."""
         self.chest_room = self.rooms[114]
+        self.bottle.contents = self.water
         self.yesno(self.messages[65], self.start2)  # want instructions?
 
     def start2(self, yes):
@@ -693,7 +694,7 @@ class Game(Data):
         else:
             obj.carry()
             if obj is self.bottle and self.bottle.contents is not None:
-                self.bottle.contents.hide()
+                self.bottle.contents.carry()
         self.say_okay_and_finish()
 
     def t_drop(self, verb, obj):  #9020
