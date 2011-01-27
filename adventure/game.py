@@ -12,7 +12,7 @@ class Game(Data):
     look_complaints = 3  # how many times to "SORRY, BUT I AM NOT ALLOWED..."
     full_description_period = 5  # how often we use a room's full description
     full_wests = 0  # how many times they have typed "west" instead of "w"
-    dwarf_stage = 0  # how active the dwarves are
+    dwarf_stage = 0  #DFLAG how active the dwarves are
     dwarves_killed = 0
     gave_up = False
     treasures_not_found = 0  # how many treasures have not yet been seen
@@ -779,6 +779,17 @@ class Game(Data):
             self.write('Okay, "{}".'.format(word.text))
             self.finish_turn()
 
+    def i_unlock(self, verb):  #8040
+        for obj in self.grate, self.door, self.oyster, self.clam:
+            if self.is_here(obj):
+                if self.is_here(self.chain):
+                    return self.print_do_what(verb)
+                return self.t_unlock(verb, obj)
+        if self.is_here(self.chain):
+            return self.t_unlock(verb, self.chain)
+        self.write_message(28)
+        self.finish_turn()
+
     def t_unlock(self, verb, obj):  #9040
         if obj is self.clam or obj is self.oyster:
             oy = 1 if (obj is self.oyster) else 0
@@ -821,15 +832,31 @@ class Game(Data):
             self.write(verb.default_message)
         self.finish_turn()
 
-    def t_light(self, verb, obj):  #9070
-        # if not here lamp: 2011
-        # if lamp out: 2011
-        self.objects['lamp'].prop = 1
-        self.write_message(39)
-        if self.loc.is_dark:
-            self.describe_location()
+    def t_light(self, verb, obj=None):  #9070
+        if not self.is_here(self.lamp):
+            self.write(verb.default_message)
+        elif self.lamp_turns == 0:
+            self.write_message(184)
         else:
-            self.finish_turn()
+            self.lamp.prop = 1
+            self.write_message(39)
+            if self.loc.is_dark:
+                return self.describe_location()
+        self.finish_turn()
+
+    i_light = t_light
+
+    def t_extinguish(self, verb, obj=None):  #9080
+        if not self.is_here(self.lamp):
+            self.write(verb.default_message)
+        else:
+            self.lamp.prop = 0
+            self.write_message(40)
+            if self.loc.is_dark:
+                self.write_message(16)
+        self.finish_turn()
+
+    i_extinguish = t_extinguish
 
     def t_wave(self, verb, obj):  #9090
         fissure = self.fissure
@@ -846,9 +873,28 @@ class Game(Data):
 
         self.finish_turn()
 
-    def t_attack(self, verb, obj):  #9120
-        if obj is None:
-            raise NotImplementedError()
+    def i_attack(self, verb):  #9120
+        enemies = [ self.snake, self.dragon, self.troll, self.bear ]
+        if self.dwarf_stage >= 2:
+            enemies.extend(self.dwarves)
+        dangers = filter(self.is_here, enemies)
+        if len(dangers) > 1:
+            return self.print_do_what(verb)
+        if len(dangers) == 1:
+            return self.t_attack(verb, dangers[0])
+        targets = []
+        if self.is_here(self.bird) and verb != 'throw':
+            targets.append(self.bird)
+        if self.is_here(self.clam) or self.is_here(self.oyster):
+            targets.append(self.clam)
+        if len(targets) > 1:
+            return self.print_do_what(verb)
+        elif len(targets) == 1:
+            return self.t_attack(verb, targets[0])
+        else:
+            return self.t_attack(verb, None)
+
+    def t_attack(self, verb, obj):  #9124  (but control goes to 9120 first)
         if obj is self.bird:
             if self.is_closed:
                 self.write_message(137)
