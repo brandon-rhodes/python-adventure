@@ -96,19 +96,25 @@ class Room(object):
         return self.visited and self.short_description or self.long_description
 
 class Word(object):
-    """A set of synonyms that can be used as part of a command."""
+    """A word that can be used as part of a command."""
 
+    text = None
     kind = None
     default_message = None
 
     def __init__(self):
-        self.names = []
+        self.synonyms = [ self ]
 
     def __repr__(self):
-        return '<Word %s>' % '/'.join(self.names)
+        return '<Word {}>'.format(self.text)
 
-    def __eq__(self, other):
-        return any( text == other for text in self.names )
+    def __eq__(self, text):
+        return any( word.text == text for word in self.synonyms )
+
+    def add_synonym(self, other):
+        """Every word in a group of synonyms shares the same list."""
+        self.synonyms.extend(other.synonyms)
+        other.synonyms = self.synonyms
 
 class Object(object):
     """An object in the game, like a grate, or a rod with a rusty star."""

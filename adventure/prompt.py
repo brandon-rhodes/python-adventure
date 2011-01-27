@@ -34,3 +34,5 @@ def install_builtins(game):
             continue
         identifier = ReprTriggeredIdentifier(game, word)
         setattr(module, word, identifier)
+        if len(word) > 5:
+            setattr(module, word[:5], identifier)

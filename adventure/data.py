@@ -99,22 +99,25 @@ def section3(data, x, y, *verbs):
     move.action = action
     data.rooms[x].travel_table.append(move)
 
-def section4(data, n, name, *etc):
-    name = name.lower()
-    if name in long_words:
-        names = [ long_words[name], name ]
-    else:
-        names = [ name ]
+def section4(data, n, text, *etc):
+    text = text.lower()
+    text = long_words.get(text, text)
     word = make_object(data.vocabulary, Word, n)
-    word.names.extend(names)
+    if word.text is None:  # this is the first word with index "n"
+        word.text = text
+    else:  # there is already a word sitting at "n", so create a synonym
+        original = word
+        word = Word()
+        word.n = n
+        word.text = text
+        original.add_synonym(word)
     word.kind = ['motion', 'object', 'verb', 'random_message'][n // 1000]
     if word.kind == 'object':
         obj = make_object(data.objects, Object, n % 1000)
-        obj.names.extend(names)
-        data.objects[name] = obj
-    for name in names:
-        if name not in data.vocabulary:  # since duplicate names exist
-            data.vocabulary[name] = word
+        obj.names.append(text)
+        data.objects[text] = obj
+    if text not in data.vocabulary:  # since duplicate names exist
+        data.vocabulary[text] = word
 
 def section5(data, n, *etc):
     if 1 <= n <= 99:

@@ -440,6 +440,10 @@ class Game(Data):
             else:
                 self.write_message(187)
 
+        self.dispatch_command(words)
+
+    def dispatch_command(self, words):
+
         if words[0] not in self.vocabulary:
             n = self.randint(1, 5)
             if n == 1:
@@ -466,14 +470,17 @@ class Game(Data):
                 word2 = self.vocabulary[words[1]]
                 obj = self.objects[word2.n % 1000]
                 #5000
-                if not self.is_here(obj):
+                if word == 'say':
+                    args = (word, word2)
+                elif not self.is_here(obj):
                     self.write('I see no %s here.\n' % obj.names[0])
                     self.finish_turn(obj)
                     return
-                args = (word, obj)
+                else:
+                    args = (word, obj)
             else:
                 args = (word,)
-            getattr(self, prefix + word.names[0])(*args)
+            getattr(self, prefix + word.synonyms[0].text)(*args)
 
     # Motion.
 
@@ -627,7 +634,7 @@ class Game(Data):
     # Verbs.
 
     def print_do_what(self, verb, *args):  #8000
-        self.write('%s What?\n' % verb.names[0])
+        self.write('%s What?\n' % verb.text)
         self.finish_turn()
 
     i_drop = print_do_what
@@ -640,6 +647,13 @@ class Game(Data):
     i_feed = print_do_what
     i_break = print_do_what
     i_wake = print_do_what
+
+    def i_carry(self, verb):  #8010
+        is_dwarf_here = any( dwarf.room == self.loc for dwarf in self.dwarves )
+        if len(self.loc.objects) != 1 or is_dwarf_here:
+            self.print_do_what(verb)
+        obj = self.loc.objects[0]
+        self.t_carry(verb, obj)
 
     def t_carry(self, verb, obj):  #9010
         if obj.is_toting:
@@ -757,6 +771,13 @@ class Game(Data):
 
         self.finish_turn()
         return
+
+    def t_say(self, verb, word):  #9030
+        if word.n in (62, 65, 71, 2025):
+            self.dispatch_command([ word ])
+        else:
+            self.write('Okay, "{}".'.format(word.text))
+            self.finish_turn()
 
     def t_unlock(self, verb, obj):  #9040
         if obj is self.clam or obj is self.oyster:
