@@ -942,6 +942,27 @@ class Game(Data):
             self.write_message(44)
         self.finish_turn()
 
+    def i_pour(self, verb):  #9130
+        raise NotImplementedError()
+
+    def t_pour(self, verb, obj):
+        raise NotImplementedError()
+
+    def i_eat(self, verb):  #8140
+        raise NotImplementedError()
+
+    def t_eat(self, verb, obj):  #9140
+        raise NotImplementedError()
+
+    def i_drink(self, verb):  #9150
+        raise NotImplementedError()
+
+    def t_drink(self, verb, obj):
+        raise NotImplementedError()
+
+    def t_rub(self, verb, obj):  #9160
+        raise NotImplementedError()
+
     def t_throw(self, verb, obj):  #9170
         if obj is self.rod and not self.rod.is_toting and self.rod2.is_toting:
             obj = self.rod2
@@ -1005,6 +1026,14 @@ class Game(Data):
 
         self.t_attack(verb, None)
 
+    def i_quit(self, verb):  #8180
+        raise NotImplementedError()
+
+    def t_find(self, verb, obj):  #9190
+        raise NotImplementedError()
+
+    t_inventory = t_find
+
     def i_inventory(self, verb):  #8200
         first = True
         objs = [ obj for obj in self.inventory if obj is not self.bear ]
@@ -1019,6 +1048,21 @@ class Game(Data):
             self.write_message(98)
         self.finish_turn()
 
+    def t_feed(self, verb, obj):  #9210
+        raise NotImplementedError()
+
+    def i_fill(self, verb):  #9220
+        raise NotImplementedError()
+
+    def t_fill(self, verb, obj):
+        raise NotImplementedError()
+
+    def i_blast(self, verb):  #9230
+        raise NotImplementedError()
+
+    def t_blast(self, verb, obj):
+        raise NotImplementedError()
+
     def i_score(self, verb):  #8240
         score, max_score = self.compute_score(for_score_command=True)
         self.write('If you were to quit now, you would score %d'
@@ -1029,6 +1073,26 @@ class Game(Data):
                 self.score_and_exit()
                 return
         self.yesno(self.messages[143], callback)
+
+    def i_foo(self, verb):  #8250
+        raise NotImplementedError()
+
+    def i_brief(self, verb):  #8260
+        raise NotImplementedError()
+
+    def i_read(self, verb):  #8270
+        raise NotImplementedError()
+
+    def t_read(self, verb, obj):  #9270
+        raise NotImplementedError()
+
+    def t_break(self, verb, obj): #9280
+        raise NotImplementedError()
+
+    def t_wake(self, verb, obj):  #9290
+        raise NotImplementedError()
+
+    # write suspend and resume here one day?
 
     def should_offer_hint(self, hint, obj): #40000
         if hint == 4:  # cave
