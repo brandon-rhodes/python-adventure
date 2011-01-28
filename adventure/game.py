@@ -779,19 +779,22 @@ class Game(Data):
             self.write('Okay, "{}".'.format(word.text))
             self.finish_turn()
 
-    def i_unlock(self, verb):  #8040
-        for obj in self.grate, self.door, self.oyster, self.clam:
-            if self.is_here(obj):
-                if self.is_here(self.chain):
-                    return self.print_do_what(verb)
-                return self.t_unlock(verb, obj)
-        if self.is_here(self.chain):
-            return self.t_unlock(verb, self.chain)
-        self.write_message(28)
-        self.finish_turn()
+    def i_unlock(self, verb):  #8040  Handles "unlock" case as well
+        objs = (self.grate, self.door, self.oyster, self.clam, self.chain)
+        objs = filter(self.is_here, objs)
+        if len(objs) > 1:
+            self.print_do_what(verb)
+        elif len(objs) == 1:
+            self.t_unlock(verb, objs[0])
+        else:
+            self.write_message(28)
+            self.finish_turn()
 
-    def t_unlock(self, verb, obj):  #9040
+    i_lock = i_unlock
+
+    def t_unlock(self, verb, obj):  #9040  Handles "lock" case as well
         if obj is self.clam or obj is self.oyster:
+            #9046
             oy = 1 if (obj is self.oyster) else 0
             if verb == 'lock':
                 self.write_message(61)
@@ -816,21 +819,50 @@ class Game(Data):
         elif obj is self.keys:
             self.write_message(55)
         elif obj is self.grate or obj is self.chain:
-            # if keys are not here, write message 31 and give up
-            if obj is self.chain:
-                raise NotImplementedError()  #9048
-            else:
-                if self.is_closing:
-                    raise NotImplementedError()  # set panic clock etc
+            if not self.is_here(self.keys):
+                self.write_message(31)
+            elif obj is self.chain:
+                #9048
+                if verb == 'unlock':
+                    if self.chain.prop == 0:
+                        self.write_message(37)
+                    elif self.bear.prop == 0:
+                        self.write_message(41)
+                    else:
+                        self.chain.prop = 0
+                        self.chain.is_fixed = False
+                        if self.bear.prop != 3:
+                            self.bear.prop = 2
+                        self.bear.is_fixed = 2 - self.bear.prop
+                        self.write_message(171)
                 else:
-                    oldprop = obj.prop
-                    obj.prop = 0 if verb == 'lock' else 1
-                    self.write_message(34 + oldprop + 2 * obj.prop)
+                    #9049
+                    if self.loc not in self.chain.starting_rooms:
+                        self.write_message(173)
+                    elif self.chain.prop != 0:
+                        self.write_message(34)
+                    self.chain.prop = 2
+                    if self.chain.is_toting:
+                        self.chain.drop(self.loc)
+                    self.chain.is_fixed = True
+                    self.write_message(172)
+            elif self.is_closing:
+                if not self.panic:
+                    self.clock2 = 15
+                    self.panic = True
+                self.write_message(130)
+            else:
+                #9043
+                oldprop = obj.prop
+                obj.prop = 0 if verb == 'lock' else 1
+                self.write_message(34 + oldprop + 2 * obj.prop)
         else:
             self.write(verb.names)
             self.write(obj.names)
             self.write(verb.default_message)
         self.finish_turn()
+
+    t_lock = t_unlock
 
     def t_light(self, verb, obj=None):  #9070
         if not self.is_here(self.lamp):

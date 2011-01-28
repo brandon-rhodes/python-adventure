@@ -148,6 +148,7 @@ def section7(data, n, room_n, *etc):
         else:
             room2 = make_object(data.rooms, Room, etc[0])
             obj.rooms.append(room2)  # exists two places, like grate
+    obj.starting_rooms = list(obj.rooms)  # remember where things started
 
 def section8(data, word_n, message_n):
     if not message_n:

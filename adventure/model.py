@@ -126,6 +126,7 @@ class Object(object):
         self.names = []
         self.prop = 0
         self.rooms = []
+        self.starting_rooms = []
         self.is_toting = False
         self.contents = None  # so the bottle can hold things
 
