@@ -158,17 +158,19 @@ def section8(data, word_n, message_n):
     word.default_message = message
 
 def section9(data, bit, *nlist):
-    if bit > 3:
-        hint = make_object(data.hints, Hint, bit)
-        for n in nlist:
-            room = make_object(data.rooms, Room, n)
+    for n in nlist:
+        room = make_object(data.rooms, Room, n)
+        if bit == 0:
+            room.is_light = True
+        elif bit == 1:
+            room.liquid = make_object(data.objects, Object, 22) #oil
+        elif bit == 2:
+            room.liquid = make_object(data.objects, Object, 21) #water
+        elif bit == 3:
+            room.is_forbidden_to_pirate = True
+        elif bit > 4:
+            hint = make_object(data.hints, Hint, bit)
             hint.rooms.append(room)
-    else:
-        attrname = ['is_light', 'has_water', 'has_oil',
-                    'is_forbidden_to_pirate'][bit]
-        for n in nlist:
-            room = make_object(data.rooms, Room, n)
-            setattr(room, attrname, True)
 
 def section10(data, score, line, *etc):
     data.class_messages.append((score, line))

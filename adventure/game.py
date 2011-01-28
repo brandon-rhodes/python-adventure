@@ -472,15 +472,25 @@ class Game(Data):
                 #5000
                 if word == 'say':
                     args = (word, word2)
-                elif not self.is_here(obj):
-                    self.write('I see no %s here.\n' % obj.names[0])
-                    self.finish_turn(obj)
-                    return
+                elif self.is_here(obj):
+                    args = (word, obj)
                 else:
+                    if obj is self.bottle.contents and self.is_here(self.bottle):
+                        pass
+                    elif obj is self.loc.liquid:
+                        pass
+                    else:
+                        self.write('I see no %s here.\n' % obj.names[0])
+                        self.finish_turn(obj)
+                        return
                     args = (word, obj)
             else:
                 args = (word,)
             getattr(self, prefix + word.synonyms[0].text)(*args)
+
+        #elif word == 'grate': #5100
+        else:
+            raise NotImplementedError('no handling for that word kind yet')
 
     # Motion.
 
@@ -678,7 +688,7 @@ class Game(Data):
             else:
                 # They must mean they want to fill the bottle.
                 if self.bottle.is_toting and self.bottle.contents is None:
-                    self.t_fill(self.bottle)  # hand off control to "fill"
+                    self.t_fill(verb, self.bottle)  # hand off control to "fill"
                     return
                 elif self.bottle.contents is not None:
                     self.write_message(105)
@@ -989,6 +999,7 @@ class Game(Data):
             self.write_message(78)
         else:
             self.bottle.prop = 1
+            self.bottle.contents = None
             obj.hide()
             if self.is_here(self.plant):
                 if obj is not self.water:

@@ -57,9 +57,8 @@ class Room(object):
     visited = False
 
     is_light = False
-    has_water = False
-    has_oil = False
     is_forbidden_to_pirate = False
+    liquid = None
     trying_to_get_into_cave = False
     trying_to_catch_bird = False
     trying_to_deal_with_snake = False
