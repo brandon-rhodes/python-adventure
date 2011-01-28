@@ -975,10 +975,36 @@ class Game(Data):
         self.finish_turn()
 
     def i_pour(self, verb):  #9130
-        raise NotImplementedError()
+        if self.bottle.contents is None:
+            self.print_do_what()
+        else:
+            self.t_pour(self, verb, self.bottle.contents)
 
     def t_pour(self, verb, obj):
-        raise NotImplementedError()
+        if obj is self.bottle:
+            return self.i_pour(verb)
+        if not obj.is_toting:
+            self.write(verb.default_message)
+        elif obj is not self.oil and obj is not self.water:
+            self.write_message(78)
+        else:
+            self.bottle.prop = 1
+            obj.hide()
+            if self.is_here(self.plant):
+                if obj is not self.water:
+                    self.write_message(112)
+                else:
+                    self.write(self.plant.messages[self.plant.prop + 1])
+                    self.plant.prop = (self.plant.prop + 2) % 6
+                    self.plant2.prop = self.plant.prop // 2
+                    return self.move_to()
+            elif self.is_here(self.door):
+                #9132
+                self.door.prop = 1 if obj is self.oil else 0
+                self.write_message(113 + self.door.prop)
+            else:
+                self.write_message(77)
+        return self.finish_turn()
 
     def i_eat(self, verb):  #8140
         raise NotImplementedError()
