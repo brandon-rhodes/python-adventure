@@ -976,7 +976,7 @@ class Game(Data):
 
     def i_pour(self, verb):  #9130
         if self.bottle.contents is None:
-            self.print_do_what()
+            self.print_do_what(verb)
         else:
             self.t_pour(self, verb, self.bottle.contents)
 
@@ -1007,10 +1007,22 @@ class Game(Data):
         return self.finish_turn()
 
     def i_eat(self, verb):  #8140
-        raise NotImplementedError()
+        if self.is_here(self.food):
+            self.t_eat(verb, self.food)
+        else:
+            self.print_do_what(verb)
 
     def t_eat(self, verb, obj):  #9140
-        raise NotImplementedError()
+        if obj is self.food:
+            #8142
+            self.food.destroy()
+            self.write_message(72)
+        elif obj in (self.bird or self.snake or self.clam or self.oyster or
+                     self.dwarf or self.dragon or self.troll or self.bear):
+            self.write_message(71)
+        else:
+            self.write(verb.default_message)
+        self.finish_turn()
 
     def i_drink(self, verb):  #9150
         raise NotImplementedError()
@@ -1019,7 +1031,12 @@ class Game(Data):
         raise NotImplementedError()
 
     def t_rub(self, verb, obj):  #9160
-        raise NotImplementedError()
+        if obj is self.lamp:
+            print(verb.default_message)
+            self.write(verb.default_message)
+        else:
+            self.write_message(71)
+        self.finish_turn()
 
     def t_throw(self, verb, obj):  #9170
         if obj is self.rod and not self.rod.is_toting and self.rod2.is_toting:

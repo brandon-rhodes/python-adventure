@@ -153,7 +153,7 @@ def section7(data, n, room_n, *etc):
 def section8(data, word_n, message_n):
     if not message_n:
         return
-    word = make_object(data.vocabulary, Word, word_n)
+    word = make_object(data.vocabulary, Word, word_n + 2000)
     message = make_object(data.messages, Message, message_n)
     word.default_message = message
 
