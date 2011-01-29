@@ -11,7 +11,7 @@ forward continue onward return retreat valley stairs outside stream
 cobble inward inside surface nowhere passage tunnel canyon awkward
 upward ascend downward descend outdoors barren across debris broken
 examine describe slabroom depression entrance secret bedquilt plover
-oriental cavern reservoir office headlamp lantern pillow velvet fissure
+oriental cavern reservoir office headlamp lantern pillow velvet fissure tablet
 oyster magazine spelunker dwarves knives rations bottle mirror beanstalk
 stalactite shadow figure drawings pirate dragon message volcano geyser
 machine vending battery carpet nugget diamonds silver jewelry treasure trident

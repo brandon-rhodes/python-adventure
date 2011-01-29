@@ -378,8 +378,8 @@ class Game(Data):
                 hint.turn_counter = 0
 
         if self.is_closed:
-            if self.oyste.prop < 0: # and toting it
-                self.write(self.oyste.messages[1])
+            if self.oyster.prop < 0 and self.oyster.is_toting:
+                self.write(self.oyster.messages[1])
             # put closing-time "prop" special case here
 
         self.could_fall_in_pit = self.is_dark  #2605
@@ -414,11 +414,11 @@ class Game(Data):
             and self.loc.n >= 15 and self.loc.n != 33):
             self.clock1 -= 1
             if self.clock1 == 0:
-                return self.start_closing_cave()
+                self.start_closing_cave()  # no "return", to do their command
         if self.clock1 < 0:
             self.clock2 -= 1
             if self.clock2 == 0:
-                return self.close_cave()
+                return self.close_cave()  # "return", to cancel their command
 
         if self.lamp.prop:
             self.lamp_turns -= 1
@@ -492,8 +492,7 @@ class Game(Data):
                     elif obj is self.loc.liquid:
                         pass
                     else:
-                        self.write('I see no %s here.\n' % obj.names[0])
-                        self.finish_turn(obj)
+                        self.i_see_no(word2.text)
                         return
                     args = (word, obj)
             else:
@@ -503,6 +502,10 @@ class Game(Data):
         #elif word == 'grate': #5100
         else:
             raise NotImplementedError('no handling for that word kind yet')
+
+    def i_see_no(self, thing):
+        self.write('I see no {} here.\n'.format(thing))
+        self.finish_turn()
 
     # Motion.
 
@@ -685,26 +688,26 @@ class Game(Data):
 
     # Verbs.
 
-    def print_do_what(self, verb, *args):  #8000
+    def ask_verb_what(self, verb, *args):  #8000
         self.write('%s What?\n' % verb.text)
         self.finish_turn()
 
-    i_drop = print_do_what
-    i_say = print_do_what
-    i_wave = print_do_what
-    i_calm = print_do_what
-    i_rub = print_do_what
-    i_toss = print_do_what
-    i_find = print_do_what
-    i_feed = print_do_what
-    i_break = print_do_what
-    i_wake = print_do_what
+    i_drop = ask_verb_what
+    i_say = ask_verb_what
+    i_wave = ask_verb_what
+    i_calm = ask_verb_what
+    i_rub = ask_verb_what
+    i_toss = ask_verb_what
+    i_find = ask_verb_what
+    i_feed = ask_verb_what
+    i_break = ask_verb_what
+    i_wake = ask_verb_what
 
     def i_carry(self, verb):  #8010
         is_dwarf_here = any( dwarf.room == self.loc for dwarf in self.dwarves )
         objs = self.objects_here
         if len(objs) != 1 or is_dwarf_here:
-            self.print_do_what(verb)
+            self.ask_verb_what(verb)
         else:
             self.t_carry(verb, objs[0])
 
@@ -835,7 +838,7 @@ class Game(Data):
         objs = (self.grate, self.door, self.oyster, self.clam, self.chain)
         objs = list(filter(self.is_here, objs))
         if len(objs) > 1:
-            self.print_do_what(verb)
+            self.ask_verb_what(verb)
         elif len(objs) == 1:
             self.t_unlock(verb, objs[0])
         else:
@@ -963,7 +966,7 @@ class Game(Data):
             enemies.extend(self.dwarves)
         dangers = filter(self.is_here, enemies)
         if len(dangers) > 1:
-            return self.print_do_what(verb)
+            return self.ask_verb_what(verb)
         if len(dangers) == 1:
             return self.t_attack(verb, dangers[0])
         targets = []
@@ -972,7 +975,7 @@ class Game(Data):
         if self.is_here(self.clam) or self.is_here(self.oyster):
             targets.append(self.clam)
         if len(targets) > 1:
-            return self.print_do_what(verb)
+            return self.ask_verb_what(verb)
         elif len(targets) == 1:
             return self.t_attack(verb, targets[0])
         else:
@@ -1028,7 +1031,7 @@ class Game(Data):
 
     def i_pour(self, verb):  #9130
         if self.bottle.contents is None:
-            self.print_do_what(verb)
+            self.ask_verb_what(verb)
         else:
             self.t_pour(verb, self.bottle.contents)
 
@@ -1063,7 +1066,7 @@ class Game(Data):
         if self.is_here(self.food):
             self.t_eat(verb, self.food)
         else:
-            self.print_do_what(verb)
+            self.ask_verb_what(verb)
 
     def t_eat(self, verb, obj):  #9140
         if obj is self.food:
@@ -1081,7 +1084,7 @@ class Game(Data):
         if self.is_here(self.water) or self.loc.liquid is self.water:
             self.t_drink(verb, self.water)
         else:
-            self.print_do_what(verb)
+            self.ask_verb_what(verb)
 
     def t_drink(self, verb, obj):  #9150
         if obj is not self.water:
@@ -1233,7 +1236,7 @@ class Game(Data):
     def i_fill(self, verb):  #9220
         if self.is_here(self.bottle):
             return self.t_fill(verb, self.bottle)
-        self.print_do_what(verb)
+        self.ask_verb_what(verb)
 
     def t_fill(self, verb, obj):
         if obj is self.bottle:
@@ -1316,10 +1319,37 @@ class Game(Data):
         raise NotImplementedError()
 
     def i_read(self, verb):  #8270
-        raise NotImplementedError()
+        if self.is_closed and self.oyster.is_toting:
+            self.t_read(verb, self.oyster)
+        objs = filter(self.is_here, (self.magazine, self.tablet, self.message))
+        if len(objs) != 1 or self.is_dark:
+            self.ask_verb_what(verb)
+        else:
+            self.t_read(verb, objs[0])
 
     def t_read(self, verb, obj):  #9270
-        raise NotImplementedError()
+        if self.is_dark:
+            self.i_see_no(obj)
+        if (obj is self.oyster and not self.hints(2).used and
+            self.oyster.is_toting):
+            def callback(yes):
+                if yes:
+                    self.hints(2).used = True
+                    self.write_message(193)
+                else:
+                    self.write_message(54)
+            self.yesno(self.messages[192], callback)
+        elif obj is self.oyster and self.hints(2).used:
+            self.write_message(194)
+        elif obj is self.message:
+            self.write_message(191)
+        elif obj is self.tablet:
+            self.write_message(196)
+        elif obj is self.magazine:
+            self.write_message(190)
+        else:
+            self.write(verb.default_message)
+        self.finish_turn()
 
     def t_break(self, verb, obj): #9280
         raise NotImplementedError()
@@ -1351,6 +1381,41 @@ class Game(Data):
 
         elif hint == 9:  # witt
             return True
+
+    def start_closing_cave(self):  #10000
+        self.grate.prop = 0
+        self.fissure.prop = 0
+        del self.dwarves[:]
+        self.troll.destroy()
+        self.troll2.rooms = list(self.troll.starting_rooms)
+        if self.bear.prop != 3:
+            self.bear.destroy()
+        for obj in self.chain, self.axe:
+            obj.prop = 0
+            obj.is_fixed = False
+        self.write_message(129)
+        self.clock1 = -1
+        self.is_closing = True
+
+    def close_cave(self):
+        ne = self.rooms[115]  # ne end of repository
+        sw = self.rooms[116]
+        for obj in (self.bottle, self.plant, self.oyster, self.lamp,
+                    self.rod, self.dwarf):
+            obj.prop = -2 if obj is self.bottle else -1
+            obj.drop(ne)
+        self.loc = self.oldloc = self.oldloc2 = ne
+        for obj in (self.grate, self.snake, self.bird, self.cage,
+                    self.rod2, self.pillow):
+            obj.prop = -2 if (obj is self.bird or obj is self.snake) else -1
+            obj.drop(sw)
+        self.mirror.rooms = [ne, sw]
+        self.mirror.is_fixed = 1
+        self.is_closed = True
+        for obj in self.inventory:
+            obj.is_toting = False
+        self.write_message(132)
+        self.move_to()
 
     def compute_score(self, for_score_command=False):  #20000
         score = maxscore = 2
