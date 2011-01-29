@@ -1141,7 +1141,7 @@ class Game(Data):
             return
 
         if self.is_here(self.troll):
-            self.write_message(156)
+            self.write_message(158)
             self.axe.drop(self.loc)
             self.do_motion(self.vocabulary['null'])
             return
