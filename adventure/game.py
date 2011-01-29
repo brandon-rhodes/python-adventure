@@ -380,7 +380,9 @@ class Game(Data):
         if self.is_closed:
             if self.oyster.prop < 0 and self.oyster.is_toting:
                 self.write(self.oyster.messages[1])
-            # put closing-time "prop" special case here
+            for obj in self.inventory:
+                if obj.prop < 0:
+                    obj.prop = - 1 - obj.prop
 
         self.could_fall_in_pit = self.is_dark  #2605
 
@@ -470,13 +472,13 @@ class Game(Data):
         word = self.vocabulary[words[0]]
 
         if word.kind == 'motion':
-            if words[0] == 'west':
+            if word == 'west':
                 self.full_wests += 1
                 if self.full_wests == 10:
                     self.write_message(17)
-            self.do_motion(word)
+            return self.do_motion(word)
 
-        elif word.kind == 'verb':
+        if word.kind == 'verb':
             prefix = 't_' if len(words) == 2 else 'i_'  # (in)transitive
             if len(words) == 2:
                 word2 = self.vocabulary[words[1]]
@@ -497,11 +499,16 @@ class Game(Data):
                     args = (word, obj)
             else:
                 args = (word,)
-            getattr(self, prefix + word.synonyms[0].text)(*args)
+            return getattr(self, prefix + word.synonyms[0].text)(*args)
 
-        #elif word == 'grate': #5100
-        else:
-            raise NotImplementedError('no handling for that word kind yet')
+        #5100
+        if word == 'grate':
+            if self.loc.n in (1, 4, 7):
+                return self.dispatch_command([ 'depression' ])
+            elif 9 < self.loc.n < 15:
+                return self.dispatch_command([ 'entrance' ])
+
+        raise NotImplementedError('no handling for that word kind yet')
 
     def i_see_no(self, thing):
         self.write('I see no {} here.\n'.format(thing))
@@ -1320,8 +1327,9 @@ class Game(Data):
 
     def i_read(self, verb):  #8270
         if self.is_closed and self.oyster.is_toting:
-            self.t_read(verb, self.oyster)
-        objs = filter(self.is_here, (self.magazine, self.tablet, self.message))
+            return self.t_read(verb, self.oyster)
+        objs = (self.magazine, self.tablet, self.message)
+        objs = list(filter(self.is_here, objs))
         if len(objs) != 1 or self.is_dark:
             self.ask_verb_what(verb)
         else:
@@ -1330,16 +1338,16 @@ class Game(Data):
     def t_read(self, verb, obj):  #9270
         if self.is_dark:
             self.i_see_no(obj)
-        if (obj is self.oyster and not self.hints(2).used and
-            self.oyster.is_toting):
+        elif (obj is self.oyster and not self.hints[2].used and
+              self.oyster.is_toting):
             def callback(yes):
                 if yes:
-                    self.hints(2).used = True
+                    self.hints[2].used = True
                     self.write_message(193)
                 else:
                     self.write_message(54)
             self.yesno(self.messages[192], callback)
-        elif obj is self.oyster and self.hints(2).used:
+        elif obj is self.oyster and self.hints[2].used:
             self.write_message(194)
         elif obj is self.message:
             self.write_message(191)
