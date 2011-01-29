@@ -584,6 +584,36 @@ class Game(Data):
                     self.do_motion(word)
                     return
 
+                elif move.action == 303:  #30300
+                    troll, troll2 = self.troll, self.troll2
+                    if troll.prop == 1:
+                        self.write(troll.messages[1])
+                        troll.prop = 0
+                        troll.rooms = list(troll.starting_rooms)
+                        troll2.destroy()
+                        self.move_to()
+                        return
+                    else:
+                        places = list(troll.starting_rooms)
+                        places.remove(self.loc)
+                        self.loc = places[0]  # "the other side of the bridge"
+                        if troll.prop == 0:
+                            troll.prop = 1
+                        if not self.bear.is_toting:
+                            self.move_to()
+                            return
+                        self.write_message(162)
+                        self.chasm.prop = 1
+                        troll.prop = 2
+                        self.bear.drop(self.loc)
+                        self.bear.is_fixed = True
+                        self.bear.prop = 3
+                        if self.spices.prop < 0:
+                            self.impossible_treasures += 1
+                        self.oldloc2 = self.loc  # refuse to strand belongings
+                        self.die()
+                        return
+
                 else:
                     raise NotImplementedError(move.action)
 
@@ -1076,8 +1106,8 @@ class Game(Data):
             # Pay the troll toll
             self.write_message(159)
             obj.destroy()
-            self.troll2.rooms = self.troll.rooms
             self.troll.destroy()
+            self.troll2.rooms = list(self.troll.starting_rooms)
             self.finish_turn()
             return
 
