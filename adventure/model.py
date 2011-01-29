@@ -68,7 +68,6 @@ class Room(object):
 
     def __init__(self):
         self.travel_table = []
-        self.objects = []
 
     @property
     def is_forced(self):

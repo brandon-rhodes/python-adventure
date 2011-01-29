@@ -13,7 +13,8 @@ class Game(Data):
     full_description_period = 5  # how often we use a room's full description
     full_wests = 0  # how many times they have typed "west" instead of "w"
     dwarf_stage = 0  #DFLAG how active the dwarves are
-    dwarves_killed = 0
+    dwarves_killed = 0  #DKILL
+    foobar = -1  #FOOBAR: turn number of most recent still-valid "fee"
     gave_up = False
     treasures_not_found = 0  # how many treasures have not yet been seen
     impossible_treasures = 0  # how many treasures can never be retrieved
@@ -309,7 +310,7 @@ class Game(Data):
             loc.times_described += 1
             if do_short and loc.short_description:
                 self.write(loc.short_description)
-            else:
+            elif loc.long_description:
                 self.write(loc.long_description)
 
         if loc.is_forced:
@@ -660,10 +661,11 @@ class Game(Data):
 
     def i_carry(self, verb):  #8010
         is_dwarf_here = any( dwarf.room == self.loc for dwarf in self.dwarves )
-        if len(self.loc.objects) != 1 or is_dwarf_here:
+        objs = self.objects_here
+        if len(objs) != 1 or is_dwarf_here:
             self.print_do_what(verb)
-        obj = self.loc.objects[0]
-        self.t_carry(verb, obj)
+        else:
+            self.t_carry(verb, objs[0])
 
     def t_carry(self, verb, obj):  #9010
         if obj.is_toting:
@@ -791,7 +793,7 @@ class Game(Data):
 
     def i_unlock(self, verb):  #8040  Handles "unlock" case as well
         objs = (self.grate, self.door, self.oyster, self.clam, self.chain)
-        objs = filter(self.is_here, objs)
+        objs = list(filter(self.is_here, objs))
         if len(objs) > 1:
             self.print_do_what(verb)
         elif len(objs) == 1:
@@ -988,7 +990,7 @@ class Game(Data):
         if self.bottle.contents is None:
             self.print_do_what(verb)
         else:
-            self.t_pour(self, verb, self.bottle.contents)
+            self.t_pour(verb, self.bottle.contents)
 
     def t_pour(self, verb, obj):
         if obj is self.bottle:
@@ -1036,14 +1038,26 @@ class Game(Data):
         self.finish_turn()
 
     def i_drink(self, verb):  #9150
-        raise NotImplementedError()
+        if self.is_here(self.water) or self.loc.liquid is self.water:
+            self.t_drink(verb, self.water)
+        else:
+            self.print_do_what(verb)
 
-    def t_drink(self, verb, obj):
-        raise NotImplementedError()
+    def t_drink(self, verb, obj):  #9150
+        if obj is not self.water:
+            self.write_message(110)
+        elif self.is_here(self.water):
+            self.bottle.prop = 1
+            self.bottle.contents = None
+            self.write_message(74)
+        elif self.loc.liquid is self.water:
+            self.write(verb.default_message)
+        else:
+            self.write_message(110)
+        self.finish_turn()
 
     def t_rub(self, verb, obj):  #9160
         if obj is self.lamp:
-            print(verb.default_message)
             self.write(verb.default_message)
         else:
             self.write_message(71)
@@ -1138,10 +1152,39 @@ class Game(Data):
         raise NotImplementedError()
 
     def i_fill(self, verb):  #9220
-        raise NotImplementedError()
+        if self.is_here(self.bottle):
+            return self.t_fill(verb, self.bottle)
+        self.print_do_what(verb)
 
     def t_fill(self, verb, obj):
-        raise NotImplementedError()
+        if obj is self.bottle:
+            liquid = self.loc.liquid
+            if liquid is None:
+                self.write_message(106)
+            elif self.bottle.contents:
+                self.write_message(105)
+            else:
+                self.bottle.contents = liquid
+                if self.bottle.is_toting:
+                    liquid.is_toting = True
+                if liquid is self.oil:
+                    self.write_message(108)
+                else:
+                    self.write_message(107)
+        elif obj is self.vase:
+            #9222
+            if self.vase.is_toting:
+                if self.loc.liquid is None:
+                    self.write_message(144)
+                else:
+                    self.write_message(145)
+                    self.vase.prop = 2
+                    self.vase.is_fixed = True
+            else:
+                self.write(verb.default_message)
+        else:
+            self.write(verb.default_message)
+        self.finish_turn()
 
     def i_blast(self, verb):  #9230
         raise NotImplementedError()
@@ -1160,8 +1203,35 @@ class Game(Data):
                 return
         self.yesno(self.messages[143], callback)
 
-    def i_foo(self, verb):  #8250
-        raise NotImplementedError()
+    def i_fee(self, verb):  #8250
+        for n in range(5):
+            if verb.synonyms[n].text == verb.text:
+                break  # so that 0=fee, 1=fie, 2=foe, 3=foo, 4=fum
+        if n == 0:
+            self.foobar = self.turns
+            self.write_message(54)
+        elif n != self.turns - self.foobar:
+            self.write_message(151)
+        elif n < 3:
+            self.write_message(54)
+        else:
+            self.foobar = -1
+            eggs = self.eggs
+            start = eggs.starting_rooms[0]
+            if (eggs.is_at(start) or eggs.is_toting and self.loc is start):
+                self.write_message(54)
+            else:
+                troll = self.troll
+                if not eggs.rooms and not troll.rooms and not troll.prop:
+                    self.troll.prop = 1
+                eggs.rooms = list(eggs.starting_rooms)
+                if self.loc is start:
+                    self.write(eggs.messages[0])
+                elif self.is_here(eggs):
+                    self.write(eggs.messages[1])
+                else:
+                    self.write(eggs.messages[2])
+        self.finish_turn()
 
     def i_brief(self, verb):  #8260
         raise NotImplementedError()

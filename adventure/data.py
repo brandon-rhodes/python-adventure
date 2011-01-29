@@ -54,7 +54,8 @@ def accumulate_message(dictionary, n, line):
 
 def section1(data, n, *etc):
     room = make_object(data.rooms, Room, n)
-    room.long_description += expand_tabs(etc) + '\n'
+    if not etc[0].startswith('>$<'):
+        room.long_description += expand_tabs(etc) + '\n'
 
 def section2(data, n, line):
     make_object(data.rooms, Room, n).short_description += line + '\n'
