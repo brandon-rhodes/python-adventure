@@ -12,12 +12,12 @@ class Game(Data):
     look_complaints = 3  # how many times to "SORRY, BUT I AM NOT ALLOWED..."
     full_description_period = 5  # how often we use a room's full description
     full_wests = 0  # how many times they have typed "west" instead of "w"
-    dwarf_stage = 0  #DFLAG how active the dwarves are
-    dwarves_killed = 0  #DKILL
-    foobar = -1  #FOOBAR: turn number of most recent still-valid "fee"
+    dwarf_stage = 0  # DFLAG how active the dwarves are
+    dwarves_killed = 0  # DKILL
+    foobar = -1  # FOOBAR turn number of most recent still-valid "fee"
     gave_up = False
-    treasures_not_found = 0  # how many treasures have not yet been seen
-    impossible_treasures = 0  # how many treasures can never be retrieved
+    treasures_not_found = 0  # TALLY how many treasures have not yet been seen
+    impossible_treasures = 0  # TALLY2 how many treasures can never be retrieved
     lamp_turns = 330
     warned_about_dim_lamp = False
     bonus = 0  # how they exited the final bonus round
@@ -32,6 +32,8 @@ class Game(Data):
         self.yesno_callback = False
         self.yesno_casual = False       # whether to insist they answer
 
+        self.clock1 = 30                # counts down from finding last treasure
+        self.clock2 = 50                # counts down until cave closes
         self.is_closing = False         # is the cave closing?
         self.panic = False              # they tried to leave during closing?
         self.is_closed = False          # is the cave closed?
@@ -408,6 +410,15 @@ class Game(Data):
                 return
 
         self.turns += 1
+        if (self.treasures_not_found == 0
+            and self.loc.n >= 15 and self.loc.n != 33):
+            self.clock1 -= 1
+            if self.clock1 == 0:
+                return self.start_closing_cave()
+        if self.clock1 < 0:
+            self.clock2 -= 1
+            if self.clock2 == 0:
+                return self.close_cave()
 
         if self.lamp.prop:
             self.lamp_turns -= 1
@@ -788,9 +799,8 @@ class Game(Data):
 
         elif obj is bear and troll.is_at(self.loc):
             self.write_message(163)
-            troll.destroy()  # and something about fixed?
-            # something else about fixed and troll2
-            # juggle?
+            troll.destroy()
+            self.troll2.rooms = list(self.troll.starting_rooms)
             troll.prop = 2
             bear.drop(self.loc)
 
