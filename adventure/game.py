@@ -469,7 +469,7 @@ class Game(Data):
             prefix = 't_' if len(words) == 2 else 'i_'  # (in)transitive
             if len(words) == 2:
                 word2 = self.vocabulary[words[1]]
-                obj = self.objects[word2.n % 1000]
+                obj = self.objects.get(word2.n % 1000, None)
                 #5000
                 if word == 'say':
                     args = (word, word2)
@@ -816,7 +816,7 @@ class Game(Data):
 
     def t_say(self, verb, word):  #9030
         if word.n in (62, 65, 71, 2025):
-            self.dispatch_command([ word ])
+            self.dispatch_command([ word.text ])
         else:
             self.write('Okay, "{}".'.format(word.text))
             self.finish_turn()
@@ -1112,7 +1112,7 @@ class Game(Data):
             return
 
         if obj is self.food and self.is_here(self.bear):
-            self.t_feed(self.bear)
+            self.t_feed(verb, self.bear)
             return
 
         if obj is not self.axe:
@@ -1179,7 +1179,46 @@ class Game(Data):
         self.finish_turn()
 
     def t_feed(self, verb, obj):  #9210
-        raise NotImplementedError()
+        if obj is self.bird:
+            self.write_message(100)
+        elif obj is self.troll:
+            self.write_message(182)
+        elif obj is self.dragon:
+            if self.dragon.prop != 0:
+                self.write_message(110)
+            else:
+                self.write_message(102)
+        elif obj is self.snake:
+            if self.is_closed or not self.is_here(self.bird):
+                self.write_message(102)
+            else:
+                self.write_message(101)
+                self.bird.destroy()
+                self.bird.prop = 0
+                self.impossible_treasures += 1
+        elif obj is self.dwarf:
+            if self.is_here(self.food):
+                self.write_message(103)
+                self.dwarf_stage += 1
+            else:
+                self.write(verb.default_message)
+        elif obj is self.bear:
+            if not self.is_here(self.food):
+                if self.bear.prop == 0:
+                    self.write_message(102)
+                elif self.bear.prop == 3:
+                    self.write_message(110)
+                else:
+                    self.write(verb.default_message)
+            else:
+                self.food.destroy()
+                self.bear.prop = 1
+                self.axe.is_fixed = False
+                self.axe.prop = 0
+                self.write_message(168)
+        else:
+            self.write_message(14)
+        self.finish_turn()
 
     def i_fill(self, verb):  #9220
         if self.is_here(self.bottle):
