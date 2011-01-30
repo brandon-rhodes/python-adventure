@@ -1243,10 +1243,24 @@ class Game(Data):
         self.t_attack(verb, None)
 
     def i_quit(self, verb):  #8180
-        raise NotImplementedError()
+        def callback(yes):
+            self.write_message(54)
+            if yes:
+                self.score_and_exit()
+        self.yesno(self.messages[22], callback)
 
     def t_find(self, verb, obj):  #9190
-        raise NotImplementedError()
+        if obj.is_toting:
+            self.write_message(24)
+        elif self.is_closed:
+            self.write_message(138)
+        elif (self.is_here(obj) or
+            obj is self.loc.liquid or
+            obj is self.dwarf and any(d.room is self.loc for d in self.dwarves)):
+            self.write_message(94)
+        else:
+            self.write(verb.default_message)
+        self.finish_turn()
 
     t_inventory = t_find
 
@@ -1341,11 +1355,21 @@ class Game(Data):
             self.write(verb.default_message)
         self.finish_turn()
 
-    def i_blast(self, verb):  #9230
-        raise NotImplementedError()
+    def t_blast(self, verb, obj=None):  #9230
+        if self.rod2.prop < 0 or not self.is_closed:
+            self.write(verb.default_message)
+            self.finish_turn()
+            return
+        if self.is_here(self.rod2):
+            self.bonus = 135
+        elif self.loc.n == 115:
+            self.bonus = 134
+        else:
+            self.bonus = 133
+        self.write_message(self.bonus)
+        self.score_and_exit()
 
-    def t_blast(self, verb, obj):
-        raise NotImplementedError()
+    i_blast = t_blast
 
     def i_score(self, verb):  #8240
         score, max_score = self.compute_score(for_score_command=True)
@@ -1355,7 +1379,6 @@ class Game(Data):
             self.write_message(54)
             if yes:
                 self.score_and_exit()
-                return
         self.yesno(self.messages[143], callback)
 
     def i_fee(self, verb):  #8250
@@ -1389,7 +1412,10 @@ class Game(Data):
         self.finish_turn()
 
     def i_brief(self, verb):  #8260
-        raise NotImplementedError()
+        self.write_message(156)
+        self.full_description_period = 10000
+        self.look_complains = 3
+        self.finish_turn()
 
     def i_read(self, verb):  #8270
         if self.is_closed and self.oyster.is_toting:
@@ -1425,11 +1451,30 @@ class Game(Data):
             self.write(verb.default_message)
         self.finish_turn()
 
-    def t_break(self, verb, obj): #9280
-        raise NotImplementedError()
+    def t_break(self, verb, obj):  #9280
+        if obj is self.vase and self.vase.prop == 0:
+            self.write_message(198)
+            if self.vase.is_toting:
+                self.vase.drop(self.loc)
+            self.vase.prop = 2
+            self.vase.is_fixed = True
+        elif obj is self.mirror and self.is_closed:
+            self.write_message(197)
+            self.wake_repository_dwarves()
+            return
+        elif obj is self.mirror:
+            self.write_message(148)
+        else:
+            self.write(verb.default_message)
+        self.finish_turn()
 
     def t_wake(self, verb, obj):  #9290
-        raise NotImplementedError()
+        if obj is self.dwarf and self.is_closed:
+            self.write_message(199)
+            self.wake_repository_dwarves()
+        else:
+            self.write(verb.default_message)
+            self.finish_turn()
 
     # write suspend and resume here one day?
 
@@ -1471,7 +1516,7 @@ class Game(Data):
         self.clock1 = -1
         self.is_closing = True
 
-    def close_cave(self):
+    def close_cave(self):  #11000
         ne = self.rooms[115]  # ne end of repository
         sw = self.rooms[116]
         for obj in (self.bottle, self.plant, self.oyster, self.lamp,
@@ -1490,6 +1535,15 @@ class Game(Data):
             obj.is_toting = False
         self.write_message(132)
         self.move_to()
+
+    # TODO: 12000
+    # TODO: 12200
+    # TODO: 12400
+    # TODO: 12600
+
+    def wake_repository_dwarves(self):  #19000
+        self.write_message(136)
+        self.compute_score()
 
     def compute_score(self, for_score_command=False):  #20000
         score = maxscore = 2
