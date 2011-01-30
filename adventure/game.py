@@ -14,6 +14,7 @@ class Game(Data):
     full_wests = 0  # how many times they have typed "west" instead of "w"
     dwarf_stage = 0  # DFLAG how active the dwarves are
     dwarves_killed = 0  # DKILL
+    knife_location = None  # KNFLOC
     foobar = -1  # FOOBAR turn number of most recent still-valid "fee"
     gave_up = False
     treasures_not_found = 0  # TALLY how many treasures have not yet been seen
@@ -212,7 +213,7 @@ class Game(Data):
                 # A dwarf cannot walk and attack at the same time.
                 if dwarf.room is dwarf.old_room:
                     dwarf_attacks += 1
-                    #knfloc here
+                    self.knife_location = self.loc
                     if self.random() < .095 * (self.dwarf_stage - 2):
                         knife_wounds += 1
 
@@ -386,8 +387,8 @@ class Game(Data):
                     obj.prop = - 1 - obj.prop
 
         self.could_fall_in_pit = self.is_dark  #2605
-
-        # remove knife from cave if they moved away from it
+        if self.knife_location and self.knife_location is not self.loc:
+            self.knife_location = None
 
         # Advance random number generator so each input affects future.
         self.random()
@@ -463,28 +464,22 @@ class Game(Data):
 
     def dispatch_command(self, words):  #19999
 
-        word1 = self.vocabulary.get(words[0])
-        if word1 is None:
-            #3000  (yes, a bit earlier than in the Fortran code)
-            n = self.randint(1, 5)
-            if n == 1:
-                self.write_message(61)
-            elif n == 2:
-                self.write_message(13)
-            else:
-                self.write_message(60)
-            self.finish_turn()
-            return
+        if not 1 <= len(words) <= 2:
+            return self.dont_understand()
 
-        word2 = self.vocabulary.get(words[1]) if len(words) > 1 else None
+        words = [ self.vocabulary.get(word) for word in words ]
+        if None in words:
+            return self.dont_understand()
+
+        word1 = words[0]
+        word2 = words[1] if len(words) == 2 else None
 
         if word1 == 'enter' and (word2 == 'stream' or word2 == 'water'):
             if self.loc.liquid is self.water:
                 self.write_message(70)
             else:
                 self.write_message(43)
-            self.finish_turn()
-            return
+            return self.finish_turn()
 
         if word1 == 'enter' and word2:
             #2800  'enter house' becomes simply 'house' and so forth
@@ -493,52 +488,93 @@ class Game(Data):
         if ((word1 == 'water' or word1 == 'oil') and
             (word2 == 'plant' or word2 == 'door') and
             self.is_here(self.objects[word2.n % 1000])):
-            word2 == 'pour'
+            word1, word2 == self.vocabulary['pour'], word1
 
-        #2610
-        if word1 == 'west':
-            self.full_wests += 1
-            if self.full_wests == 10:
-                self.write_message(17)
+        if word1 == 'say':
+            return self.t_say(word1, word2) if word2 else self.i_say(word1)
 
-        if word1.kind == 'motion':
+        kinds = tuple( word.kind for word in words )
+
+        #2630
+        if kinds == ('travel',):
+            if word1 == 'west':  #2610
+                self.full_wests += 1
+                if self.full_wests == 10:
+                    self.write_message(17)
             return self.do_motion(word1)
 
-        if word1.kind == 'snappy_comeback':
+        if kinds == ('snappy_comeback',):
             self.write_message(word1.n % 1000)
             return self.finish_turn()
 
-        if word1.kind == 'verb':
-            prefix = 't_' if len(words) == 2 else 'i_'  # (in)transitive
-            if len(words) == 2:
-                word2 = self.vocabulary[words[1]]
-                obj = self.objects.get(word2.n % 1000, None)
-                #5000
-                if word1 == 'say':
-                    args = (word1, word2)
-                elif self.is_here(obj):
-                    args = (word1, obj)
-                else:
-                    if obj is self.bottle.contents and self.is_here(self.bottle):
-                        pass
-                    elif obj is self.loc.liquid:
-                        pass
-                    else:
-                        self.i_see_no(word2.text)
-                        return
-                    args = (word1, obj)
-            else:
-                args = (word1,)
-            return getattr(self, prefix + word1.synonyms[0].text)(*args)
+        if kinds == ('noun',):
+            verb, noun = None, word1
+        elif kinds == ('verb',):
+            verb, noun = word1, None
+        elif kinds == ('verb', 'noun'):
+            verb, noun = word1, word2
+        else:
+            return self.dont_understand()
 
-        #5100
-        if word == 'grate':
-            if self.loc.n in (1, 4, 7):
-                return self.dispatch_command([ 'depression' ])
-            elif 9 < self.loc.n < 15:
-                return self.dispatch_command([ 'entrance' ])
+        if not noun:
+            obj = None
+        else:
+            obj = self.objects[noun.n % 1000]
+            obj_here = self.is_here(obj)
+            if not obj_here:
+                if obj is self.grate:
+                    if self.loc.n in (1, 4, 7):
+                        return self.dispatch_command([ 'depression' ])
+                    elif 9 < self.loc.n < 15:
+                        return self.dispatch_command([ 'entrance' ])
+                elif noun == 'dwarf':
+                    obj_here = bool([ d.room == self.loc for d in self.dwarves ])
+                elif obj is self.bottle.contents and self.is_here(bottle):
+                    obj_here = True
+                elif obj is self.loc.liquid:
+                    obj_here = True
+                elif (obj is self.plant and self.is_here(self.plant2)
+                      and self.plant2.prop == 0):
+                    obj = self.plant2
+                    obj_here = True
+                elif obj is self.knife and self.knife_location is self.loc:
+                    self.knife_location = None
+                    self.write_message(116)
+                    return self.finish_turn()
+                elif obj is self.rod and self.is_here(self.rod2):
+                    obj = self.rod2
+                    obj_here = True
+                elif verb and (verb == 'find' or verb == 'inventory'):
+                    obj_here = True  # lie; these verbs work for absent objects
 
-        raise NotImplementedError('no handling for that word kind yet')
+            if not obj_here:
+                self.write('I see no {} here.\n'.format(noun.text))
+                return self.finish_turn()
+
+            if not verb:
+                self.write('What do you want to do with the {}?\n'.format(obj))
+                return self.finish_turn()
+
+        verb_name = verb.synonyms[0].text
+        if obj:
+            method_name = 't_' + verb_name
+            args = (verb, obj)
+        else:
+            method_name = 'i_' + verb_name
+            args = (verb,)
+        method = getattr(self, method_name)
+        method(*args)
+
+    def dont_understand(self):
+        #3000  (a bit earlier than in the Fortran code)
+        n = self.random()
+        if n < 0.20:    # 20% of the entire 1.0 range of random()
+            self.write_message(61)
+        elif n < 0.36:  # 20% of the remaining 0.8 left
+            self.write_message(13)
+        else:
+            self.write_message(60)
+        self.finish_turn()
 
     def i_see_no(self, thing):
         self.write('I see no {} here.\n'.format(thing))
