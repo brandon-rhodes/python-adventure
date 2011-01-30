@@ -99,7 +99,7 @@ class Game(Data):
         self.yesno(self.messages[65], self.start2)  # want instructions?
 
     def start2(self, yes):
-        """Print out instructions if the user wants them."""
+        """Display out instructions if the user wants them."""
         if yes:
             self.write_message(1)
             self.hints[3].used = True
@@ -351,6 +351,7 @@ class Game(Data):
         self.finish_turn()
 
     #2009 sets SPK="OK" then...
+    #2010 sets SPK to K
     #2011 speaks SPK then...
     #2012 blanks VERB and OBJ and calls:
     def finish_turn(self, obj=None):  #2600
@@ -394,7 +395,7 @@ class Game(Data):
     # The central do_command() method, that should be called over and
     # over again with words supplied by the user.
 
-    def do_command(self, words):  #2608
+    def do_command(self, words):
         """Parse and act upon the command in the list of strings `words`."""
 
         if self.yesno_callback is not None:
@@ -411,6 +412,7 @@ class Game(Data):
                 callback(answer)
                 return
 
+        #2608
         self.turns += 1
         if (self.treasures_not_found == 0
             and self.loc.n >= 15 and self.loc.n != 33):
@@ -422,30 +424,33 @@ class Game(Data):
             if self.clock2 == 0:
                 return self.close_cave()  # "return", to cancel their command
 
-        if self.lamp.prop:
+        if self.lamp.prop == 1:
             self.lamp_turns -= 1
 
         if self.lamp_turns <= 30 and self.is_here(self.battery) \
                 and self.battery.prop == 0 and self.is_here(self.lamp):
+            #12000
             self.write_message(188)
             self.battery.prop = 1
             if self.battery.is_toting:
                 self.battery.drop(self.loc)
             self.lamp_turns += 2500
             self.warned_about_dim_lamp = False
-
-        if self.lamp_turns == 0:
+        elif self.lamp_turns == 0:
+            #12400
             self.lamp_turns = -1
             self.lamp.prop = 0
             if self.is_here(self.lamp):
                 self.write_message(184)
         elif self.lamp_turns < 0 and self.loc.is_aboveground:
+            #12600
             self.write_message(185)
             self.gave_up = True
             self.score_and_exit()
             return
         elif self.lamp_turns <= 30 and not self.warned_about_dim_lamp \
                 and self.is_here(self.lamp):
+            #12200
             self.warned_about_dim_lamp = True
             if self.battery.prop == 1:
                 self.write_message(189)
@@ -456,9 +461,11 @@ class Game(Data):
 
         self.dispatch_command(words)
 
-    def dispatch_command(self, words):
+    def dispatch_command(self, words):  #19999
 
-        if words[0] not in self.vocabulary:
+        word1 = self.vocabulary.get(words[0])
+        if word1 is None:
+            #3000  (yes, a bit earlier than in the Fortran code)
             n = self.randint(1, 5)
             if n == 1:
                 self.write_message(61)
@@ -469,25 +476,48 @@ class Game(Data):
             self.finish_turn()
             return
 
-        word = self.vocabulary[words[0]]
+        word2 = self.vocabulary.get(words[1]) if len(words) > 1 else None
 
-        if word.kind == 'motion':
-            if word == 'west':
-                self.full_wests += 1
-                if self.full_wests == 10:
-                    self.write_message(17)
-            return self.do_motion(word)
+        if word1 == 'enter' and (word2 == 'stream' or word2 == 'water'):
+            if self.loc.liquid is self.water:
+                self.write_message(70)
+            else:
+                self.write_message(43)
+            self.finish_turn()
+            return
 
-        if word.kind == 'verb':
+        if word1 == 'enter' and word2:
+            #2800  'enter house' becomes simply 'house' and so forth
+            word1, word2 = word2, None
+
+        if ((word1 == 'water' or word1 == 'oil') and
+            (word2 == 'plant' or word2 == 'door') and
+            self.is_here(self.objects[word2.n % 1000])):
+            word2 == 'pour'
+
+        #2610
+        if word1 == 'west':
+            self.full_wests += 1
+            if self.full_wests == 10:
+                self.write_message(17)
+
+        if word1.kind == 'motion':
+            return self.do_motion(word1)
+
+        if word1.kind == 'snappy_comeback':
+            self.write_message(word1.n % 1000)
+            return self.finish_turn()
+
+        if word1.kind == 'verb':
             prefix = 't_' if len(words) == 2 else 'i_'  # (in)transitive
             if len(words) == 2:
                 word2 = self.vocabulary[words[1]]
                 obj = self.objects.get(word2.n % 1000, None)
                 #5000
-                if word == 'say':
-                    args = (word, word2)
+                if word1 == 'say':
+                    args = (word1, word2)
                 elif self.is_here(obj):
-                    args = (word, obj)
+                    args = (word1, obj)
                 else:
                     if obj is self.bottle.contents and self.is_here(self.bottle):
                         pass
@@ -496,10 +526,10 @@ class Game(Data):
                     else:
                         self.i_see_no(word2.text)
                         return
-                    args = (word, obj)
+                    args = (word1, obj)
             else:
-                args = (word,)
-            return getattr(self, prefix + word.synonyms[0].text)(*args)
+                args = (word1,)
+            return getattr(self, prefix + word1.synonyms[0].text)(*args)
 
         #5100
         if word == 'grate':
@@ -556,7 +586,7 @@ class Game(Data):
             return
 
         elif word == 'cave':  #40
-            self.write(self.messages[57 if self.loc.is_aboveground else 58])
+            self.write_message(57 if self.loc.is_aboveground else 58)
             self.move_to()
             return
 

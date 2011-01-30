@@ -112,7 +112,7 @@ def section4(data, n, text, *etc):
         word.n = n
         word.text = text
         original.add_synonym(word)
-    word.kind = ['motion', 'object', 'verb', 'random_message'][n // 1000]
+    word.kind = ['motion', 'object', 'verb', 'snappy_comeback'][n // 1000]
     if word.kind == 'object':
         obj = make_object(data.objects, Object, n % 1000)
         obj.names.append(text)
