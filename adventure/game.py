@@ -33,9 +33,8 @@ class Game(Data):
     max_deaths = 3  # how many times the player can die
     turns = 0
 
-    def __init__(self, end_game, seed=None):
+    def __init__(self, seed=None):
         Data.__init__(self)
-        self.end_game = end_game  # function to call to end us
         self.output = ''
         self.yesno_callback = False
         self.yesno_casual = False       # whether to insist they answer
@@ -45,6 +44,7 @@ class Game(Data):
         self.is_closing = False         # is the cave closing?
         self.panic = False              # they tried to leave during closing?
         self.is_closed = False          # is the cave closed?
+        self.is_done = False            # caller can check for "game over"
         self.could_fall_in_pit = False  # could the player fall into a pit?
 
         self.random_instance = random.Random()
@@ -1632,4 +1632,4 @@ class Game(Data):
         else:
             self.write('To achieve the next higher rating '
                        'would be a neat trick!\n\nCongratulations!!\n')
-        self.end_game()
+        self.is_done = True

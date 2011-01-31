@@ -1,11 +1,12 @@
 This is a faithful port of the “Adventure” game to Python 3 from the
-original 1977 FORTRAN code by Crowther and Woods, that lets you explore
-Colossal Cave, where others have found fortunes in treasure and gold,
-though it is rumored that some who enter are never seen again.  To
-encourage the use of Python 3, the game is designed to be played right
-at the Python prompt.  Single-word commands can be typed by themselves,
-but two-word commands should be written as a function call (since a
-two-word command would not be valid Python)::
+original 1977 FORTRAN code by Crowther and Woods, driven by the same
+``advent.dat`` file, that lets you explore Colossal Cave, where others
+have found fortunes in treasure and gold, though it is rumored that some
+who enter are never seen again.  To encourage the use of Python 3, the
+game is designed to be played right at the Python prompt.  Single-word
+commands can be typed by themselves, but two-word commands should be
+written as a function call (since a two-word command would not be valid
+Python)::
 
     >>> import adventure
     >>> adventure.play()
@@ -16,7 +17,7 @@ two-word command would not be valid Python)::
     AROUND YOU IS A FOREST.  A SMALL STREAM FLOWS OUT OF THE BUILDING AND
     DOWN A GULLY.
 
-    >>> e
+    >>> east
     YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
 
     THERE ARE SOME KEYS ON THE GROUND HERE.
@@ -33,20 +34,20 @@ two-word command would not be valid Python)::
     >>> leave
     YOU'RE AT END OF ROAD AGAIN.
 
-    >>> s
+    >>> south
     YOU ARE IN A VALLEY IN THE FOREST BESIDE A STREAM TUMBLING ALONG A
     ROCKY BED.
 
 You can find two complete, working walkthroughs of the game in its
-`tests` directory, which you can run using the `discover` module that
-comes built-in to Python 3.2::
+``tests`` directory, which you can run using the ``discover`` module that
+comes built-in with Python 3.2::
 
     $ python3.2 -m unittest discover adventure
 
 I wrote most of this package over Christmas vacation 2010, to learn more
 about the workings of the game that so entralled me as a child; the
-project also gave me practice in writing Python 3.  I still forget the
-parentheses when writing `print()` if I am not paying attention.
+project also gave me practice writing Python 3.  I still forget the
+parentheses when writing ``print()`` if I am not paying attention.
 
 Over the coming weeks I intend to improve the test coverage with many
 situation-specific tests.  Once coverage has reached 100%, I will feel
