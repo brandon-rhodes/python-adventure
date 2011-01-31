@@ -38,6 +38,11 @@ Python)::
     YOU ARE IN A VALLEY IN THE FOREST BESIDE A STREAM TUMBLING ALONG A
     ROCKY BED.
 
+The original Adventure payed attention to only the first five letters of
+each command, so a long command like ``inventory`` could simply be typed
+as ``inven``.  This package defines a symbol for both versions of every
+long word, so you can type the long or short version as you please.
+
 You can find two complete, working walkthroughs of the game in its
 ``tests`` directory, which you can run using the ``discover`` module that
 comes built-in with Python 3.2::
@@ -49,10 +54,17 @@ about the workings of the game that so entralled me as a child; the
 project also gave me practice writing Python 3.  I still forget the
 parentheses when writing ``print()`` if I am not paying attention.
 
-Over the coming weeks I intend to improve the test coverage with many
-situation-specific tests.  Once coverage has reached 100%, I will feel
-free to start cleaning, refactoring, and improving the code — right now
-it is laid out very much like the original FORTRAN, to make it easier to
-determine whether its logic really matches.
+Todo
+====
+
+* Add commands to save and load the game.
+* Improve the test coverage with situation-specific tests.
+* Once coverage has reached 100%, start cleaning, refactoring, and
+  improving the code — right now it is laid out very much like the
+  original FORTRAN, to make it easier to determine whether its logic
+  really matches.
+
+Changelog
+=========
 
 | 2011 January 31 — 0.3 — first public release
