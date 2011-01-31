@@ -22,8 +22,9 @@ class Game(Data):
     lamp_turns = 330
     warned_about_dim_lamp = False
     bonus = 0  # how they exited the final bonus round
+    is_dead = False  # whether we are currently dead
     deaths = 0  # how many times the player has died
-    max_deaths = 4  # how many times the player can die
+    max_deaths = 3  # how many times the player can die
     turns = 0
 
     def __init__(self, writer, end_game, seed=None):
@@ -264,8 +265,8 @@ class Game(Data):
         if dwarf_count == 1:
             self.write_message(4)
         elif dwarf_count:
-            self.write('There are %d threatening little dwarves in the'
-                       ' room with you.\n' % dwarf_count)
+            self.write('There are {} threatening little dwarves in the'
+                       ' room with you.\n'.format(dwarf_count))
 
         if dwarf_attacks and self.dwarf_stage == 2:
             self.dwarf_stage = 3
@@ -274,7 +275,7 @@ class Game(Data):
             self.write_message(5)
             k = 52
         elif dwarf_attacks:
-            self.write('%d of them throw knives at you!\n' % dwarf_attacks)
+            self.write('{} of them throw knives at you!\n'.format(dwarf_attacks))
             k = 6
 
         if not dwarf_attacks:
@@ -285,7 +286,7 @@ class Game(Data):
             if knife_wounds == 1:
                 self.write_message(k + 1)
             else:
-                self.write('%d of them get you!\n' % knife_wounds)
+                self.write('{} of them get you!\n'.format(knife_wounds))
             self.oldloc2 = self.loc
             self.die()
             return
@@ -413,6 +414,10 @@ class Game(Data):
                 callback(answer)
                 return
 
+        if self.is_dead:
+            self.write('You have gotten yourself killed.')
+            return
+
         #2608
         self.turns += 1
         if (self.treasures_not_found == 0
@@ -497,7 +502,7 @@ class Game(Data):
 
         #2630
         if kinds == ('travel',):
-            if word1 == 'west':  #2610
+            if word1.text == 'west':  #2610
                 self.full_wests += 1
                 if self.full_wests == 10:
                     self.write_message(17)
@@ -529,7 +534,7 @@ class Game(Data):
                         return self.dispatch_command([ 'entrance' ])
                 elif noun == 'dwarf':
                     obj_here = bool([ d.room == self.loc for d in self.dwarves ])
-                elif obj is self.bottle.contents and self.is_here(bottle):
+                elif obj is self.bottle.contents and self.is_here(self.bottle):
                     obj_here = True
                 elif obj is self.loc.liquid:
                     obj_here = True
@@ -552,7 +557,8 @@ class Game(Data):
                 return self.finish_turn()
 
             if not verb:
-                self.write('What do you want to do with the {}?\n'.format(obj))
+                self.write('What do you want to do with the {}?\n'.format(
+                        noun.text))
                 return self.finish_turn()
 
         verb_name = verb.synonyms[0].text
@@ -732,6 +738,7 @@ class Game(Data):
 
     def die(self):  #99
         self.deaths += 1
+        self.is_dead = True
 
         if self.is_closing:
             self.write_message(131)
@@ -743,6 +750,7 @@ class Game(Data):
                 self.write_message(80 + self.deaths * 2)
                 if self.deaths < self.max_deaths:
                     # do water and oil thing
+                    self.is_dead = False
                     if self.lamp.is_toting:
                         self.lamp.prop = 0
                     for obj in self.inventory:
@@ -762,7 +770,7 @@ class Game(Data):
     # Verbs.
 
     def ask_verb_what(self, verb, *args):  #8000
-        self.write('%s What?\n' % verb.text)
+        self.write('{} What?\n'.format(verb.text))
         self.finish_turn()
 
     i_drop = ask_verb_what
@@ -843,6 +851,7 @@ class Game(Data):
     def t_drop(self, verb, obj):  #9020
         if obj is self.rod and not self.rod.is_toting and self.rod2.is_toting:
             obj = self.rod2
+
         if not obj.is_toting:
             self.write_message(verb.default_message)
             self.finish_turn()
@@ -854,17 +863,17 @@ class Game(Data):
         if obj is bird and self.is_here(snake):
             self.write_message(30)
             if self.is_closed:
-                self.write_message(136)
-                self.score_and_exit()
+                self.wake_repository_dwarves()
+                return
             snake.prop = 1
             snake.destroy()
-            bird.prop = 0
-            bird.drop(self.loc)
 
         elif obj is self.coins and self.is_here(self.machine):
             obj.destroy()
             self.battery.drop(self.loc)
             self.write(self.battery.messages[0])
+            self.finish_turn()
+            return
 
         elif obj is bird and self.is_here(dragon) and dragon.prop == 0:
             self.write_message(154)
@@ -872,13 +881,14 @@ class Game(Data):
             bird.prop = 0
             if snake.rooms:
                 self.impossible_treasures += 1
+            self.finish_turn()
+            return
 
-        elif obj is bear and troll.is_at(self.loc):
+        elif obj is bear and self.is_here(troll):
             self.write_message(163)
             troll.destroy()
             self.troll2.rooms = list(self.troll.starting_rooms)
             troll.prop = 2
-            bear.drop(self.loc)
 
         elif obj is self.vase and self.loc is not self.rooms[96]:
             if self.pillow.is_at(self.loc):
@@ -887,16 +897,20 @@ class Game(Data):
                 self.vase.prop = 2
                 self.vase.is_fixed = True
             self.write(self.vase.messages[self.vase.prop + 1])
-            obj.drop(self.loc)
 
         else:
-            if obj is self.cage and self.bird.prop != 0:
-                bird.drop(self.loc)
-            elif obj is self.bird:
-                obj.prop = 0
             self.write_message(54)
-            obj.drop(self.loc)
 
+        #9021
+        if obj is self.bottle.contents:
+            obj = self.bottle
+        if obj is self.bottle and self.bottle.contents:
+            self.bottle.contents.hide()
+        if obj is self.cage and self.bird.prop != 0:
+            bird.drop(self.loc)
+        elif obj is self.bird:
+            obj.prop = 0
+        obj.drop(self.loc)
         self.finish_turn()
         return
 
@@ -1373,8 +1387,8 @@ class Game(Data):
 
     def i_score(self, verb):  #8240
         score, max_score = self.compute_score(for_score_command=True)
-        self.write('If you were to quit now, you would score %d'
-                   ' out of a possible %d.\n' % (score, max_score))
+        self.write('If you were to quit now, you would score {}'
+                   ' out of a possible {}.\n'.format(score, max_score))
         def callback(yes):
             self.write_message(54)
             if yes:
@@ -1578,14 +1592,14 @@ class Game(Data):
 
         maxscore += 25
         if self.is_closing:
-            maxscore += 25
+            score += 25
 
         maxscore += 45
         if self.is_closed:
             score += {0: 10, 135: 25, 134: 30, 133: 45}[self.bonus]
 
         maxscore += 1
-        if self.magazine.rooms[0].n == 108:
+        if 108 in (room.n for room in self.magazine.rooms):
             score += 1
 
         for hint in list(self.hints.values()):
@@ -1596,16 +1610,16 @@ class Game(Data):
 
     def score_and_exit(self):
         score, maxscore = self.compute_score()
-        self.write('\nYou scored %d out of a possible %d using %d turns.'
-                   % (score, maxscore, self.turns))
+        self.write('\nYou scored {} out of a possible {} using {} turns.'
+                   .format(score, maxscore, self.turns))
         for i, (minimum, text) in enumerate(self.class_messages):
             if minimum >= score:
                 break
-        self.write('\n%s\n' % text)
+        self.write('\n{}\n'.format(text))
         if i < len(self.class_messages) - 1:
             d = self.class_messages[i+1][0] + 1 - score
             self.write('To achieve the next higher rating, you need'
-                       ' %s more point%s\n' % (d, 's' if d > 1 else ''))
+                       ' {} more point{}\n'.format(d, 's' if d > 1 else ''))
         else:
             self.write('To achieve the next higher rating '
                        'would be a neat trick!\n\nCongratulations!!\n')

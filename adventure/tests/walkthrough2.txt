@@ -1,5 +1,5 @@
 >>> import adventure
->>> adventure.play()
+>>> adventure.play(seed=2)
 WELCOME TO ADVENTURE!!  WOULD YOU LIKE INSTRUCTIONS?
 <BLANKLINE>
 >>> no
@@ -7,3 +7,351 @@ YOU ARE STANDING AT THE END OF A ROAD BEFORE A SMALL BRICK BUILDING.
 AROUND YOU IS A FOREST.  A SMALL STREAM FLOWS OUT OF THE BUILDING AND
 DOWN A GULLY.
 <BLANKLINE>
+>>> brief
+OKAY, FROM NOW ON I'LL ONLY DESCRIBE A PLACE IN FULL THE FIRST TIME
+YOU COME TO IT.  TO GET THE FULL DESCRIPTION, SAY "LOOK".
+<BLANKLINE>
+>>> enter
+YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
+<BLANKLINE>
+THERE ARE SOME KEYS ON THE GROUND HERE.
+<BLANKLINE>
+THERE IS A SHINY BRASS LAMP NEARBY.
+<BLANKLINE>
+THERE IS FOOD HERE.
+<BLANKLINE>
+THERE IS A BOTTLE OF WATER HERE.
+<BLANKLINE>
+>>> get(lamp)
+OK
+<BLANKLINE>
+>>> xyzzy
+>>> on
+YOUR LAMP IS NOW ON.
+<BLANKLINE>
+>>> get(rod)
+>>> e
+>>> get(cage)
+>>> w
+>>> w
+>>> w
+>>> drop(rod)
+>>> get(bird)
+>>> get(rod)
+>>> w
+>>> d
+>>> d
+>>> drop(bird)
+>>> drop(cage)
+>>> u
+>>> w
+>>> swing(rod)
+>>> drop(rod)
+>>> w
+>>> get(diamonds)
+
+Make an immediate turn to the pirate's chest; he will, luckily, steal
+our diamonds right before we reach it.
+
+>>> w
+>>> s
+>>> e
+>>> s
+>>> s
+>>> s
+>>> n
+>>> e
+>>> e
+>>> nw
+>>> get(chest)
+>>> get(diamonds)
+
+The pirate is now gone from the game!  Leave the maze and kill some
+dwarves while cleaning the upper level of its treasures.
+
+>>> se
+>>> n
+>>> get(axe)
+>>> d
+>>> w
+>>> d
+>>> throw(axe)
+>>> get(axe)
+>>> s
+>>> get(gold)
+>>> n
+>>> throw(axe)
+>>> get(axe)
+>>> d
+>>> w
+>>> get(coins)
+>>> e
+>>> s
+>>> get(jewelry)
+>>> n
+>>> drop(axe)
+>>> sw
+>>> w
+>>> kill(dragon)
+>>> yes
+>>> get(rug)
+
+We have enough treasures now to return to the building.
+
+>>> e
+>>> e
+>>> n
+>>> n
+>>> plugh
+>>> drop(gold)
+>>> drop(diamonds)
+>>> drop(jewelry)
+>>> drop(coins)
+>>> drop(chest)
+>>> drop(rug)
+
+Grab two last nearby treasures and return them to the building.
+
+>>> plugh
+>>> s
+>>> s
+>>> get(axe)
+>>> n
+>>> get(silver)
+>>> n
+>>> plover
+>>> ne
+>>> get(platinum)
+>>> s
+>>> plover
+>>> plugh
+>>> drop(silver)
+>>> drop(platinum)
+
+Gear up for tackling the plant-eggs-troll-bear complex of puzzles.
+
+>>> get(keys)
+>>> get(food)
+>>> get(bottle)
+>>> plugh
+>>> s
+>>> d
+>>> w
+>>> d
+>>> w
+>>> w
+
+We will go ahead through the oriental room and get the emerald while we
+only have four things to drop and pick back up.
+
+>>> oriental
+>>> throw(axe)
+>>> n
+>>> w
+>>> drop(keys)
+>>> drop(lantern)
+>>> drop(food)
+>>> drop(bottle)
+>>> e
+>>> get(emerald)
+>>> w
+>>> get(keys)
+>>> get(lantern)
+>>> get(food)
+>>> get(bottle)
+>>> nw
+>>> s
+>>> se
+
+Now we proceed to the west pit in the twopit room, and water the plant
+twice to create a giant beanstalk.
+
+>>> w
+>>> w
+>>> d
+>>> pour(water)
+>>> u
+>>> w
+>>> u
+>>> n
+>>> n
+>>> get(water)
+>>> s
+>>> s
+>>> d
+>>> s
+>>> d
+>>> pour(water)
+
+Grab some oil for the door before climbing the beanstalk.
+
+>>> u
+>>> e
+>>> d
+>>> get(oil)
+>>> u
+>>> w
+>>> d
+
+Now, climb the beanstalk, and do everything "upstairs" in the giant area.
+
+>>> climb
+>>> w
+>>> get(eggs)
+>>> n
+>>> pour(oil)
+>>> drop(bottle)
+>>> n
+>>> get(trident)
+>>> w
+
+Drop down into the large low room.
+
+>>> d
+
+Resolve the troll and bear puzzles.
+
+>>> sw
+>>> u
+>>> throw(eggs)
+>>> cross
+>>> ne
+>>> e
+>>> se
+>>> s
+>>> e
+>>> feed(bear)
+>>> unlock(chain)
+>>> drop(keys)
+>>> get(chain)
+>>> get(bear)
+>>> w
+>>> w
+>>> n
+>>> ne
+>>> e
+>>> get(spices)
+>>> w
+>>> s
+>>> w
+>>> w
+>>> sw
+>>> drop(bear)
+>>> sw
+>>> sw
+>>> d
+
+Retrieve the eggs that we gave to the troll.
+
+>>> se
+>>> se
+>>> w
+>>> w
+>>> d
+>>> climb
+>>> w
+>>> fee
+>>> fie
+>>> foe
+>>> foo
+>>> get(eggs)
+
+On our return to the building, use the trident to get the pearl.
+
+>>> s
+>>> d
+>>> u
+>>> w
+>>> n
+>>> e
+>>> n
+>>> unlock(clam)
+>>> d
+>>> d
+>>> get(pearl)
+
+Glimpsing the pearl - the last treasure - has started the clock that
+will close the cave.  We hurry back and deposit everything in the
+building.
+
+>>> u
+>>> u
+>>> s
+>>> u
+>>> e
+>>> u
+>>> n
+>>> plugh
+>>> drop(eggs)
+>>> drop(trident)
+>>> drop(emerald)
+>>> drop(pearl)
+>>> drop(spices)
+>>> drop(chain)
+
+We make one last run into the cave to retrieve the vase.
+
+>>> plugh
+>>> s
+>>> d
+>>> w
+>>> d
+>>> w
+>>> w
+>>> oriental
+>>> get(vase)
+>>> se
+>>> e
+>>> get(pillow)
+>>> w
+>>> ne
+>>> e
+>>> u
+>>> e
+>>> u
+>>> n
+>>> plugh
+>>> drop(pillow)
+>>> drop(vase)
+>>> adventure._game.clock1
+
+Well, that was close!  The clock has five ticks left.  We return to the
+cave, delay until the closing message plays, then immediately try to
+"plugh" out, resetting clock2 to only 15 moves.
+
+>>> plugh
+>>> s
+>>> s
+>>> s
+>>> n
+>>> n
+>>> n
+>>> plugh
+
+Now that we have 15 moves left, we go place the magazine at Witt's End
+and await the afterlife.
+
+>>> s
+>>> d
+>>> w
+>>> d
+>>> e
+>>> get(magazine)
+>>> e
+>>> drop(magazine)
+>>> n
+>>> n
+>>> n
+>>> n
+>>> n
+>>> n
+>>> n
+
+We are in the repository!  Finish the game in triumph.
+
+>>> sw
+>>> get(rod)
+>>> ne
+>>> drop(rod)
+>>> sw
+>>> blast
