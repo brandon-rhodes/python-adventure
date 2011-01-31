@@ -1,7 +1,5 @@
 """Routines that install Adventure commands for the Python prompt."""
 
-from io import StringIO
-
 class ReprTriggeredIdentifier(object):
     def __init__(self, game, word):
         self.game = game
@@ -9,19 +7,13 @@ class ReprTriggeredIdentifier(object):
 
     def __repr__(self):
         """The word was typed by itself; interpret as a single-word command."""
-        s = StringIO()
-        old_writer = self.game.writer
-        self.game.writer = s.write
-        self.game.do_command([ self.word ])
-        self.game.writer = old_writer
-        v = s.getvalue()
-        if len(v) and v[-1] == '\n':
-            v = v[:-1]  # since Python eval loop will add its own newline
-        return v
+        output = self.game.do_command([ self.word ])
+        return output.rstrip('\n') + '\n'
 
     def __call__(self, arg):
         """Two words were provided like `get(keys)`."""
-        self.game.do_command([ self.word, arg.word ])
+        output = self.game.do_command([ self.word, arg.word ])
+        print(output.rstrip('\n') + '\n')
 
 def install_builtins(game):
     import sys

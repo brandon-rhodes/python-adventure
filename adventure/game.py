@@ -1,5 +1,11 @@
 """How we keep track of the state of the game."""
 
+# Numeric comments scattered through this file refer to FORTRAN line
+# numbers, for those comparing this file and `advent.for`; so "#2012"
+# refers to FORTRAN line number 2012 (which you can find easily in the
+# FORTRAN using Emacs with an interactive search for newline-2012-tab,
+# that is typed C-s C-q C-j 2 0 1 2 C-i).
+
 import random
 from operator import attrgetter
 from .data import Data
@@ -27,10 +33,10 @@ class Game(Data):
     max_deaths = 3  # how many times the player can die
     turns = 0
 
-    def __init__(self, writer, end_game, seed=None):
+    def __init__(self, end_game, seed=None):
         Data.__init__(self)
-        self.writer = writer
         self.end_game = end_game  # function to call to end us
+        self.output = ''
         self.yesno_callback = False
         self.yesno_casual = False       # whether to insist they answer
 
@@ -49,12 +55,11 @@ class Game(Data):
         self.randint = self.random_instance.randint
         self.choice = self.random_instance.choice
 
-    def write(self, s):
-        """Output the Unicode representation of `s`."""
-        s = str(s).upper()
-        if s:
-            self.writer(s)
-            self.writer('\n')
+    def write(self, more):
+        """Append the Unicode representation of `s` to our output."""
+        if more:
+            self.output += str(more).upper()
+            self.output += '\n'
 
     def write_message(self, n):
         self.write(self.messages[n])
@@ -399,7 +404,11 @@ class Game(Data):
 
     def do_command(self, words):
         """Parse and act upon the command in the list of strings `words`."""
+        self.output = ''
+        self._do_command(words)
+        return self.output
 
+    def _do_command(self, words):
         if self.yesno_callback is not None:
             answer = YESNO_ANSWERS.get(words[0], None)
             if answer is None:
@@ -1084,7 +1093,7 @@ class Game(Data):
             self.write_message(46)
         elif obj is self.dwarf:
             if self.is_closed:
-                die
+                self.wake_repository_dwarves()
                 return
             self.write_message(49)
         elif obj is self.dragon:
