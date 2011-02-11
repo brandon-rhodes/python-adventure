@@ -4,9 +4,9 @@ class FooTest(unittest.TestCase):
 
     def setUp(self):
         from adventure.data import Data
-        from adventure.interpret import read_data_from_nearby_file
+        from adventure import load_advent_dat
         self.data = Data()
-        read_data_from_nearby_file(self.data)
+        load_advent_dat(self.data)
 
     def test_long_description(self):
         self.assertEqual(self.data.rooms[4].long_description, """\
