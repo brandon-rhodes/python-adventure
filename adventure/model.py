@@ -36,18 +36,6 @@ class Move(object):
 
         return '<%s%s %s>' % ('|'.join(verblist), condition, action)
 
-    def test_condition(self, data):
-        pass
-
-    def take_action(self, data):
-        if isinstance(self.action, Room):
-            data.room = self.action
-            print(data.room.description)
-        elif isinstance(self.action, Message):
-            print(self.action.text)
-        else:
-            print('special %d' % self.action)
-
 class Room(object):
     """A location in the game."""
 
@@ -88,10 +76,6 @@ class Room(object):
     @property
     def is_dark(self):
         return not self.is_light
-
-    @property
-    def description(self):
-        return self.visited and self.short_description or self.long_description
 
 class Word(object):
     """A word that can be used as part of a command."""
@@ -179,10 +163,6 @@ class Hint(object):
     def __init__(self):
         self.rooms = []
 
-    def write(self, writer):
-        writer(self.message)
-        self.used = True
-
 class Dwarf(object):
     is_dwarf = True
     is_pirate = False
@@ -206,6 +186,3 @@ class Dwarf(object):
 class Pirate(Dwarf):
     is_dwarf = False
     is_pirate = True
-
-    def can_enter(self, room):
-        return Dwarf.can_enter(room) and not room.is_forbidden_to_pirate
