@@ -27,3 +27,14 @@ def play(seed=None):
     install_builtins(_game)
     _game.start()
     print(_game.output[:-1])
+
+def load(savefile):
+    global _game
+    import pickle
+
+    if isinstance(savefile, str):
+        savefile = open(savefile, 'rb')
+    _game = pickle.load(savefile)
+    install_builtins(_game)
+    _game.post_suspend()
+    print('GAME RESTORED\n')

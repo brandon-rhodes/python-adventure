@@ -6,6 +6,7 @@
 # FORTRAN using Emacs with an interactive search for newline-2012-tab,
 # that is typed C-s C-q C-j 2 0 1 2 C-i).
 
+import pickle
 import random
 from operator import attrgetter
 from .data import Data
@@ -47,13 +48,15 @@ class Game(Data):
         self.is_done = False            # caller can check for "game over"
         self.could_fall_in_pit = False  # could the player fall into a pit?
 
-        self.random_instance = random.Random()
+        self.random_generator = random.Random()
         if seed is not None:
-            self.random_instance.seed(seed)
+            self.random_generator.seed(seed)
 
-        self.random = self.random_instance.random
-        self.randint = self.random_instance.randint
-        self.choice = self.random_instance.choice
+    def random(self):
+        return self.random_generator.random()
+
+    def choice(self, seq):
+        return self.random_generator.choice(seq)
 
     def write(self, more):
         """Append the Unicode representation of `s` to our output."""
@@ -106,7 +109,7 @@ class Game(Data):
         self.yesno(self.messages[65], self.start2)  # want instructions?
 
     def start2(self, yes):
-        """Display out instructions if the user wants them."""
+        """Display instructions if the user wants them."""
         if yes:
             self.write_message(1)
             self.hints[3].used = True
@@ -175,7 +178,7 @@ class Game(Data):
             self.dwarf_stage = 2
             for i in range(2):  # randomly remove 0, 1, or 2 dwarves
                 if self.random() < .5:
-                    del self.dwarves[self.randint(0, len(self.dwarves) - 1)]
+                    self.dwarves.remove(self.choice(self.dwarves))
             for dwarf in self.dwarves:
                 if dwarf.room is self.loc:  # move dwarf away from our loc
                     dwarf.start_at(self.rooms[18])
@@ -480,6 +483,12 @@ class Game(Data):
 
         if not 1 <= len(words) <= 2:
             return self.dont_understand()
+
+        if words[0] == 'save' and len(words) > 1:
+            # Handle suspend separately, since filename can be anything,
+            # and is not restricted to being a vocabulary word (and, in
+            # fact, it can be an open file).
+            return self.t_suspend(words[0], words[1])
 
         words = [ self.vocabulary.get(word) for word in words ]
         if None in words:
@@ -1230,15 +1239,16 @@ class Game(Data):
 
         dwarves_here = [ d for d in self.dwarves if d.room is self.loc ]
         if dwarves_here:
-            if self.randint(0, 2):  # 1/3rd chance of killing a dwarf
-                self.write_message(48)  # Miss
-            else:
+            # 1/3rd chance that throwing the axe kills a dwarf
+            if self.choice((True, False, False)):
                 self.dwarves.remove(dwarves_here[0])
                 self.dwarves_killed += 1
                 if self.dwarves_killed == 1:
                     self.write_message(149)
                 else:
                     self.write_message(47)
+            else:
+                self.write_message(48)  # Miss
             self.axe.drop(self.loc)
             self.do_motion(self.vocabulary['null'])
             return
@@ -1499,7 +1509,27 @@ class Game(Data):
             self.write(verb.default_message)
             self.finish_turn()
 
-    # write suspend and resume here one day?
+    def i_suspend(self, verb):
+        self.write('Provide "{}" with a filename or open file'.format(verb))
+        self.finish_turn()
+
+    def t_suspend(self, verb, obj):
+        if isinstance(obj, str):
+            obj = open(obj, 'wb')
+        r = self.random_generator
+        self.random_state = r.getstate()
+        try:
+            del self.random_generator
+            pickle.dump(self, obj)
+        finally:
+            self.random_generator = r
+        self.write('Game saved')
+
+    def post_suspend(self):
+        """Reinstate the random number generator after being unpickled."""
+        self.random_generator = random.Random()
+        self.random_generator.setstate(self.random_state)
+        del self.random_state
 
     def should_offer_hint(self, hint, obj): #40000
         if hint == 4:  # cave

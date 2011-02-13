@@ -12,7 +12,9 @@ class ReprTriggeredIdentifier(object):
 
     def __call__(self, arg):
         """Two words were provided like `get(keys)`."""
-        output = self.game.do_command([ self.word, arg.word ])
+        if isinstance(arg, ReprTriggeredIdentifier):
+            arg = arg.word
+        output = self.game.do_command([ self.word, arg ])
         print(output.rstrip('\n') + '\n')
 
 def install_builtins(game):
