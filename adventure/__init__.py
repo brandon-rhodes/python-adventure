@@ -28,9 +28,10 @@ def play(seed=None):
     _game.start()
     print(_game.output[:-1])
 
-def resume(savefile):
+def resume(savefile, quiet=False):
     global _game
 
     _game = Game.resume(savefile)
     install_builtins(_game)
-    print('GAME RESTORED\n')
+    if not quiet:
+        print('GAME RESTORED\n')

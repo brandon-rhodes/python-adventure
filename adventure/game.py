@@ -89,7 +89,7 @@ class Game(Data):
 
     @property
     def treasures(self):
-        return [ obj for obj in self.object_list if obj.n >= 50 ]
+        return [ obj for obj in self.object_list if obj.is_treasure ]
 
     @property
     def objects_here(self):
@@ -235,14 +235,14 @@ class Game(Data):
 
                 treasures = [ t for t in self.treasures if t.is_toting ]
                 if (self.platinum in treasures and self.loc.n in (100, 101)):
-                    treasures.remove(self.pyramid)
+                    treasures.remove(self.platinum)
 
                 if not treasures:
                     h = any( t for t in self.treasures if self.is_here(t) )
                     one_treasure_left = (self.treasures_not_found ==
                                          self.impossible_treasures + 1)
                     shiver_me_timbers = (
-                        one_treasure_left and not h and self.chest.room.n == 0
+                        one_treasure_left and not h and not(self.chest.rooms)
                         and self.is_here(self.lamp) and self.lamp.prop == 1
                         )
 
@@ -511,7 +511,7 @@ class Game(Data):
 
         if ((word1 == 'water' or word1 == 'oil') and
             (word2 == 'plant' or word2 == 'door') and
-            self.is_here(self.objects[word2.n % 1000])):
+            self.is_here(self.referent(word2))):
             word1, word2 == self.vocabulary['pour'], word1
 
         if word1 == 'say':
@@ -543,7 +543,7 @@ class Game(Data):
         if not noun:
             obj = None
         else:
-            obj = self.objects[noun.n % 1000]
+            obj = self.referent(noun)
             obj_here = self.is_here(obj)
             if not obj_here:
                 if obj is self.grate:
@@ -1448,7 +1448,7 @@ class Game(Data):
     def i_brief(self, verb):  #8260
         self.write_message(156)
         self.full_description_period = 10000
-        self.look_complains = 3
+        self.look_complaints = 0
         self.finish_turn()
 
     def i_read(self, verb):  #8270

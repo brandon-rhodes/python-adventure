@@ -44,9 +44,9 @@ with a filename, and then can resume it later at any time::
 
     >>> save('advent.save')
     GAME SAVED
+
     >>> adventure.resume('advent.save')
     GAME RESTORED
-    <BLANKLINE>
     >>> look
     SORRY, BUT I AM NOT ALLOWED TO GIVE MORE DETAIL.  I WILL REPEAT THE
     LONG DESCRIPTION OF YOUR LOCATION.

@@ -1,6 +1,16 @@
 """Routines that install Adventure commands for the Python prompt."""
 
+class ReprString(object):
+    """An object whose __repr__() can be specified explicitly."""
+
+    def __init__(self, value):
+        self.value = value
+    def __repr__(self):
+        return self.value
+
 class ReprTriggeredIdentifier(object):
+    """A command word that activates simply by being typed at the prompt."""
+
     def __init__(self, game, word):
         self.game = game
         self.word = word
@@ -18,7 +28,7 @@ class ReprTriggeredIdentifier(object):
                 arg = arg.word
             words.append(arg)
         output = self.game.do_command(words)
-        print(output.rstrip('\n') + '\n')
+        return ReprString(output.rstrip('\n') + '\n')
 
 def install_builtins(game):
     import sys

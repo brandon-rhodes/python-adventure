@@ -103,6 +103,7 @@ class Object(object):
 
     def __init__(self):
         self.is_fixed = False
+        self.is_treasure = False
         self.inventory_message = ''
         self.messages = {}
         self.names = []
@@ -122,8 +123,8 @@ class Object(object):
         return any( text == other for text in self.names )
 
     @property
-    def is_treasure(self):
-        return self.n >= 50
+    def name(self):
+        return self.names[0]
 
     def is_at(self, room):
         return room in self.rooms

@@ -31,6 +31,11 @@ class Data(object):
         self.hints = {}
         self.magic_messages = {}
 
+    def referent(self, word):
+        if word.kind == 'noun':
+            return self.objects[word.n % 1000]
+        raise ValueError('no idea what {} refers to'.format(word))
+
 # Helper functions.
 
 def make_object(dictionary, klass, n):
@@ -114,8 +119,10 @@ def section4(data, n, text, *etc):
         original.add_synonym(word)
     word.kind = ['travel', 'noun', 'verb', 'snappy_comeback'][n // 1000]
     if word.kind == 'noun':
-        obj = make_object(data.objects, Object, n % 1000)
+        n %= 1000
+        obj = make_object(data.objects, Object, n)
         obj.names.append(text)
+        obj.is_treasure = (n >= 50)
         data.objects[text] = obj
     if text not in data.vocabulary:  # since duplicate names exist
         data.vocabulary[text] = word
