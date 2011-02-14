@@ -1,7 +1,10 @@
-This file tests the behavior of the game in all sorts of specific
-situations that would be very tedious to arrange in actual walkthroughs.
-As the basis for these tests, we will start a game, enter the building,
-and grab and activate the lamp.
+>>> import io
+>>> from itertools import cycle, islice
+
+This file tests the behavior of the Adventure game in all sorts of
+specific situations that would be very tedious to arrange in actual
+walkthroughs.  As the basis for these tests, we will begin by starting a
+game, entering the building, and carrying the lamp.
 
 >>> import adventure
 >>> adventure.play(seed=3)
@@ -36,7 +39,6 @@ OK
 
 Now we can save this game.
 
->>> import io
 >>> savefile = io.BytesIO()
 >>> save(savefile)
 GAME SAVED
@@ -44,6 +46,9 @@ GAME SAVED
 
 Now, all of the tests below can begin by calling this restart() function
 to place them back at the beginning of the adventure in a known state.
+If a room is specified, note that restart() performs two turns in the
+room before handing back control: the first when it asks the game to
+move the caller into that room, and the second when it calls look().
 
 >>> def restart(room=None, objects=(), randoms=None):
 ...     global game
@@ -66,6 +71,7 @@ to place them back at the beginning of the adventure in a known state.
 ...     if isinstance(room, int):
 ...         room = game.rooms[room]
 ...     game.move_to(room)
+...     return look
 
 >>> def quiet(*args):
 ...     for arg in args:
@@ -78,7 +84,7 @@ If the dwarves activate when we are standing in one of their starting
 rooms, then does the dwarf at our location get moved successfully to the
 gold nuggets room?
 
->>> restart(41, randoms=[None, .9, .9, .99])
+>>> restart(room=41, randoms=[None, .9, .9, .99])
 YOU ARE AT THE WEST END OF HALL OF MISTS.  A LOW WIDE CRAWL CONTINUES
 WEST AND ANOTHER GOES NORTH.  TO THE SOUTH IS A LITTLE PASSAGE 6 FEET
 OFF THE FLOOR.
@@ -102,7 +108,7 @@ If the pirate encounters us in the plover room or dark room, does he
 leave the platinum pyramid since learning how to remove it from the room
 is one of the game's puzzles?
 
->>> restart(100, objects=[pyramid])
+>>> restart(room=100, objects=[pyramid])
 YOU'RE IN A SMALL CHAMBER LIT BY AN EERIE GREEN LIGHT.  AN EXTREMELY
 NARROW TUNNEL EXITS TO THE WEST.  A DARK CORRIDOR LEADS NE.
 <BLANKLINE>
@@ -156,7 +162,6 @@ WITH THAT, HE VANISHES INTO THE GLOOM.
 YOU ARE IN A SECRET N/S CANYON ABOVE A LARGE ROOM.
 <BLANKLINE>
 >>> goto(game.chest_room)
->>> look
 DEAD END
 <BLANKLINE>
 THE PIRATE'S TREASURE CHEST IS HERE!
@@ -164,7 +169,7 @@ THE PIRATE'S TREASURE CHEST IS HERE!
 
 If several dwarves throw knives that hit us, does a sensible message result?
 
->>> quiet(restart(75, randoms=(.05,.05,.05,.05,.05,.05)))
+>>> quiet(restart(room=75, randoms=(.05,.05,.05,.05,.05,.05)))
 >>> game.dwarf_stage = 3
 >>> for dwarf in game.dwarves:
 ...     dwarf.room = game.rooms[75]
@@ -180,3 +185,114 @@ HELP YOU OUT, BUT I'VE NEVER REALLY DONE THIS BEFORE.  DO YOU WANT ME
 TO TRY TO REINCARNATE YOU?
 <BLANKLINE>
 
+If, when a treasure is found, the game figures out that all remaining
+treasures are impossible to acquire - like the jewelry in the south side
+chamber of the Hall of the Mountain King, if the bird dies before the
+snake is driven away - then the lamp should be reduced to only having 35
+turns left.
+
+>>> quiet(restart())
+>>> for t in game.treasures:
+...     if t == 'jewelry' or t == 'silver': continue
+...     t.drop(game.loc)
+>>> quiet(look)
+>>> game.bird.carry()
+>>> goto(119)
+YOU ARE IN A SECRET CANYON WHICH EXITS TO THE NORTH AND EAST.
+<BLANKLINE>
+A HUGE GREEN FIERCE DRAGON BARS THE WAY!
+<BLANKLINE>
+>>> drop(bird)
+THE LITTLE BIRD ATTACKS THE GREEN DRAGON, AND IN AN ASTOUNDING FLURRY
+GETS BURNT TO A CINDER.  THE ASHES BLOW AWAY.
+<BLANKLINE>
+>>> game.lamp_turns
+324
+>>> goto(28)
+YOU ARE IN A LOW N/S PASSAGE AT A HOLE IN THE FLOOR.  THE HOLE GOES
+DOWN TO AN E/W PASSAGE.
+<BLANKLINE>
+THERE ARE BARS OF SILVER HERE!
+<BLANKLINE>
+>>> game.lamp_turns
+34
+
+If you act confused, the game should offer you a hint.  Here are quick
+(but certainly not thorough!) tests of whether the logic for each hint
+allows it to be offered.
+
+>>> quiet(restart(room=8), look)
+>>> look
+YOU ARE IN A 20-FOOT DEPRESSION FLOORED WITH BARE DIRT.  SET INTO THE
+DIRT IS A STRONG STEEL GRATE MOUNTED IN CONCRETE.  A DRY STREAMBED
+LEADS INTO THE DEPRESSION.
+<BLANKLINE>
+THE GRATE IS LOCKED.
+<BLANKLINE>
+ARE YOU TRYING TO GET INTO THE CAVE?
+<BLANKLINE>
+>>> yes
+THE GRATE IS VERY SOLID AND HAS A HARDENED STEEL LOCK.  YOU CANNOT
+ENTER WITHOUT A KEY, AND THERE ARE NO KEYS NEARBY.  I WOULD RECOMMEND
+LOOKING ELSEWHERE FOR THE KEYS.
+<BLANKLINE>
+
+>>> quiet(restart(room=13, objects=[rod]), get(rod), look)
+>>> get(bird)
+THE BIRD WAS UNAFRAID WHEN YOU ENTERED, BUT AS YOU APPROACH IT BECOMES
+DISTURBED AND YOU CANNOT CATCH IT.
+<BLANKLINE>
+ARE YOU TRYING TO CATCH THE BIRD?
+<BLANKLINE>
+>>> no
+OK
+<BLANKLINE>
+
+>>> quiet(restart(room=19), look, look, look, look, look)
+>>> look
+YOU ARE IN THE HALL OF THE MOUNTAIN KING, WITH PASSAGES OFF IN ALL
+DIRECTIONS.
+<BLANKLINE>
+A HUGE GREEN FIERCE SNAKE BARS THE WAY!
+<BLANKLINE>
+THERE IS A LITTLE AXE HERE.
+<BLANKLINE>
+ARE YOU TRYING TO SOMEHOW DEAL WITH THE SNAKE?
+<BLANKLINE>
+
+>>> quiet(restart(room=42), s, n)
+>>> get(axe)
+OK
+<BLANKLINE>
+>>> del game.dwarves[:]
+>>> quiet(*islice(cycle((w, s, n)), 75 - 6))
+>>> look
+YOU ARE IN A MAZE OF TWISTY LITTLE PASSAGES, ALL ALIKE.
+<BLANKLINE>
+DO YOU NEED HELP GETTING OUT OF THE MAZE?
+<BLANKLINE>
+>>> yes
+YOU CAN MAKE THE PASSAGES LOOK LESS ALIKE BY DROPPING THINGS.
+<BLANKLINE>
+
+>>> quiet(restart(room=99))
+>>> game.dwarf_stage = 2
+>>> del game.dwarves[:]
+>>> quiet([ look ] * (25 - 3))
+>>> look
+YOU ARE IN AN ALCOVE.  A SMALL NW PATH SEEMS TO WIDEN AFTER A SHORT
+DISTANCE.  AN EXTREMELY TIGHT TUNNEL LEADS EAST.  IT LOOKS LIKE A VERY
+TIGHT SQUEEZE.  AN EERIE LIGHT CAN BE SEEN AT THE OTHER END.
+<BLANKLINE>
+ARE YOU TRYING TO EXPLORE BEYOND THE PLOVER ROOM?
+<BLANKLINE>
+
+>>> quiet(restart(room=108), [ look ] * (20 - 3))
+>>> del game.dwarves[:]
+>>> look
+YOU ARE AT WITT'S END.  PASSAGES LEAD OFF IN *ALL* DIRECTIONS.
+<BLANKLINE>
+THERE IS A LITTLE AXE HERE.
+<BLANKLINE>
+DO YOU NEED HELP GETTING OUT OF HERE?
+<BLANKLINE>

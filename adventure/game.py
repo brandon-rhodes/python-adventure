@@ -367,6 +367,10 @@ class Game(Data):
     #2012 blanks VERB and OBJ and calls:
     def finish_turn(self, obj=None):  #2600
 
+        # Advance random number generator so each input affects future.
+        self.random()
+
+        # Check whether we should offer a hint.
         for hint in self.hints.values():
             if hint.turns_needed == 9999 or hint.used:
                 continue
@@ -381,6 +385,7 @@ class Game(Data):
                         def callback(yes):
                             if yes:
                                 self.write(hint.message)
+                                hint.used = True
                             else:
                                 self.write_message(54)
 
@@ -399,9 +404,6 @@ class Game(Data):
         self.could_fall_in_pit = self.is_dark  #2605
         if self.knife_location and self.knife_location is not self.loc:
             self.knife_location = None
-
-        # Advance random number generator so each input affects future.
-        self.random()
 
     # The central do_command() method, that should be called over and
     # over again with words supplied by the user.
@@ -851,7 +853,7 @@ class Game(Data):
         if obj is self.bird and obj.prop == 0:
             if self.rod.is_toting:
                 self.write_message(26)
-                self.finish_turn()
+                self.finish_turn(obj)  # needs obj to decide to give hint
                 return
             if not self.cage.is_toting:
                 self.write_message(27)
@@ -1548,26 +1550,26 @@ class Game(Data):
         return game
 
     def should_offer_hint(self, hint, obj): #40000
-        if hint == 4:  # cave
+        if hint.n == 4:  # cave
             return self.grate.prop == 0 and not self.is_here(self.keys)
 
-        elif hint == 5:  # bird
+        elif hint.n == 5:  # bird
             bird = self.bird
             return self.is_here(bird) and self.rod.is_toting and obj is bird
 
-        elif hint == 6:  # snake
-            return self.is_here(self.snake) and not self.is_here(bird)
+        elif hint.n == 6:  # snake
+            return self.is_here(self.snake) and not self.is_here(self.bird)
 
-        elif hint == 7:  # maze
+        elif hint.n == 7:  # maze
             return (not len(self.objects_here) and
                     not len(self.objects_at(self.oldloc)) and
                     not len(self.objects_at(self.oldloc2)) and
                     len(self.inventory) > 1)
 
-        elif hint == 8:  # dark
-            return self.emerald.prop != 1 and self.pyramid.prop != 1
+        elif hint.n == 8:  # dark
+            return self.emerald.prop != 1 and self.platinum.prop != 1
 
-        elif hint == 9:  # witt
+        elif hint.n == 9:  # witt
             return True
 
     def start_closing_cave(self):  #10000

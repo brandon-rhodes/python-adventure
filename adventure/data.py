@@ -176,7 +176,7 @@ def section9(data, bit, *nlist):
             room.liquid = make_object(data.objects, Object, 21) #water
         elif bit == 3:
             room.is_forbidden_to_pirate = True
-        elif bit > 4:
+        else:
             hint = make_object(data.hints, Hint, bit)
             hint.rooms.append(room)
 
