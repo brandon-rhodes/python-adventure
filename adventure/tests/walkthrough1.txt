@@ -855,7 +855,7 @@ YOU HAVE GOTTEN YOURSELF KILLED.
 
 >>> savefile.seek(0)
 0
->>> adventure.load(savefile)
+>>> adventure.resume(savefile)
 GAME RESTORED
 <BLANKLINE>
 

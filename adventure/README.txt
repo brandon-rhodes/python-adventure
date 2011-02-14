@@ -19,13 +19,9 @@ Python)::
 
     >>> east
     YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
-
     THERE ARE SOME KEYS ON THE GROUND HERE.
-
     THERE IS A SHINY BRASS LAMP NEARBY.
-
     THERE IS FOOD HERE.
-
     THERE IS A BOTTLE OF WATER HERE.
 
     >>> get(lamp)
@@ -42,6 +38,20 @@ The original Adventure payed attention to only the first five letters of
 each command, so a long command like ``inventory`` could simply be typed
 as ``inven``.  This package defines a symbol for both versions of every
 long word, so you can type the long or short version as you please.
+
+You can save your game at any time by calling the ``save()`` command
+with a filename, and then can resume it later at any time::
+
+    >>> save('advent.save')
+    GAME SAVED
+    >>> adventure.resume('advent.save')
+    GAME RESTORED
+    <BLANKLINE>
+    >>> look
+    SORRY, BUT I AM NOT ALLOWED TO GIVE MORE DETAIL.  I WILL REPEAT THE
+    LONG DESCRIPTION OF YOUR LOCATION.
+    YOU ARE IN A VALLEY IN THE FOREST BESIDE A STREAM TUMBLING ALONG A
+    ROCKY BED.
 
 You can find two complete, working walkthroughs of the game in its
 ``tests`` directory, which you can run using the ``discover`` module that

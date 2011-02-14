@@ -28,13 +28,9 @@ def play(seed=None):
     _game.start()
     print(_game.output[:-1])
 
-def load(savefile):
+def resume(savefile):
     global _game
-    import pickle
 
-    if isinstance(savefile, str):
-        savefile = open(savefile, 'rb')
-    _game = pickle.load(savefile)
+    _game = Game.resume(savefile)
     install_builtins(_game)
-    _game.post_suspend()
     print('GAME RESTORED\n')

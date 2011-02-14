@@ -8,6 +8,7 @@
 
 import pickle
 import random
+import zlib
 from operator import attrgetter
 from .data import Data
 from .model import Room, Message, Dwarf, Pirate
@@ -1510,26 +1511,41 @@ class Game(Data):
             self.finish_turn()
 
     def i_suspend(self, verb):
-        self.write('Provide "{}" with a filename or open file'.format(verb))
+        self.write('Provide "{}" with a filename or open file'.format(
+                verb.text))
         self.finish_turn()
 
     def t_suspend(self, verb, obj):
         if isinstance(obj, str):
-            obj = open(obj, 'wb')
+            savefile = open(obj, 'wb')
+        else:
+            savefile = obj
         r = self.random_generator
         self.random_state = r.getstate()
         try:
             del self.random_generator
-            pickle.dump(self, obj)
+            savefile.write(zlib.compress(pickle.dumps(self), 9))
         finally:
             self.random_generator = r
+            if savefile is not obj:
+                savefile.close()
         self.write('Game saved')
 
-    def post_suspend(self):
-        """Reinstate the random number generator after being unpickled."""
-        self.random_generator = random.Random()
-        self.random_generator.setstate(self.random_state)
-        del self.random_state
+    @classmethod
+    def resume(self, obj):
+        """Returns an Adventure game saved to the given file."""
+        if isinstance(obj, str):
+            savefile = open(obj, 'rb')
+        else:
+            savefile = obj
+        game = pickle.loads(zlib.decompress(savefile.read()))
+        if savefile is not obj:
+            savefile.close()
+        # Reinstate the random number generator.
+        game.random_generator = random.Random()
+        game.random_generator.setstate(game.random_state)
+        del game.random_state
+        return game
 
     def should_offer_hint(self, hint, obj): #40000
         if hint == 4:  # cave
