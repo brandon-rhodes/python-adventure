@@ -448,13 +448,13 @@ class Game(Data):
         if self.lamp.prop == 1:
             self.lamp_turns -= 1
 
-        if self.lamp_turns <= 30 and self.is_here(self.battery) \
-                and self.battery.prop == 0 and self.is_here(self.lamp):
+        if self.lamp_turns <= 30 and self.is_here(self.batteries) \
+                and self.batteries.prop == 0 and self.is_here(self.lamp):
             #12000
             self.write_message(188)
-            self.battery.prop = 1
-            if self.battery.is_toting:
-                self.battery.drop(self.loc)
+            self.batteries.prop = 1
+            if self.batteries.is_toting:
+                self.batteries.drop(self.loc)
             self.lamp_turns += 2500
             self.warned_about_dim_lamp = False
         elif self.lamp_turns == 0:
@@ -473,9 +473,9 @@ class Game(Data):
                 and self.is_here(self.lamp):
             #12200
             self.warned_about_dim_lamp = True
-            if self.battery.prop == 1:
+            if self.batteries.prop == 1:
                 self.write_message(189)
-            elif not self.battery.rooms:
+            elif not self.batteries.rooms:
                 self.write_message(183)
             else:
                 self.write_message(187)
@@ -891,8 +891,8 @@ class Game(Data):
 
         elif obj is self.coins and self.is_here(self.machine):
             obj.destroy()
-            self.battery.drop(self.loc)
-            self.write(self.battery.messages[0])
+            self.batteries.drop(self.loc)
+            self.write(self.batteries.messages[0])
             self.finish_turn()
             return
 

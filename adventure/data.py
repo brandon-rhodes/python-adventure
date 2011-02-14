@@ -14,8 +14,8 @@ examine describe slabroom depression entrance secret bedquilt plover
 oriental cavern reservoir office headlamp lantern pillow velvet fissure tablet
 oyster magazine spelunker dwarves knives rations bottle mirror beanstalk
 stalactite shadow figure drawings pirate dragon message volcano geyser
-machine vending battery carpet nuggets diamonds silver jewelry treasure trident
-shards pottery emerald platinum pyramid pearl persian spices capture
+machine vending batteries carpet nuggets diamonds silver jewelry treasure
+trident shards pottery emerald platinum pyramid pearl persian spices capture
 release discard mumble unlock nothing extinguish placate travel proceed
 continue explore follow attack strike devour inventory detonate ignite
 blowup peruse shatter disturb suspend sesame opensesame abracadabra
