@@ -89,7 +89,7 @@ YOU ARE AT THE WEST END OF HALL OF MISTS.  A LOW WIDE CRAWL CONTINUES
 WEST AND ANOTHER GOES NORTH.  TO THE SOUTH IS A LITTLE PASSAGE 6 FEET
 OFF THE FLOOR.
 <BLANKLINE>
->>> [ dwarf.room.n for dwarf in game.dwarves ]
+>>> [ d.room.n for d in game.dwarves ]
 [19, 27, 33, 44, 64]
 >>> e
 A LITTLE DWARF JUST WALKED AROUND A CORNER, SAW YOU, THREW A LITTLE
@@ -101,7 +101,7 @@ THERE IS A LITTLE AXE HERE.
 <BLANKLINE>
 THERE ARE DIAMONDS HERE!
 <BLANKLINE>
->>> [ dwarf.room.n for dwarf in game.dwarves ]
+>>> [ d.room.n for d in game.dwarves ]
 [19, 18, 33, 44, 64]
 
 If the pirate encounters us in the plover room or dark room, does he
@@ -171,8 +171,8 @@ If several dwarves throw knives that hit us, does a sensible message result?
 
 >>> quiet(restart(room=75, randoms=(.05,.05,.05,.05,.05,.05)))
 >>> game.dwarf_stage = 3
->>> for dwarf in game.dwarves:
-...     dwarf.room = game.rooms[75]
+>>> for d in game.dwarves:
+...     d.room = game.rooms[75]
 >>> look
 THERE ARE 5 THREATENING LITTLE DWARVES IN THE ROOM WITH YOU.
 <BLANKLINE>
@@ -392,3 +392,138 @@ YOUR LAMP IS GETTING DIM.  YOU'D BEST GO BACK FOR THOSE BATTERIES.
 <BLANKLINE>
 YOU ARE IN A LITTLE MAZE OF TWISTING PASSAGES, ALL DIFFERENT.
 <BLANKLINE>
+
+Various complaints are associated with poorly-chosen requests.
+
+>>> quiet(restart(room=34))
+>>> enter(water)
+WHERE?
+<BLANKLINE>
+>>> quiet(goto(7))
+>>> enter(water)
+YOUR FEET ARE NOW WET.
+<BLANKLINE>
+
+You can try to enter the house with the 'enter' command instead of just
+naming the house.
+
+>>> quiet(restart(room=1))
+>>> enter(house)
+YOU'RE INSIDE BUILDING.
+<BLANKLINE>
+THERE ARE SOME KEYS ON THE GROUND HERE.
+<BLANKLINE>
+THERE IS FOOD HERE.
+<BLANKLINE>
+THERE IS A BOTTLE OF WATER HERE.
+<BLANKLINE>
+
+Both "oil" and "water" can be used as verbs, despite officially being
+treated as nouns in the game vocabulary.
+
+>>> restart(room=94)
+YOU ARE AT ONE END OF AN IMMENSE NORTH/SOUTH PASSAGE.
+<BLANKLINE>
+THE WAY NORTH IS BARRED BY A MASSIVE, RUSTY, IRON DOOR.
+<BLANKLINE>
+>>> oil(door)
+I SEE NO OIL HERE.
+<BLANKLINE>
+>>> goto(25)
+YOU ARE AT THE BOTTOM OF THE WESTERN PIT IN THE TWOPIT ROOM.  THERE IS
+A LARGE HOLE IN THE WALL ABOUT 25 FEET ABOVE YOU.
+<BLANKLINE>
+THERE IS A TINY LITTLE PLANT IN THE PIT, MURMURING "WATER, WATER, ..."
+<BLANKLINE>
+>>> water(plant)
+I SEE NO WATER HERE.
+<BLANKLINE>
+
+Various combinations of words yield somewhat sensible retorts; and
+several nouns invoke small special cases in the code, like "grate" also
+being a movement noun.
+
+>>> restart(room=4)
+YOU ARE IN A VALLEY IN THE FOREST BESIDE A STREAM TUMBLING ALONG A
+ROCKY BED.
+<BLANKLINE>
+
+>>> game.do_command(['eat', 'pray', 'love'])
+"I DON'T KNOW THAT WORD.\n\n"
+
+>>> grate
+YOU ARE IN A 20-FOOT DEPRESSION FLOORED WITH BARE DIRT.  SET INTO THE
+DIRT IS A STRONG STEEL GRATE MOUNTED IN CONCRETE.  A DRY STREAMBED
+LEADS INTO THE DEPRESSION.
+<BLANKLINE>
+THE GRATE IS LOCKED.
+<BLANKLINE>
+>>> goto(12)
+YOU ARE IN AN AWKWARD SLOPING EAST/WEST CANYON.
+<BLANKLINE>
+>>> grate
+YOU ARE IN A SMALL CHAMBER BENEATH A 3X3 STEEL GRATE TO THE SURFACE.
+A LOW CRAWL OVER COBBLES LEADS INWARD TO THE WEST.
+<BLANKLINE>
+THE GRATE IS LOCKED.
+<BLANKLINE>
+
+>>> carry(dwarf)
+I SEE NO DWARF HERE.
+<BLANKLINE>
+
+>>> quiet(goto(3))
+>>> get(water)
+OK
+<BLANKLINE>
+>>> inventory
+YOU ARE CURRENTLY HOLDING THE FOLLOWING:
+<BLANKLINE>
+BRASS LANTERN
+SMALL BOTTLE
+WATER IN THE BOTTLE
+<BLANKLINE>
+
+>>> get(knife)
+I SEE NO KNIFE HERE.
+<BLANKLINE>
+>>> game.dwarf_stage = 2
+>>> goto(27)
+THERE IS A THREATENING LITTLE DWARF IN THE ROOM WITH YOU!
+<BLANKLINE>
+ONE SHARP NASTY KNIFE IS THROWN AT YOU!
+<BLANKLINE>
+IT MISSES!
+<BLANKLINE>
+YOU ARE ON THE WEST SIDE OF THE FISSURE IN THE HALL OF MISTS.
+<BLANKLINE>
+THERE ARE DIAMONDS HERE!
+<BLANKLINE>
+>>> get(knife)
+THE DWARVES' KNIVES VANISH AS THEY STRIKE THE WALLS OF THE CAVE.
+<BLANKLINE>
+>>> get(knife)
+I SEE NO KNIFE HERE.
+<BLANKLINE>
+
+>>> find(jewelry)
+I CAN ONLY TELL YOU WHAT YOU SEE AS YOU MOVE ABOUT AND MANIPULATE
+THINGS.  I CANNOT TELL YOU WHERE REMOTE THINGS ARE.
+<BLANKLINE>
+
+>>> lamp
+WHAT DO YOU WANT TO DO WITH THE LAMP?
+<BLANKLINE>
+
+>>> quiet(restart(randoms=(None, 0.1, None, 0.3, None, 0.9)))
+>>> carry(pour)
+I DON'T KNOW THAT WORD.
+<BLANKLINE>
+>>> jump(eat)
+I DON'T UNDERSTAND THAT!
+<BLANKLINE>
+>>> throw(drop)
+WHAT?
+<BLANKLINE>
+
+todo: test plant2 in repository

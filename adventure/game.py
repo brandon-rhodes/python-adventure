@@ -514,28 +514,28 @@ class Game(Data):
         if ((word1 == 'water' or word1 == 'oil') and
             (word2 == 'plant' or word2 == 'door') and
             self.is_here(self.referent(word2))):
-            word1, word2 == self.vocabulary['pour'], word1
+            word1, word2 = self.vocabulary['pour'], word1
 
         if word1 == 'say':
             return self.t_say(word1, word2) if word2 else self.i_say(word1)
 
-        kinds = tuple( word.kind for word in words )
+        kinds = (word1.kind, word2.kind if word2 else None)
 
         #2630
-        if kinds == ('travel',):
+        if kinds == ('travel', None):
             if word1.text == 'west':  #2610
                 self.full_wests += 1
                 if self.full_wests == 10:
                     self.write_message(17)
             return self.do_motion(word1)
 
-        if kinds == ('snappy_comeback',):
+        if kinds == ('snappy_comeback', None):
             self.write_message(word1.n % 1000)
             return self.finish_turn()
 
-        if kinds == ('noun',):
+        if kinds == ('noun', None):
             verb, noun = None, word1
-        elif kinds == ('verb',):
+        elif kinds == ('verb', None):
             verb, noun = word1, None
         elif kinds == ('verb', 'noun'):
             verb, noun = word1, word2
@@ -554,7 +554,7 @@ class Game(Data):
                     elif 9 < self.loc.n < 15:
                         return self.dispatch_command([ 'entrance' ])
                 elif noun == 'dwarf':
-                    obj_here = bool([ d.room == self.loc for d in self.dwarves ])
+                    obj_here = any( d.room is self.loc for d in self.dwarves )
                 elif obj is self.bottle.contents and self.is_here(self.bottle):
                     obj_here = True
                 elif obj is self.loc.liquid:
@@ -574,8 +574,7 @@ class Game(Data):
                     obj_here = True  # lie; these verbs work for absent objects
 
             if not obj_here:
-                self.write('I see no {} here.\n'.format(noun.text))
-                return self.finish_turn()
+                return self.i_see_no(noun)
 
             if not verb:
                 self.write('What do you want to do with the {}?\n'.format(
@@ -604,7 +603,7 @@ class Game(Data):
         self.finish_turn()
 
     def i_see_no(self, thing):
-        self.write('I see no {} here.\n'.format(thing))
+        self.write('I see no {} here.\n'.format(thing.text))
         self.finish_turn()
 
     # Motion.
@@ -1465,7 +1464,7 @@ class Game(Data):
 
     def t_read(self, verb, obj):  #9270
         if self.is_dark:
-            self.i_see_no(obj)
+            return self.i_see_no(obj)
         elif (obj is self.oyster and not self.hints[2].used and
               self.oyster.is_toting):
             def callback(yes):
