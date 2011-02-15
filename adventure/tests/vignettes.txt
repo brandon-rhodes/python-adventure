@@ -50,30 +50,41 @@ If a room is specified, note that restart() performs two turns in the
 room before handing back control: the first when it asks the game to
 move the caller into that room, and the second when it calls look().
 
->>> def restart(room=None, objects=(), randoms=None):
+>>> def restart(room=None, dwarves=False, objects=(), randoms=None):
+...     """Restart the whole Adventure game from our stringio file."""
+...
 ...     global game
 ...     savefile.seek(0)
 ...     adventure.resume(savefile, quiet=True)
 ...     game = adventure._game
 ...     if room is not None:
-...         goto(room)
+...         _goto(room)
 ...     room = game.loc
+...     if not dwarves:
+...         game.dwarf_stage = 2
+...         del game.dwarves[:]
 ...     for obj in objects:
-...         if not isinstance(obj, adventure.model.Object):
-...             obj = game.referent(game.vocabulary[obj.word])
+...         if isinstance(obj, adventure.prompt.ReprTriggeredPhrase):
+...             obj = game.referent(game.vocabulary[obj.words[0]])
 ...         obj.drop(room)
-...     message = repr(look)
 ...     if randoms is not None:
 ...         game.random = list(randoms).pop
-...     return adventure.prompt.ReprString(message)
 
->>> def goto(room):
-...     if isinstance(room, int):
-...         room = game.rooms[room]
-...     game.move_to(room)
-...     return look
+>>> class goto(object):
+...     """Special command that warps us directly to a location."""
+...
+...     def __init__(self, room):
+...         self.room = room
+...     def __repr__(self):
+...         _goto(self.room)
+...         return repr(look)
+
+>>> def _goto(room):
+...     game.move_to(game.rooms[room] if isinstance(room, int) else room)
 
 >>> def quiet(*args):
+...     """Run one or more commands without printing their result."""
+...
 ...     for arg in args:
 ...         repr(arg)
 ...     return None
@@ -84,12 +95,8 @@ If the dwarves activate when we are standing in one of their starting
 rooms, then does the dwarf at our location get moved successfully to the
 gold nuggets room?
 
->>> restart(room=41, randoms=[None, .9, .9, .99])
-YOU ARE AT THE WEST END OF HALL OF MISTS.  A LOW WIDE CRAWL CONTINUES
-WEST AND ANOTHER GOES NORTH.  TO THE SOUTH IS A LITTLE PASSAGE 6 FEET
-OFF THE FLOOR.
-<BLANKLINE>
->>> [ d.room.n for d in game.dwarves ]
+>>> restart(room=41, dwarves=True, randoms=[None, .9, .9, .99])
+>>> [ _dwarf.room.n for _dwarf in game.dwarves ]
 [19, 27, 33, 44, 64]
 >>> e
 A LITTLE DWARF JUST WALKED AROUND A CORNER, SAW YOU, THREW A LITTLE
@@ -101,7 +108,7 @@ THERE IS A LITTLE AXE HERE.
 <BLANKLINE>
 THERE ARE DIAMONDS HERE!
 <BLANKLINE>
->>> [ d.room.n for d in game.dwarves ]
+>>> [ _dwarf.room.n for _dwarf in game.dwarves ]
 [19, 18, 33, 44, 64]
 
 If the pirate encounters us in the plover room or dark room, does he
@@ -109,6 +116,7 @@ leave the platinum pyramid since learning how to remove it from the room
 is one of the game's puzzles?
 
 >>> restart(room=100, objects=[pyramid])
+>>> look
 YOU'RE IN A SMALL CHAMBER LIT BY AN EERIE GREEN LIGHT.  AN EXTREMELY
 NARROW TUNNEL EXITS TO THE WEST.  A DARK CORRIDOR LEADS NE.
 <BLANKLINE>
@@ -122,8 +130,6 @@ OK
 >>> get(emerald)
 OK
 <BLANKLINE>
->>> del game.dwarves[:]
->>> game.dwarf_stage = 2
 >>> game.pirate.room = game.loc
 >>> look
 OUT FROM THE SHADOWS BEHIND YOU POUNCES A BEARDED PIRATE!  "HAR, HAR,"
@@ -145,7 +151,7 @@ If we manage to collect all of the treasures before the pirate spots us,
 then when we find him he goes to hide his treasure chest in the maze
 without any other treasures to accompany it.
 
->>> quiet(restart())
+>>> restart()
 >>> for t in game.treasures:
 ...     if t == 'chest': continue
 ...     t.drop(game.loc)
@@ -169,10 +175,10 @@ THE PIRATE'S TREASURE CHEST IS HERE!
 
 If several dwarves throw knives that hit us, does a sensible message result?
 
->>> quiet(restart(room=75, randoms=(.05,.05,.05,.05,.05,.05)))
+>>> restart(room=75, dwarves=True, randoms=(.05,.05,.05,.05,.05,.05))
 >>> game.dwarf_stage = 3
->>> for d in game.dwarves:
-...     d.room = game.rooms[75]
+>>> for _dwarf in game.dwarves:
+...     _dwarf.room = game.rooms[75]
 >>> look
 THERE ARE 5 THREATENING LITTLE DWARVES IN THE ROOM WITH YOU.
 <BLANKLINE>
@@ -191,7 +197,7 @@ chamber of the Hall of the Mountain King, if the bird dies before the
 snake is driven away - then the lamp should be reduced to only having 35
 turns left.
 
->>> quiet(restart())
+>>> restart()
 >>> for t in game.treasures:
 ...     if t == 'jewelry' or t == 'silver': continue
 ...     t.drop(game.loc)
@@ -207,7 +213,7 @@ THE LITTLE BIRD ATTACKS THE GREEN DRAGON, AND IN AN ASTOUNDING FLURRY
 GETS BURNT TO A CINDER.  THE ASHES BLOW AWAY.
 <BLANKLINE>
 >>> game.lamp_turns
-324
+325
 >>> goto(28)
 YOU ARE IN A LOW N/S PASSAGE AT A HOLE IN THE FLOOR.  THE HOLE GOES
 DOWN TO AN E/W PASSAGE.
@@ -221,7 +227,8 @@ If you act confused, the game should offer you a hint.  Here are quick
 (but certainly not thorough!) tests of whether the logic for each hint
 allows it to be offered.
 
->>> quiet(restart(room=8), look)
+>>> restart(room=8)
+>>> quiet(look, look)
 >>> look
 YOU ARE IN A 20-FOOT DEPRESSION FLOORED WITH BARE DIRT.  SET INTO THE
 DIRT IS A STRONG STEEL GRATE MOUNTED IN CONCRETE.  A DRY STREAMBED
@@ -237,7 +244,8 @@ ENTER WITHOUT A KEY, AND THERE ARE NO KEYS NEARBY.  I WOULD RECOMMEND
 LOOKING ELSEWHERE FOR THE KEYS.
 <BLANKLINE>
 
->>> quiet(restart(room=13, objects=[rod]), get(rod), look)
+>>> restart(room=13, objects=[rod])
+>>> quiet(get(rod), look, look)
 >>> get(bird)
 THE BIRD WAS UNAFRAID WHEN YOU ENTERED, BUT AS YOU APPROACH IT BECOMES
 DISTURBED AND YOU CANNOT CATCH IT.
@@ -248,24 +256,20 @@ ARE YOU TRYING TO CATCH THE BIRD?
 OK
 <BLANKLINE>
 
->>> quiet(restart(room=19), look, look, look, look, look)
+>>> restart(room=19)
+>>> quiet(*[ look ] * 6)
 >>> look
 YOU ARE IN THE HALL OF THE MOUNTAIN KING, WITH PASSAGES OFF IN ALL
 DIRECTIONS.
 <BLANKLINE>
 A HUGE GREEN FIERCE SNAKE BARS THE WAY!
 <BLANKLINE>
-THERE IS A LITTLE AXE HERE.
-<BLANKLINE>
 ARE YOU TRYING TO SOMEHOW DEAL WITH THE SNAKE?
 <BLANKLINE>
 
->>> quiet(restart(room=42), s, n)
->>> get(axe)
-OK
-<BLANKLINE>
->>> del game.dwarves[:]
->>> quiet(*islice(cycle((w, s, n)), 75 - 6))
+>>> restart(room=42, objects=[food])
+>>> quiet(get(food), s, n)
+>>> quiet(*islice(cycle((w, s, n)), 75 - 5))
 >>> look
 YOU ARE IN A MAZE OF TWISTY LITTLE PASSAGES, ALL ALIKE.
 <BLANKLINE>
@@ -276,9 +280,7 @@ YOU CAN MAKE THE PASSAGES LOOK LESS ALIKE BY DROPPING THINGS.
 <BLANKLINE>
 
 >>> quiet(restart(room=99))
->>> game.dwarf_stage = 2
->>> del game.dwarves[:]
->>> quiet([ look ] * (25 - 3))
+>>> quiet([ look ] * (25 - 2))
 >>> look
 YOU ARE IN AN ALCOVE.  A SMALL NW PATH SEEMS TO WIDEN AFTER A SHORT
 DISTANCE.  AN EXTREMELY TIGHT TUNNEL LEADS EAST.  IT LOOKS LIKE A VERY
@@ -287,12 +289,9 @@ TIGHT SQUEEZE.  AN EERIE LIGHT CAN BE SEEN AT THE OTHER END.
 ARE YOU TRYING TO EXPLORE BEYOND THE PLOVER ROOM?
 <BLANKLINE>
 
->>> quiet(restart(room=108), [ look ] * (20 - 3))
->>> del game.dwarves[:]
+>>> quiet(restart(room=108), [ look ] * (20 - 2))
 >>> look
 YOU ARE AT WITT'S END.  PASSAGES LEAD OFF IN *ALL* DIRECTIONS.
-<BLANKLINE>
-THERE IS A LITTLE AXE HERE.
 <BLANKLINE>
 DO YOU NEED HELP GETTING OUT OF HERE?
 <BLANKLINE>
@@ -303,9 +302,7 @@ batteries from the vending machine in the maze.
 
 >>> quiet(restart(room=34))
 >>> game.chest.prop = 1
->>> game.dwarf_stage = 2
->>> del game.dwarves[:]
->>> quiet([ look ] * (330 - 30 - 4))
+>>> quiet([ look ] * (330 - 30 - 3))
 >>> look
 YOUR LAMP IS GETTING DIM.  YOU'D BEST START WRAPPING THIS UP, UNLESS
 YOU CAN FIND SOME FRESH BATTERIES.  I SEEM TO RECALL THERE'S A VENDING
@@ -362,13 +359,12 @@ TO ACHIEVE THE NEXT HIGHER RATING, YOU NEED 70 MORE POINTS
 If the batteries are in the user's inventory when replaced, then the old
 ones are tossed on the ground rather than remaining in the inventory.
 
->>> quiet(restart(room=34), goto(30), get(coins), goto(140), drop(coins))
+>>> restart(room=30)
+>>> quiet(get(coins), goto(140), drop(coins))
 >>> get(batteries)
 OK
 <BLANKLINE>
 >>> game.chest.prop = 1
->>> game.dwarf_stage = 2
->>> del game.dwarves[:]
 >>> game.lamp_turns = 30
 >>> look
 YOUR LAMP IS GETTING DIM.  I'M TAKING THE LIBERTY OF REPLACING THE
@@ -422,6 +418,7 @@ Both "oil" and "water" can be used as verbs, despite officially being
 treated as nouns in the game vocabulary.
 
 >>> restart(room=94)
+>>> look
 YOU ARE AT ONE END OF AN IMMENSE NORTH/SOUTH PASSAGE.
 <BLANKLINE>
 THE WAY NORTH IS BARRED BY A MASSIVE, RUSTY, IRON DOOR.
@@ -443,7 +440,8 @@ Various combinations of words yield somewhat sensible retorts; and
 several nouns invoke small special cases in the code, like "grate" also
 being a movement noun.
 
->>> restart(room=4)
+>>> restart(room=4, dwarves=True)
+>>> look
 YOU ARE IN A VALLEY IN THE FOREST BESIDE A STREAM TUMBLING ALONG A
 ROCKY BED.
 <BLANKLINE>
@@ -526,4 +524,111 @@ I DON'T UNDERSTAND THAT!
 WHAT?
 <BLANKLINE>
 
+The "back" movement command has to handle several special cases, in case
+the previous location was an intermediate "forced" room, or if it simply
+cannot figure out how to return you to the previous location.
+
+>>> quiet(restart(room=65))
+>>> n
+YOU HAVE CRAWLED AROUND IN SOME LITTLE HOLES AND WOUND UP BACK IN THE
+MAIN PASSAGE.
+<BLANKLINE>
+YOU ARE IN BEDQUILT, A LONG EAST/WEST PASSAGE WITH HOLES EVERYWHERE.
+TO EXPLORE AT RANDOM SELECT NORTH, SOUTH, UP, OR DOWN.
+<BLANKLINE>
+>>> back
+SORRY, BUT I NO LONGER SEEM TO REMEMBER HOW IT WAS YOU GOT HERE.
+<BLANKLINE>
+YOU ARE IN BEDQUILT, A LONG EAST/WEST PASSAGE WITH HOLES EVERYWHERE.
+TO EXPLORE AT RANDOM SELECT NORTH, SOUTH, UP, OR DOWN.
+<BLANKLINE>
+
+>>> game.plant.prop = 4
+>>> goto(88)
+YOU ARE IN A LONG, NARROW CORRIDOR STRETCHING OUT OF SIGHT TO THE
+WEST.  AT THE EASTERN END IS A HOLE THROUGH WHICH YOU CAN SEE A
+PROFUSION OF LEAVES.
+<BLANKLINE>
+>>> d
+YOU ARE AT THE BOTTOM OF THE WESTERN PIT IN THE TWOPIT ROOM.  THERE IS
+A LARGE HOLE IN THE WALL ABOUT 25 FEET ABOVE YOU.
+<BLANKLINE>
+THERE IS A GIGANTIC BEANSTALK STRETCHING ALL THE WAY UP TO THE HOLE.
+<BLANKLINE>
+>>> back
+YOU CLAMBER UP THE PLANT AND SCURRY THROUGH THE HOLE AT THE TOP.
+<BLANKLINE>
+YOU'RE IN NARROW CORRIDOR.
+<BLANKLINE>
+
+>>> goto(91)
+YOU ARE AT THE TOP OF A STEEP INCLINE ABOVE A LARGE ROOM.  YOU COULD
+CLIMB DOWN HERE, BUT YOU WOULD NOT BE ABLE TO CLIMB UP.  THERE IS A
+PASSAGE LEADING BACK TO THE NORTH.
+<BLANKLINE>
+>>> d
+YOU ARE IN A LARGE LOW ROOM.  CRAWLS LEAD NORTH, SE, AND SW.
+<BLANKLINE>
+>>> back
+YOU CAN'T GET THERE FROM HERE.
+<BLANKLINE>
+YOU ARE IN A LARGE LOW ROOM.  CRAWLS LEAD NORTH, SE, AND SW.
+<BLANKLINE>
+
+If the player tries walking back across the troll bridge while still
+carrying the bear, then disaster strikes: the bridge breaks beneath
+them, and both player and bear wind up dead at the bottom of the pit.
+But the game shows a bit of elegance, and refuses to strand the player's
+belongings out of reach, either at the pit bottom or where they were
+last standing on the far side of the troll bridge - since without the
+bridge, the items would be permanently lost!
+
+>>> quiet(restart(), get(keys), goto(123))
+>>> game.bear.carry()
+>>> game.bear.prop = 2
+>>> game.bear.is_fixed = False
+>>> w
+YOU ARE BEING FOLLOWED BY A VERY LARGE, TAME BEAR.
+<BLANKLINE>
+YOU ARE ON THE FAR SIDE OF THE CHASM.  A NE PATH LEADS AWAY FROM THE
+CHASM ON THIS SIDE.
+<BLANKLINE>
+A RICKETY WOODEN BRIDGE EXTENDS ACROSS THE CHASM, VANISHING INTO THE
+MIST.  A SIGN POSTED ON THE BRIDGE READS, "STOP! PAY TROLL!"
+<BLANKLINE>
+A BURLY TROLL STANDS BY THE BRIDGE AND INSISTS YOU THROW HIM A
+TREASURE BEFORE YOU MAY CROSS.
+<BLANKLINE>
+>>> drop(bear)
+THE BEAR LUMBERS TOWARD THE TROLL, WHO LETS OUT A STARTLED SHRIEK AND
+SCURRIES AWAY.  THE BEAR SOON GIVES UP THE PURSUIT AND WANDERS BACK.
+<BLANKLINE>
+>>> get(bear)
+OK
+<BLANKLINE>
+>>> sw
+JUST AS YOU REACH THE OTHER SIDE, THE BRIDGE BUCKLES BENEATH THE
+WEIGHT OF THE BEAR, WHICH WAS STILL FOLLOWING YOU AROUND.  YOU
+SCRABBLE DESPERATELY FOR SUPPORT, BUT AS THE BRIDGE COLLAPSES YOU
+STUMBLE BACK AND FALL INTO THE CHASM.
+<BLANKLINE>
+OH DEAR, YOU SEEM TO HAVE GOTTEN YOURSELF KILLED.  I MIGHT BE ABLE TO
+HELP YOU OUT, BUT I'VE NEVER REALLY DONE THIS BEFORE.  DO YOU WANT ME
+TO TRY TO REINCARNATE YOU?
+<BLANKLINE>
+>>> quiet(yes, leave, get(lamp), on)
+>>> goto(117)
+YOU ARE ON ONE SIDE OF A LARGE, DEEP CHASM.  A HEAVY WHITE MIST RISING
+UP FROM BELOW OBSCURES ALL VIEW OF THE FAR SIDE.  A SW PATH LEADS AWAY
+FROM THE CHASM INTO A WINDING CORRIDOR.
+<BLANKLINE>
+THERE ARE SOME KEYS ON THE GROUND HERE.
+<BLANKLINE>
+THE WRECKAGE OF A BRIDGE (AND A DEAD BEAR) CAN BE SEEN AT THE BOTTOM
+OF THE CHASM.
+<BLANKLINE>
+THE TROLL IS NOWHERE TO BE SEEN.
+<BLANKLINE>
+
 todo: test plant2 in repository
+
