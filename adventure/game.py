@@ -738,8 +738,6 @@ class Game(Data):
             self.write_message(10)
         elif n in (11, 19):
             self.write_message(11)
-        elif word == 'find' or word == 'invent':  # ? this might be wrong
-            self.write_message(59)
         elif n in (62, 65):
             self.write_message(42)
         elif n == 17:
