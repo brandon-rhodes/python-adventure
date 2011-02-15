@@ -812,7 +812,7 @@ class Game(Data):
 
     def t_carry(self, verb, obj):  #9010
         if obj.is_toting:
-            self.write_message(verb.default_message or 54)
+            self.write(verb.default_message)
             self.finish_turn()
             return
         if obj.is_fixed or len(obj.rooms) > 1:
@@ -832,15 +832,13 @@ class Game(Data):
                 obj = self.bottle
             else:
                 # They must mean they want to fill the bottle.
-                if self.bottle.is_toting and self.bottle.contents is None:
-                    self.t_fill(verb, self.bottle)  # hand off control to "fill"
-                    return
+                if not self.bottle.is_toting:
+                    self.write_message(104)
                 elif self.bottle.contents is not None:
                     self.write_message(105)
-                elif not self.bottle.is_toting:
-                    self.write_message(104)
                 else:
-                    self.write_message(verb.default_message)
+                    self.t_fill(verb, self.bottle)  # hand off control to "fill"
+                    return
                 self.finish_turn()
                 return
         if len(self.inventory) >= 7:
@@ -871,7 +869,7 @@ class Game(Data):
             obj = self.rod2
 
         if not obj.is_toting:
-            self.write_message(verb.default_message)
+            self.write(verb.default_message)
             self.finish_turn()
             return
 
@@ -1435,13 +1433,14 @@ class Game(Data):
                 troll = self.troll
                 if not eggs.rooms and not troll.rooms and not troll.prop:
                     self.troll.prop = 1
-                eggs.rooms = list(eggs.starting_rooms)
                 if self.loc is start:
                     self.write(eggs.messages[0])
                 elif self.is_here(eggs):
                     self.write(eggs.messages[1])
                 else:
                     self.write(eggs.messages[2])
+                eggs.rooms = list(eggs.starting_rooms)
+                eggs.is_toting = False
         self.finish_turn()
 
     def i_brief(self, verb):  #8260

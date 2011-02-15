@@ -163,7 +163,8 @@ def section8(data, word_n, message_n):
         return
     word = make_object(data.vocabulary, Word, word_n + 2000)
     message = make_object(data.messages, Message, message_n)
-    word.default_message = message
+    for word2 in word.synonyms:
+        word2.default_message = message
 
 def section9(data, bit, *nlist):
     for n in nlist:

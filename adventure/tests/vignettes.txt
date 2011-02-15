@@ -679,6 +679,31 @@ WHICH WAY?
 YOU ARE IN A JUMBLE OF ROCK, WITH CRACKS EVERYWHERE.
 <BLANKLINE>
 
+And now, we exercise dozens of fiddly edge cases for verbs.
+
+>>> quiet(restart())
+>>> carry                       # ambiguous in the face of several objects
+CARRY WHAT?
+<BLANKLINE>
+
+>>> quiet(restart(room=25))
+>>> get(plant)
+THE PLANT HAS EXCEPTIONALLY DEEP ROOTS AND CANNOT BE PULLED FREE.
+<BLANKLINE>
+
+>>> quiet(restart(), goto(24))
+>>> get(oil)
+YOU HAVE NOTHING IN WHICH TO CARRY IT.
+<BLANKLINE>
+
+>>> quiet(restart(), get(bottle), goto(24))
+>>> get(oil)
+YOUR BOTTLE IS ALREADY FULL.
+<BLANKLINE>
+>>> get(bottle)
+YOU ARE ALREADY CARRYING IT!
+<BLANKLINE>
+
 
 todo: test plant2 in repository
 
