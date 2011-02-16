@@ -253,7 +253,7 @@ class Game(Data):
                         if (pirate.old_room != pirate.room
                             and self.random() < .2):
                             self.write_message(127)
-                        continue  # proceed to the next character? aren't any!
+                        continue  # pragma: no cover
 
                     self.write_message(186)
                     self.chest.drop(self.chest_room)
@@ -326,7 +326,7 @@ class Game(Data):
             loc.times_described += 1
             if do_short and loc.short_description:
                 self.write(loc.short_description)
-            elif loc.long_description:
+            else:
                 self.write(loc.long_description)
 
         if loc.is_forced:
@@ -563,7 +563,7 @@ class Game(Data):
                 elif obj is self.loc.liquid:
                     obj_here = True
                 elif (obj is self.plant and self.is_here(self.plant2)
-                      and self.plant2.prop == 0):
+                      and self.plant2.prop != 0):
                     obj = self.plant2
                     obj_here = True
                 elif obj is self.knife and self.knife_location is self.loc:
@@ -729,9 +729,6 @@ class Game(Data):
                         self.oldloc2 = self.loc  # refuse to strand belongings
                         self.die()
                         return
-
-                else:
-                    raise NotImplementedError(move.action)
 
         #50
         n = word.n

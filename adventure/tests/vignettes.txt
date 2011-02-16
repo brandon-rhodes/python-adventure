@@ -36,6 +36,8 @@ YOUR LAMP IS NOW ON.
 >>> get(lamp)
 OK
 <BLANKLINE>
+>>> for _room in adventure._game.rooms.values():
+...     _room.times_described = 1  # to avoid long descriptions
 
 Now we can save this game.
 
@@ -76,8 +78,9 @@ move the caller into that room, and the second when it calls look().
 ...     def __init__(self, room):
 ...         self.room = room
 ...     def __repr__(self):
+...         game.output = ''
 ...         _goto(self.room)
-...         return repr(look)
+...         return game.output.rstrip('\n') + '\n'
 
 >>> def _goto(room):
 ...     game.move_to(game.rooms[room] if isinstance(room, int) else room)
@@ -217,7 +220,7 @@ THE LITTLE BIRD ATTACKS THE GREEN DRAGON, AND IN AN ASTOUNDING FLURRY
 GETS BURNT TO A CINDER.  THE ASHES BLOW AWAY.
 <BLANKLINE>
 >>> game.lamp_turns
-325
+326
 >>> goto(28)
 YOU ARE IN A LOW N/S PASSAGE AT A HOLE IN THE FLOOR.  THE HOLE GOES
 DOWN TO AN E/W PASSAGE.
@@ -225,7 +228,7 @@ DOWN TO AN E/W PASSAGE.
 THERE ARE BARS OF SILVER HERE!
 <BLANKLINE>
 >>> game.lamp_turns
-34
+35
 
 ----------------------------------
 Making sure that hints are offered
@@ -357,11 +360,14 @@ YOUR LAMP HAS RUN OUT OF POWER.
 IT IS NOW PITCH DARK.  IF YOU PROCEED YOU WILL LIKELY FALL INTO A PIT.
 <BLANKLINE>
 >>> goto(5)
+YOU'RE IN FOREST.
+<BLANKLINE>
+>>> w
 THERE'S NOT MUCH POINT IN WANDERING AROUND OUT HERE, AND YOU CAN'T
 EXPLORE THE CAVE WITHOUT A LAMP.  SO LET'S JUST CALL IT A DAY.
 <BLANKLINE>
 <BLANKLINE>
-YOU SCORED 61 OUT OF A POSSIBLE 350 USING 311 TURNS.
+YOU SCORED 61 OUT OF A POSSIBLE 350 USING 309 TURNS.
 <BLANKLINE>
 YOUR SCORE QUALIFIES YOU AS A NOVICE CLASS ADVENTURER.
 <BLANKLINE>
@@ -443,8 +449,7 @@ THE WAY NORTH IS BARRED BY A MASSIVE, RUSTY, IRON DOOR.
 I SEE NO OIL HERE.
 <BLANKLINE>
 >>> goto(25)
-YOU ARE AT THE BOTTOM OF THE WESTERN PIT IN THE TWOPIT ROOM.  THERE IS
-A LARGE HOLE IN THE WALL ABOUT 25 FEET ABOVE YOU.
+YOU'RE IN WEST PIT.
 <BLANKLINE>
 THERE IS A TINY LITTLE PLANT IN THE PIT, MURMURING "WATER, WATER, ..."
 <BLANKLINE>
@@ -466,9 +471,7 @@ ROCKY BED.
 "I DON'T KNOW THAT WORD.\n\n"
 
 >>> grate
-YOU ARE IN A 20-FOOT DEPRESSION FLOORED WITH BARE DIRT.  SET INTO THE
-DIRT IS A STRONG STEEL GRATE MOUNTED IN CONCRETE.  A DRY STREAMBED
-LEADS INTO THE DEPRESSION.
+YOU'RE OUTSIDE GRATE.
 <BLANKLINE>
 THE GRATE IS LOCKED.
 <BLANKLINE>
@@ -476,8 +479,7 @@ THE GRATE IS LOCKED.
 YOU ARE IN AN AWKWARD SLOPING EAST/WEST CANYON.
 <BLANKLINE>
 >>> grate
-YOU ARE IN A SMALL CHAMBER BENEATH A 3X3 STEEL GRATE TO THE SURFACE.
-A LOW CRAWL OVER COBBLES LEADS INWARD TO THE WEST.
+YOU'RE BELOW THE GRATE.
 <BLANKLINE>
 THE GRATE IS LOCKED.
 <BLANKLINE>
@@ -548,7 +550,7 @@ The "back" movement command has to handle several special cases, in case
 the previous location was an intermediate "forced" room, or if it simply
 cannot figure out how to return you to the previous location.
 
->>> quiet(restart(room=65))
+>>> quiet(restart(room=65, randoms=(None, None, 0.001,)))
 >>> n
 YOU HAVE CRAWLED AROUND IN SOME LITTLE HOLES AND WOUND UP BACK IN THE
 MAIN PASSAGE.
@@ -563,15 +565,16 @@ YOU ARE IN BEDQUILT, A LONG EAST/WEST PASSAGE WITH HOLES EVERYWHERE.
 TO EXPLORE AT RANDOM SELECT NORTH, SOUTH, UP, OR DOWN.
 <BLANKLINE>
 
->>> game.plant.prop = 4
+While testing "back" on the beanstalk, we also test for whether we can
+run a command like "get" on the plant as seen from outside the pits.
+
+>>> quiet(restart(), get(bottle), goto(25), pour(water))
+>>> quiet(goto(113), get(water), goto(25), pour(water))
 >>> goto(88)
-YOU ARE IN A LONG, NARROW CORRIDOR STRETCHING OUT OF SIGHT TO THE
-WEST.  AT THE EASTERN END IS A HOLE THROUGH WHICH YOU CAN SEE A
-PROFUSION OF LEAVES.
+YOU'RE IN NARROW CORRIDOR.
 <BLANKLINE>
 >>> d
-YOU ARE AT THE BOTTOM OF THE WESTERN PIT IN THE TWOPIT ROOM.  THERE IS
-A LARGE HOLE IN THE WALL ABOUT 25 FEET ABOVE YOU.
+YOU'RE IN WEST PIT.
 <BLANKLINE>
 THERE IS A GIGANTIC BEANSTALK STRETCHING ALL THE WAY UP TO THE HOLE.
 <BLANKLINE>
@@ -580,11 +583,22 @@ YOU CLAMBER UP THE PLANT AND SCURRY THROUGH THE HOLE AT THE TOP.
 <BLANKLINE>
 YOU'RE IN NARROW CORRIDOR.
 <BLANKLINE>
+>>> goto(23)
+YOU'RE AT WEST END OF TWOPIT ROOM.
+<BLANKLINE>
+THERE IS A HUGE BEANSTALK GROWING OUT OF THE WEST PIT UP TO THE HOLE.
+<BLANKLINE>
+>>> find(beanstalk)
+I BELIEVE WHAT YOU WANT IS RIGHT HERE WITH YOU.
+<BLANKLINE>
+>>> goto(67)
+YOU'RE AT EAST END OF TWOPIT ROOM.
+<BLANKLINE>
+THERE IS A HUGE BEANSTALK GROWING OUT OF THE WEST PIT UP TO THE HOLE.
+<BLANKLINE>
 
 >>> goto(91)
-YOU ARE AT THE TOP OF A STEEP INCLINE ABOVE A LARGE ROOM.  YOU COULD
-CLIMB DOWN HERE, BUT YOU WOULD NOT BE ABLE TO CLIMB UP.  THERE IS A
-PASSAGE LEADING BACK TO THE NORTH.
+YOU'RE AT STEEP INCLINE ABOVE LARGE ROOM.
 <BLANKLINE>
 >>> d
 YOU ARE IN A LARGE LOW ROOM.  CRAWLS LEAD NORTH, SE, AND SW.
@@ -612,8 +626,7 @@ we are at it.)
 >>> w
 YOU ARE BEING FOLLOWED BY A VERY LARGE, TAME BEAR.
 <BLANKLINE>
-YOU ARE ON THE FAR SIDE OF THE CHASM.  A NE PATH LEADS AWAY FROM THE
-CHASM ON THIS SIDE.
+YOU'RE ON NE SIDE OF CHASM.
 <BLANKLINE>
 A RICKETY WOODEN BRIDGE EXTENDS ACROSS THE CHASM, VANISHING INTO THE
 MIST.  A SIGN POSTED ON THE BRIDGE READS, "STOP! PAY TROLL!"
@@ -643,9 +656,7 @@ TO TRY TO REINCARNATE YOU?
 <BLANKLINE>
 >>> quiet(yes, leave, get(lamp), on)
 >>> goto(117)
-YOU ARE ON ONE SIDE OF A LARGE, DEEP CHASM.  A HEAVY WHITE MIST RISING
-UP FROM BELOW OBSCURES ALL VIEW OF THE FAR SIDE.  A SW PATH LEADS AWAY
-FROM THE CHASM INTO A WINDING CORRIDOR.
+YOU'RE ON SW SIDE OF CHASM.
 <BLANKLINE>
 THERE ARE SOME KEYS ON THE GROUND HERE.
 <BLANKLINE>
@@ -1271,6 +1282,38 @@ PROVIDE "SUSPEND" WITH A FILENAME OR OPEN FILE
 ----------------
 Closing the cave
 ----------------
+
+Finally, there are a few situations we need to test that relate
+specifically to the end-game.  So we reload our saved game one last
+time, take it through the ending, and then save anew so that we can do
+several tests in the repository.
+
+>>> quiet(restart(), get(keys), goto(9))
+>>> game.is_closing = 1
+>>> game.start_closing_cave()
+>>> unlock
+A MYSTERIOUS RECORDED VOICE GROANS INTO LIFE AND ANNOUNCES:
+   "THIS EXIT IS CLOSED.  PLEASE LEAVE VIA MAIN OFFICE."
+<BLANKLINE>
+>>> game.clock2 = 1
+>>> w
+THE SEPULCHRAL VOICE ENTONES, "THE CAVE IS NOW CLOSED."  AS THE ECHOES
+FADE, THERE IS A BLINDING FLASH OF LIGHT (AND A SMALL PUFF OF ORANGE
+SMOKE). . . .    AS YOUR EYES REFOCUS, YOU LOOK AROUND AND FIND...
+<BLANKLINE>
+YOU'RE AT NE END.
+<BLANKLINE>
+>>> quiet(savefile.truncate())
+>>> save(savefile)
+GAME SAVED
+<BLANKLINE>
+
+Most of the end-game events are fatal, but not all.
+
+>>> restart()
+>>> game.is_here(game.plant2)
+>>> game.plant2.prop
+>>> get(plant)
 
 todo: test plant2 in repository
 
