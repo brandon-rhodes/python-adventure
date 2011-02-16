@@ -606,7 +606,7 @@ class Game(Data):
         self.finish_turn()
 
     def i_see_no(self, thing):
-        self.write('I see no {} here.\n'.format(thing.text))
+        self.write('I see no {} here.\n'.format(getattr(thing, 'text', thing)))
         self.finish_turn()
 
     # Motion.
@@ -1178,8 +1178,8 @@ class Game(Data):
             #8142
             self.food.destroy()
             self.write_message(72)
-        elif obj in (self.bird or self.snake or self.clam or self.oyster or
-                     self.dwarf or self.dragon or self.troll or self.bear):
+        elif obj in (self.bird, self.snake, self.clam, self.oyster,
+                     self.dwarf, self.dragon, self.troll, self.bear):
             self.write_message(71)
         else:
             self.write(verb.default_message)
@@ -1197,11 +1197,10 @@ class Game(Data):
         elif self.is_here(self.water):
             self.bottle.prop = 1
             self.bottle.contents = None
+            self.water.destroy()
             self.write_message(74)
         elif self.loc.liquid is self.water:
             self.write(verb.default_message)
-        else:
-            self.write_message(110)
         self.finish_turn()
 
     def t_rub(self, verb, obj):  #9160
@@ -1380,6 +1379,7 @@ class Game(Data):
                     self.write_message(144)
                 else:
                     self.write_message(145)
+                    self.vase.drop(self.loc)
                     self.vase.prop = 2
                     self.vase.is_fixed = True
             else:
@@ -1463,7 +1463,7 @@ class Game(Data):
 
     def t_read(self, verb, obj):  #9270
         if self.is_dark:
-            return self.i_see_no(obj)
+            return self.i_see_no(obj.names[0])
         elif (obj is self.oyster and not self.hints[2].used and
               self.oyster.is_toting):
             def callback(yes):

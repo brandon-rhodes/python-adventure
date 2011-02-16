@@ -28,7 +28,7 @@ def install_builtins(game):
     words.append('yes')
     words.append('no')
     for word in words:
-        if word in ('exit', 'help', 'open', 'quit'):
+        if word in ('exit', 'open'):
             continue
         identifier = ReprTriggeredPhrase(game, [ word ])
         setattr(module, word, identifier)

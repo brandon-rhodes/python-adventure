@@ -581,7 +581,9 @@ them, and both player and bear wind up dead at the bottom of the pit.
 But the game shows a bit of elegance, and refuses to strand the player's
 belongings out of reach, either at the pit bottom or where they were
 last standing on the far side of the troll bridge - since without the
-bridge, the items would be permanently lost!
+bridge, the items would be permanently lost!  (We also try feeding the
+bear a few times, to test some special cases in the feed() logic while
+we are at it.)
 
 >>> quiet(restart(), get(keys), goto(123))
 >>> game.bear.carry()
@@ -602,6 +604,9 @@ TREASURE BEFORE YOU MAY CROSS.
 >>> drop(bear)
 THE BEAR LUMBERS TOWARD THE TROLL, WHO LETS OUT A STARTLED SHRIEK AND
 SCURRIES AWAY.  THE BEAR SOON GIVES UP THE PURSUIT AND WANDERS BACK.
+<BLANKLINE>
+>>> feed(bear)
+THERE IS NOTHING HERE TO EAT.
 <BLANKLINE>
 >>> get(bear)
 OK
@@ -628,6 +633,9 @@ THE WRECKAGE OF A BRIDGE (AND A DEAD BEAR) CAN BE SEEN AT THE BOTTOM
 OF THE CHASM.
 <BLANKLINE>
 THE TROLL IS NOWHERE TO BE SEEN.
+<BLANKLINE>
+>>> feed(bear)
+DON'T BE RIDICULOUS!
 <BLANKLINE>
 
 Several motion words elicit special messages when they do not apply.
@@ -880,6 +888,317 @@ WITH WHAT?  YOUR BARE HANDS?
 FOR CRYING OUT LOUD, THE POOR THING IS ALREADY DEAD!
 <BLANKLINE>
 
+>>> quiet(restart(), get(bottle))
+>>> pour
+YOUR BOTTLE IS EMPTY AND THE GROUND IS WET.
+<BLANKLINE>
+>>> pour
+POUR WHAT?
+<BLANKLINE>
+>>> quiet(goto(24), get(oil), goto(25))
+>>> pour(bottle)
+THE PLANT INDIGNANTLY SHAKES THE OIL OFF ITS LEAVES AND ASKS, "WATER?"
+<BLANKLINE>
+>>> quiet(goto(24), get(oil))
+>>> pour
+YOUR BOTTLE IS EMPTY AND THE GROUND IS WET.
+<BLANKLINE>
+>>> pour(oil)
+YOU AREN'T CARRYING IT!
+<BLANKLINE>
+>>> pour(lamp)
+YOU CAN'T POUR THAT.
+<BLANKLINE>
+
+>>> restart()
+>>> eat
+THANK YOU, IT WAS DELICIOUS!
+<BLANKLINE>
+>>> eat
+EAT WHAT?
+<BLANKLINE>
+>>> quiet(goto(13))
+>>> eat(bird)
+I THINK I JUST LOST MY APPETITE.
+<BLANKLINE>
+>>> quiet(e, e)
+>>> eat(rod)
+DON'T BE RIDICULOUS!
+<BLANKLINE>
+
+>>> quiet(restart(), get(bottle), leave, w)
+>>> drink
+THE BOTTLE OF WATER IS NOW EMPTY.
+<BLANKLINE>
+>>> drink
+DRINK WHAT?
+<BLANKLINE>
+>>> drink(lamp)
+DON'T BE RIDICULOUS!
+<BLANKLINE>
+
+>>> quiet(restart())
+>>> rub(lamp)
+RUBBING THE ELECTRIC LAMP IS NOT PARTICULARLY REWARDING.  ANYWAY,
+NOTHING EXCITING HAPPENS.
+<BLANKLINE>
+>>> rub(bottle)
+I THINK I JUST LOST MY APPETITE.
+<BLANKLINE>
+
+>>> quiet(restart(objects=[axe]), get(axe))
+>>> throw(food)
+YOU AREN'T CARRYING IT!
+<BLANKLINE>
+>>> quiet(get(food), leave)
+>>> throw(lamp)
+OK
+<BLANKLINE>
+>>> look
+YOU ARE STANDING AT THE END OF A ROAD BEFORE A SMALL BRICK BUILDING.
+AROUND YOU IS A FOREST.  A SMALL STREAM FLOWS OUT OF THE BUILDING AND
+DOWN A GULLY.
+<BLANKLINE>
+THERE IS A LAMP SHINING NEARBY.
+<BLANKLINE>
+>>> quiet(get(lamp), goto(130))
+>>> throw(axe)
+THE AXE MISSES AND LANDS NEAR THE BEAR WHERE YOU CAN'T GET AT IT.
+<BLANKLINE>
+>>> get(axe)
+YOU CAN'T BE SERIOUS!
+<BLANKLINE>
+>>> throw(food)
+THE BEAR EAGERLY WOLFS DOWN YOUR FOOD, AFTER WHICH HE SEEMS TO CALM
+DOWN CONSIDERABLY AND EVEN BECOMES RATHER FRIENDLY.
+<BLANKLINE>
+>>> get(axe)
+OK
+<BLANKLINE>
+>>> quiet(leave)
+>>> throw(axe)
+THERE IS NOTHING HERE TO ATTACK.
+<BLANKLINE>
+
+>>> restart()
+>>> quit()
+DO YOU REALLY WANT TO QUIT NOW?
+<BLANKLINE>
+>>> no
+OK
+<BLANKLINE>
+>>> quit()
+DO YOU REALLY WANT TO QUIT NOW?
+<BLANKLINE>
+>>> yes
+OK
+<BLANKLINE>
+<BLANKLINE>
+YOU SCORED 61 OUT OF A POSSIBLE 350 USING 7 TURNS.
+<BLANKLINE>
+YOUR SCORE QUALIFIES YOU AS A NOVICE CLASS ADVENTURER.
+<BLANKLINE>
+TO ACHIEVE THE NEXT HIGHER RATING, YOU NEED 70 MORE POINTS
+<BLANKLINE>
+
+>>> restart()
+>>> find(lamp)
+YOU ARE ALREADY CARRYING IT!
+<BLANKLINE>
+>>> find(keys)
+I BELIEVE WHAT YOU WANT IS RIGHT HERE WITH YOU.
+<BLANKLINE>
+
+>>> quiet(restart(), get(food), get(keys), goto(130), throw(food), unlock)
+>>> get(bear)
+OK
+<BLANKLINE>
+>>> inventory
+YOU ARE CURRENTLY HOLDING THE FOLLOWING:
+<BLANKLINE>
+SET OF KEYS
+BRASS LANTERN
+YOU ARE BEING FOLLOWED BY A VERY LARGE, TAME BEAR.
+<BLANKLINE>
+
+>>> quiet(restart(dwarves=True), goto(10), get(cage), goto(13))
+>>> feed(bird)
+IT'S NOT HUNGRY (IT'S MERELY PININ' FOR THE FJORDS).  BESIDES, YOU
+HAVE NO BIRD SEED.
+<BLANKLINE>
+>>> quiet(get(bird), goto(117))
+>>> feed(troll)
+GLUTTONY IS NOT ONE OF THE TROLL'S VICES.  AVARICE, HOWEVER, IS.
+<BLANKLINE>
+>>> quiet(goto(119))
+>>> feed(dragon)
+THERE'S NOTHING HERE IT WANTS TO EAT (EXCEPT PERHAPS YOU).
+<BLANKLINE>
+>>> quiet(kill(dragon), yes)
+>>> feed(dragon)
+DON'T BE RIDICULOUS!
+<BLANKLINE>
+>>> quiet(goto(19))
+>>> feed(snake)
+THE SNAKE HAS NOW DEVOURED YOUR BIRD.
+<BLANKLINE>
+>>> feed(snake)
+THERE'S NOTHING HERE IT WANTS TO EAT (EXCEPT PERHAPS YOU).
+<BLANKLINE>
+>>> game.dwarf_stage = 2
+>>> quiet(look)
+>>> feed(dwarf)
+THERE IS NOTHING HERE TO EAT.
+<BLANKLINE>
+>>> game.food.drop(game.loc)
+>>> feed(dwarf)
+YOU FOOL, DWARVES EAT ONLY COAL!  NOW YOU'VE MADE HIM *REALLY* MAD!!
+<BLANKLINE>
+>>> quiet(goto(129), drop(food), e)
+>>> feed(bear)
+THERE'S NOTHING HERE IT WANTS TO EAT (EXCEPT PERHAPS YOU).
+<BLANKLINE>
+>>> feed(chain)
+I'M GAME.  WOULD YOU CARE TO EXPLAIN HOW?
+<BLANKLINE>
+
+>>> quiet(restart(), get(bottle), drink)
+>>> fill
+YOUR BOTTLE IS NOW FULL OF WATER.
+<BLANKLINE>
+>>> fill
+YOUR BOTTLE IS ALREADY FULL.
+<BLANKLINE>
+>>> quiet(drink, plugh)
+>>> fill
+THERE IS NOTHING HERE WITH WHICH TO FILL THE BOTTLE.
+<BLANKLINE>
+>>> quiet(drop(bottle), goto(97))
+>>> fill(vase)
+YOU CAN'T FILL THAT.
+<BLANKLINE>
+>>> quiet(get(vase))
+>>> fill(vase)
+THERE IS NOTHING HERE WITH WHICH TO FILL THE VASE.
+<BLANKLINE>
+>>> quiet(goto(38))
+>>> fill(vase)
+THE SUDDEN CHANGE IN TEMPERATURE HAS DELICATELY SHATTERED THE VASE.
+<BLANKLINE>
+>>> look
+YOU ARE IN THE BOTTOM OF A SMALL PIT WITH A LITTLE STREAM, WHICH
+ENTERS AND EXITS THROUGH TINY SLITS.
+<BLANKLINE>
+THE FLOOR IS LITTERED WITH WORTHLESS SHARDS OF POTTERY.
+<BLANKLINE>
+>>> get(vase)
+YOU CAN'T BE SERIOUS!
+<BLANKLINE>
+>>> fill(lamp)
+YOU CAN'T FILL THAT.
+<BLANKLINE>
+>>> fill
+FILL WHAT?
+<BLANKLINE>
+
+>>> restart()
+>>> blast
+BLASTING REQUIRES DYNAMITE.
+<BLANKLINE>
+
+>>> restart()
+>>> score
+IF YOU WERE TO QUIT NOW, YOU WOULD SCORE 57 OUT OF A POSSIBLE 350.
+<BLANKLINE>
+DO YOU INDEED WISH TO QUIT NOW?
+<BLANKLINE>
+>>> yes
+OK
+<BLANKLINE>
+<BLANKLINE>
+YOU SCORED 61 OUT OF A POSSIBLE 350 USING 6 TURNS.
+<BLANKLINE>
+YOUR SCORE QUALIFIES YOU AS A NOVICE CLASS ADVENTURER.
+<BLANKLINE>
+TO ACHIEVE THE NEXT HIGHER RATING, YOU NEED 70 MORE POINTS
+<BLANKLINE>
+
+>>> quiet(restart(), goto(92), fee, fie, foe)
+>>> foo                         # does nothing obvious since the eggs are here
+OK
+<BLANKLINE>
+>>> quiet(get(eggs), goto(117))
+>>> throw(eggs)
+THE TROLL CATCHES YOUR TREASURE AND SCURRIES AWAY OUT OF SIGHT.
+<BLANKLINE>
+>>> quiet(fee, fie, foe)
+>>> foo
+DONE!
+<BLANKLINE>
+>>> cross                       # troll does not wait for us to cross!
+THE TROLL STEPS OUT FROM BENEATH THE BRIDGE AND BLOCKS YOUR WAY.
+<BLANKLINE>
+YOU'RE ON SW SIDE OF CHASM.
+<BLANKLINE>
+A RICKETY WOODEN BRIDGE EXTENDS ACROSS THE CHASM, VANISHING INTO THE
+MIST.  A SIGN POSTED ON THE BRIDGE READS, "STOP! PAY TROLL!"
+<BLANKLINE>
+A BURLY TROLL STANDS BY THE BRIDGE AND INSISTS YOU THROW HIM A
+TREASURE BEFORE YOU MAY CROSS.
+<BLANKLINE>
+
+>>> quiet(restart(), goto(106))
+>>> read
+I'M AFRAID THE MAGAZINE IS WRITTEN IN DWARVISH.
+<BLANKLINE>
+>>> quiet(off)
+>>> read(magazine)
+I SEE NO MAGAZINE HERE.
+<BLANKLINE>
+>>> quiet(on, get(magazine), goto(101))
+>>> read                        # confused by two choices
+READ WHAT?
+<BLANKLINE>
+>>> read(tablet)
+"CONGRATULATIONS ON BRINGING LIGHT INTO THE DARK-ROOM!"
+<BLANKLINE>
+>>> quiet(goto(95), get(trident), goto(103), unlock(clam), get(oyster))
+>>> read(oyster)
+HMMM, THIS LOOKS LIKE A CLUE, WHICH MEANS IT'LL COST YOU 10 POINTS TO
+READ IT.  SHOULD I GO AHEAD AND READ IT ANYWAY?
+<BLANKLINE>
+>>> yes
+IT SAYS, "THERE IS SOMETHING STRANGE ABOUT THIS PLACE, SUCH THAT ONE
+OF THE WORDS I'VE ALWAYS KNOWN NOW HAS A NEW EFFECT."
+<BLANKLINE>
+>>> read(oyster)
+IT SAYS THE SAME THING IT DID BEFORE.
+<BLANKLINE>
+>>> quiet(goto(29), get(gold), goto(112))
+>>> game.pirate.room = game.rooms[112]
+>>> look
+OUT FROM THE SHADOWS BEHIND YOU POUNCES A BEARDED PIRATE!  "HAR, HAR,"
+HE CHORTLES, "I'LL JUST TAKE ALL THIS BOOTY AND HIDE IT AWAY WITH ME
+CHEST DEEP IN THE MAZE!"  HE SNATCHES YOUR TREASURE AND VANISHES INTO
+THE GLOOM.
+<BLANKLINE>
+YOU ARE IN A LITTLE MAZE OF TWISTING PASSAGES, ALL DIFFERENT.
+<BLANKLINE>
+>>> s
+DEAD END
+<BLANKLINE>
+THERE IS A MESSAGE SCRAWLED IN THE DUST IN A FLOWERY SCRIPT, READING:
+"THIS IS NOT THE MAZE WHERE THE PIRATE LEAVES HIS TREASURE CHEST."
+<BLANKLINE>
+THERE IS A MASSIVE VENDING MACHINE HERE.  THE INSTRUCTIONS ON IT READ:
+"DROP COINS HERE TO RECEIVE FRESH BATTERIES."
+<BLANKLINE>
+>>> read(message)
+"THIS IS NOT THE MAZE WHERE THE PIRATE LEAVES HIS TREASURE CHEST."
+<BLANKLINE>
+>>> read(lamp)
+I'M AFRAID I DON'T UNDERSTAND.
+<BLANKLINE>
 
 todo: test plant2 in repository
 
