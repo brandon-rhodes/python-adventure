@@ -1,6 +1,9 @@
 import doctest
+import os
 
 def load_tests(loader, tests, pattern):
+    if os.path.exists('advent.save'):
+        os.unlink('advent.save')  # to avoid an error during README.txt
     tests.addTests(doctest.DocFileSuite(
             '../README.txt', optionflags=doctest.NORMALIZE_WHITESPACE))
     tests.addTests(doctest.DocFileSuite('vignettes.txt'))

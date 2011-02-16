@@ -6,6 +6,7 @@
 # FORTRAN using Emacs with an interactive search for newline-2012-tab,
 # that is typed C-s C-q C-j 2 0 1 2 C-i).
 
+import os
 import pickle
 import random
 import zlib
@@ -1514,10 +1515,13 @@ class Game(Data):
 
     def t_suspend(self, verb, obj):
         if isinstance(obj, str):
+            if os.path.exists(obj):  # pragma: no cover
+                self.write('I refuse to overwrite an existing file.')
+                return
             savefile = open(obj, 'wb')
         else:
             savefile = obj
-        r = self.random_generator
+        r = self.random_generator  # must replace live object with static state
         self.random_state = r.getstate()
         try:
             del self.random_generator
@@ -1609,7 +1613,7 @@ class Game(Data):
 
     def wake_repository_dwarves(self):  #19000
         self.write_message(136)
-        self.compute_score()
+        self.score_and_exit()
 
     def compute_score(self, for_score_command=False):  #20000
         score = maxscore = 2
