@@ -91,6 +91,10 @@ move the caller into that room, and the second when it calls look().
 
 With those definitions complete, we can proceed with the actual tests!
 
+-------------------
+Pirates and dwarves
+-------------------
+
 If the dwarves activate when we are standing in one of their starting
 rooms, then does the dwarf at our location get moved successfully to the
 gold nuggets room?
@@ -223,6 +227,10 @@ THERE ARE BARS OF SILVER HERE!
 >>> game.lamp_turns
 34
 
+----------------------------------
+Making sure that hints are offered
+----------------------------------
+
 If you act confused, the game should offer you a hint.  Here are quick
 (but certainly not thorough!) tests of whether the logic for each hint
 allows it to be offered.
@@ -295,6 +303,10 @@ YOU ARE AT WITT'S END.  PASSAGES LEAD OFF IN *ALL* DIRECTIONS.
 <BLANKLINE>
 DO YOU NEED HELP GETTING OUT OF HERE?
 <BLANKLINE>
+
+------------------------
+Your lamp is getting dim
+------------------------
 
 There is an elaborate set of messages generated for the player as their
 lamp starts to grow dim.  You can, of course, replentish the lamp using
@@ -388,6 +400,10 @@ YOUR LAMP IS GETTING DIM.  YOU'D BEST GO BACK FOR THOSE BATTERIES.
 <BLANKLINE>
 YOU ARE IN A LITTLE MAZE OF TWISTING PASSAGES, ALL DIFFERENT.
 <BLANKLINE>
+
+----------------------------------
+Basic and advanced command parsing
+----------------------------------
 
 Various complaints are associated with poorly-chosen requests.
 
@@ -523,6 +539,10 @@ I DON'T UNDERSTAND THAT!
 >>> throw(drop)
 WHAT?
 <BLANKLINE>
+
+---------------
+Special motions
+---------------
 
 The "back" movement command has to handle several special cases, in case
 the previous location was an intermediate "forced" room, or if it simply
@@ -686,6 +706,10 @@ WHICH WAY?
 <BLANKLINE>
 YOU ARE IN A JUMBLE OF ROCK, WITH CRACKS EVERYWHERE.
 <BLANKLINE>
+
+---------------
+Verb edge cases
+---------------
 
 And now, we exercise dozens of fiddly edge cases for verbs.
 
@@ -1199,6 +1223,54 @@ THERE IS A MASSIVE VENDING MACHINE HERE.  THE INSTRUCTIONS ON IT READ:
 >>> read(lamp)
 I'M AFRAID I DON'T UNDERSTAND.
 <BLANKLINE>
+
+>>> quiet(restart(), goto(97))
+>>> smash(vase)
+YOU HAVE TAKEN THE VASE AND HURLED IT DELICATELY TO THE GROUND.
+<BLANKLINE>
+>>> get(vase)
+YOU CAN'T BE SERIOUS!
+<BLANKLINE>
+>>> quiet(restart(), goto(97))
+>>> get(vase)                   # can we also break it while carrying it?
+OK
+<BLANKLINE>
+>>> smash(vase)
+YOU HAVE TAKEN THE VASE AND HURLED IT DELICATELY TO THE GROUND.
+<BLANKLINE>
+>>> inventory
+YOU ARE CURRENTLY HOLDING THE FOLLOWING:
+<BLANKLINE>
+BRASS LANTERN
+<BLANKLINE>
+>>> look
+THIS IS THE ORIENTAL ROOM.  ANCIENT ORIENTAL CAVE DRAWINGS COVER THE
+WALLS.  A GENTLY SLOPING PASSAGE LEADS UPWARD TO THE NORTH, ANOTHER
+PASSAGE LEADS SE, AND A HANDS AND KNEES CRAWL LEADS WEST.
+<BLANKLINE>
+THE FLOOR IS LITTERED WITH WORTHLESS SHARDS OF POTTERY.
+<BLANKLINE>
+>>> quiet(goto(109))
+>>> smash(mirror)
+IT IS TOO FAR UP FOR YOU TO REACH.
+<BLANKLINE>
+>>> smash(lamp)
+IT IS BEYOND YOUR POWER TO DO THAT.
+<BLANKLINE>
+
+>>> quiet(restart())
+>>> wake(keys)
+DON'T BE RIDICULOUS!
+<BLANKLINE>
+
+>>> quiet(restart())
+>>> suspend
+PROVIDE "SUSPEND" WITH A FILENAME OR OPEN FILE
+<BLANKLINE>
+
+----------------
+Closing the cave
+----------------
 
 todo: test plant2 in repository
 

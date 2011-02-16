@@ -34,7 +34,6 @@ class Data(object):
     def referent(self, word):
         if word.kind == 'noun':
             return self.objects[word.n % 1000]
-        raise ValueError('no idea what {} refers to'.format(word))
 
 # Helper functions.
 
@@ -100,7 +99,7 @@ def section3(data, x, y, *verbs):
         move.is_forced = True
     else:
         move.verbs = [ make_object(data.vocabulary, Word, verb_n)
-                       for verb_n in verbs ]
+                       for verb_n in verbs if verb_n < 100 ] # skip bad "109"
     move.condition = condition
     move.action = action
     data.rooms[x].travel_table.append(move)

@@ -60,9 +60,25 @@ comes built-in with Python 3.2::
     $ python3.2 -m unittest discover adventure
 
 I wrote most of this package over Christmas vacation 2010, to learn more
-about the workings of the game that so entralled me as a child; the
+about the workings of the game that so enthralled me as a child; the
 project also gave me practice writing Python 3.  I still forget the
 parentheses when writing ``print()`` if I am not paying attention.
+
+Notes
+=====
+
+* Several Adventure commands conflict with standard Python built-in
+  functions.  The function “exit” is so important that I refused to
+  overwrite it, so you will have to use one of the synonyms “out,”
+  “outside,” or “leave” instead.  Similarly, use “unlock” instead of
+  “open.”
+
+* I use the Python functions “quit” and “help” less often, so I allow
+  the game to replace them with Colossal Cave commands.
+
+* The word “break” is a Python keyword, so there was no possibility of
+  using it in the game.  Instead, use one of the two synonyms defined by
+  the PDP version of Adventure: “shatter” or “smash.”
 
 Todo
 ====

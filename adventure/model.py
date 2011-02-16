@@ -19,22 +19,21 @@ class Move(object):
         elif c == 'not_dwarf':
             condition = ' if not a dwarf'
         elif c == 'carrying':
-            condition = ' if carrying %s'
+            condition = ' if carrying %s' % self.condition[1]
         elif c == 'carrying_or_in_room_with':
-            condition = ' if carrying or in room with %s'
+            condition = ' if carrying or in room with %s' % self.condition[1]
         elif c == 'prop!=':
             condition = ' if prop %d != %d' % self.condition[1:]
-        else:
-            condition = ' if X'
 
         if isinstance(self.action, Room):
-            action = 'moves to %r' % self.action.description
+            action = 'moves to %r' % (self.action.short_description
+                or self.action.long_description[:20]).strip()
         elif isinstance(self.action, Message):
             action = 'prints %r' % self.action.text
         else:
             action = 'special %d' % self.action
 
-        return '<%s%s %s>' % ('|'.join(verblist), condition, action)
+        return '<{}{} {}>'.format('|'.join(verblist), condition, action)
 
 class Room(object):
     """A location in the game."""
@@ -56,6 +55,9 @@ class Room(object):
 
     def __init__(self):
         self.travel_table = []
+
+    def __repr__(self):
+        return '<room {} at {}>'.format(self.n, hex(id(self)))
 
     @property
     def is_forced(self):
@@ -121,10 +123,6 @@ class Object(object):
 
     def __eq__(self, other):
         return any( text == other for text in self.names )
-
-    @property
-    def name(self):
-        return self.names[0]
 
     def is_at(self, room):
         return room in self.rooms
