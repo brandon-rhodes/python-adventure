@@ -99,7 +99,10 @@ class Game(Data):
         return [ obj for obj in self.object_list if room in obj.rooms ]
 
     def is_here(self, obj):
-        return obj.is_toting or (self.loc in obj.rooms)
+        if isinstance(obj, Dwarf):
+            return self.loc is obj.room
+        else:
+            return obj.is_toting or (self.loc in obj.rooms)
 
     # Game startup
 
@@ -1066,7 +1069,7 @@ class Game(Data):
         enemies = [ self.snake, self.dragon, self.troll, self.bear ]
         if self.dwarf_stage >= 2:
             enemies.extend(self.dwarves)
-        dangers = filter(self.is_here, enemies)
+        dangers = list(filter(self.is_here, enemies))
         if len(dangers) > 1:
             return self.ask_verb_what(verb)
         if len(dangers) == 1:

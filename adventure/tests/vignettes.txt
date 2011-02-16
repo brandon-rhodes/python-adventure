@@ -824,6 +824,62 @@ IT IS NOW PITCH DARK.  IF YOU PROCEED YOU WILL LIKELY FALL INTO A PIT.
 YOUR LAMP HAS RUN OUT OF POWER.
 <BLANKLINE>
 
+>>> restart()
+>>> wave(lamp)
+NOTHING HAPPENS.
+<BLANKLINE>
+>>> wave(keys)
+YOU AREN'T CARRYING IT!
+<BLANKLINE>
+
+The "attack" verb is a particularly long test, because its intransitive
+form works hard to determine - in two stages, focusing first on real
+enemies and then on some harmless objects - what on earth you could
+possibly be designating as a target.
+
+>>> restart(dwarves=True)
+>>> attack
+THERE IS NOTHING HERE TO ATTACK.
+<BLANKLINE>
+>>> quiet(goto(117))
+>>> attack
+TROLLS ARE CLOSE RELATIVES WITH THE ROCKS AND HAVE SKIN AS TOUGH AS
+THAT OF A RHINOCEROS.  THE TROLL FENDS OFF YOUR BLOWS EFFORTLESSLY.
+<BLANKLINE>
+>>> game.dwarf_stage = 2
+>>> game.dwarves[0].room = game.loc
+>>> attack                      # now there are two choices: dwarf and troll
+ATTACK WHAT?
+<BLANKLINE>
+>>> attack(dwarf)
+WITH WHAT?  YOUR BARE HANDS?
+<BLANKLINE>
+>>> quiet(goto(103), get(clam), goto(13))
+>>> attack                      # cannot decide between oyster and bird
+ATTACK WHAT?
+<BLANKLINE>
+>>> quiet(w, drop(clam), e)
+>>> attack
+THE LITTLE BIRD IS NOW DEAD.  ITS BODY DISAPPEARS.
+<BLANKLINE>
+>>> look                        # make sure the bird is really gone
+YOU ARE IN A SPLENDID CHAMBER THIRTY FEET HIGH.  THE WALLS ARE FROZEN
+RIVERS OF ORANGE STONE.  AN AWKWARD CANYON AND A GOOD PASSAGE EXIT
+FROM EAST AND WEST SIDES OF THE CHAMBER.
+<BLANKLINE>
+>>> quiet(w)
+>>> attack
+THE SHELL IS VERY STRONG AND IS IMPERVIOUS TO ATTACK.
+<BLANKLINE>
+>>> quiet(goto(119))
+>>> attack(dragon)
+WITH WHAT?  YOUR BARE HANDS?
+<BLANKLINE>
+>>> quiet(yes)
+>>> attack(dragon)
+FOR CRYING OUT LOUD, THE POOR THING IS ALREADY DEAD!
+<BLANKLINE>
+
 
 todo: test plant2 in repository
 
