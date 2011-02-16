@@ -999,11 +999,12 @@ class Game(Data):
                         self.write_message(173)
                     elif self.chain.prop != 0:
                         self.write_message(34)
-                    self.chain.prop = 2
-                    if self.chain.is_toting:
-                        self.chain.drop(self.loc)
-                    self.chain.is_fixed = True
-                    self.write_message(172)
+                    else:
+                        self.chain.prop = 2
+                        if self.chain.is_toting:
+                            self.chain.drop(self.loc)
+                        self.chain.is_fixed = True
+                        self.write_message(172)
             elif self.is_closing:
                 if not self.panic:
                     self.clock2 = 15
@@ -1015,8 +1016,6 @@ class Game(Data):
                 obj.prop = 0 if verb == 'lock' else 1
                 self.write_message(34 + oldprop + 2 * obj.prop)
         else:
-            self.write(verb.names)
-            self.write(obj.names)
             self.write(verb.default_message)
         self.finish_turn()
 
@@ -1025,7 +1024,7 @@ class Game(Data):
     def t_light(self, verb, obj=None):  #9070
         if not self.is_here(self.lamp):
             self.write(verb.default_message)
-        elif self.lamp_turns == 0:
+        elif self.lamp_turns <= 0:
             self.write_message(184)
         else:
             self.lamp.prop = 1
