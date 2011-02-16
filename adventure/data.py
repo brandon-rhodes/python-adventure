@@ -7,7 +7,7 @@ from .model import Hint, Message, Move, Object, Room, Word
 # word in the game, so we have to know the full verion of each word.
 
 long_words = { w[:5]: w for w in """upstream downstream forest
-forward continue onward return retreat valley stairs outside stream
+forward continue onward return retreat valley staircase outside building stream
 cobble inward inside surface nowhere passage tunnel canyon awkward
 upward ascend downward descend outdoors barren across debris broken
 examine describe slabroom depression entrance secret bedquilt plover
