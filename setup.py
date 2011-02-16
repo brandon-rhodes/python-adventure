@@ -7,8 +7,8 @@ with open(README_PATH) as f:
 
 setup(
     name='adventure',
-    version='0.3',
-    description='Colossal cave adventure game at the Python prompt',
+    version='1.0',
+    description='Colossal Cave adventure game at the Python prompt',
     long_description=README_TEXT,
     author='Brandon Craig Rhodes',
     author_email='brandon@rhodesmill.org',
@@ -16,7 +16,7 @@ setup(
     packages=['adventure', 'adventure/tests'],
     package_data={'adventure': ['README.txt', '*.dat', 'tests/*.txt']},
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 6 - Mature',
         'Environment :: Console',
         'Intended Audience :: End Users/Desktop',
         'License :: OSI Approved :: BSD License',

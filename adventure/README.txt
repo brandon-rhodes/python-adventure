@@ -1,12 +1,12 @@
 This is a faithful port of the “Adventure” game to Python 3 from the
-original 1977 FORTRAN code by Crowther and Woods, driven by the same
-``advent.dat`` file, that lets you explore Colossal Cave, where others
-have found fortunes in treasure and gold, though it is rumored that some
-who enter are never seen again.  To encourage the use of Python 3, the
-game is designed to be played right at the Python prompt.  Single-word
-commands can be typed by themselves, but two-word commands should be
-written as a function call (since a two-word command would not be valid
-Python)::
+original 1977 FORTRAN code by Crowther and Woods (it is driven by the
+same ``advent.dat`` file!) that lets you explore Colossal Cave, where
+others have found fortunes in treasure and gold, though it is rumored
+that some who enter are never seen again.  To encourage the use of
+Python 3, the game is designed to be played right at the Python prompt.
+Single-word commands can be typed by themselves, but two-word commands
+should be written as a function call (since a two-word command would not
+be valid Python)::
 
     >>> import adventure
     >>> adventure.play()
@@ -80,17 +80,8 @@ Notes
   using it in the game.  Instead, use one of the two synonyms defined by
   the PDP version of Adventure: “shatter” or “smash.”
 
-Todo
-====
-
-* Add commands to save and load the game.
-* Improve the test coverage with situation-specific tests.
-* Once coverage has reached 100%, start cleaning, refactoring, and
-  improving the code — right now it is laid out very much like the
-  original FORTRAN, to make it easier to determine whether its logic
-  really matches.
-
 Changelog
 =========
 
-| 2011 January 31 — 0.3 — first public release
+| 1.0 — 2011 February 15 — 100% test coverage, feature-complete
+| 0.3 — 2011 January 31 — first public release
