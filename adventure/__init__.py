@@ -1,11 +1,9 @@
 """The Adventure game."""
 
-import os
-from .data import parse
-from .game import Game
-from .prompt import install_builtins
-
 def load_advent_dat(data):
+    import os
+    from .data import parse
+
     datapath = os.path.join(os.path.dirname(__file__), 'advent.dat')
     with open(datapath, 'r', encoding='ascii') as datafile:
         parse(data, datafile)
@@ -22,6 +20,9 @@ def play(seed=None):
     """
     global _game
 
+    from .game import Game
+    from .prompt import install_builtins
+
     _game = Game(seed)
     load_advent_dat(_game)
     install_builtins(_game)
@@ -30,6 +31,9 @@ def play(seed=None):
 
 def resume(savefile, quiet=False):
     global _game
+
+    from .game import Game
+    from .prompt import install_builtins
 
     _game = Game.resume(savefile)
     install_builtins(_game)
