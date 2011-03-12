@@ -64,6 +64,34 @@ about the workings of the game that so enthralled me as a child; the
 project also gave me practice writing Python 3.  I still forget the
 parentheses when writing ``print()`` if I am not paying attention.
 
+Traditional Mode
+================
+
+You can also use this package to play Adventure at a traditional prompt
+that does not require its input to be valid Python.  Use your operating
+system command line to run the package::
+
+    $ python -m adventure
+
+At the prompt that will appear, two-word commands can simply be
+separated by a space::
+
+    > get lamp
+    OK
+
+For extra authenticity, the output of the Adventure game in this mode is
+typed to your screen at 1200 baud.  You will note that although this
+prints the text faster than you can read it anyway, your experience of
+the game will improve considerably, especially when a move results in a
+surprise.
+
+Why is the game better at 1200 baud?  When a paragraph of text is
+allowed to appear on the screen all at once, your eyes scan the entire
+paragraph for important information, often ruining any surprises before
+you can then settle down and read it from the beginning.  But at 1200
+baud, you wind up scanning the text in order as it appears, which
+unfolds the narrative sequentially as the author of Adventure intended.
+
 Notes
 =====
 
@@ -83,5 +111,6 @@ Notes
 Changelog
 =========
 
+| 1.1 — 2011 March 12 — “-m” traditional prompt
 | 1.0 — 2011 February 15 — 100% test coverage, feature-complete
 | 0.3 — 2011 January 31 — first public release

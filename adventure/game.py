@@ -105,6 +105,10 @@ class Game(Data):
         else:
             return obj.is_toting or (self.loc in obj.rooms)
 
+    @property
+    def is_finished(self):
+        return self.is_dead and not self.yesno_callback
+
     # Game startup
 
     def start(self):
