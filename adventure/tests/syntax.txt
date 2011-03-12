@@ -1,0 +1,63 @@
+>>> import adventure
+>>> adventure.play(seed=2)
+WELCOME TO ADVENTURE!!  WOULD YOU LIKE INSTRUCTIONS?
+<BLANKLINE>
+>>> no
+YOU ARE STANDING AT THE END OF A ROAD BEFORE A SMALL BRICK BUILDING.
+AROUND YOU IS A FOREST.  A SMALL STREAM FLOWS OUT OF THE BUILDING AND
+DOWN A GULLY.
+<BLANKLINE>
+>>> brief
+OKAY, FROM NOW ON I'LL ONLY DESCRIBE A PLACE IN FULL THE FIRST TIME
+YOU COME TO IT.  TO GET THE FULL DESCRIPTION, SAY "LOOK".
+<BLANKLINE>
+
+This doctest exercises all of the different ways that people try to
+invoke Adventure commands from the Python prompt.
+
+Simple movement can be invoked simply by typing the direction, but some
+players will try to call them as functions instead.
+
+>>> s
+YOU ARE IN A VALLEY IN THE FOREST BESIDE A STREAM TUMBLING ALONG A
+ROCKY BED.
+<BLANKLINE>
+>>> n()
+YOU'RE AT END OF ROAD AGAIN.
+<BLANKLINE>
+
+That pretty much exhausts the possibilities when a word is being used
+alone as a command.  But when two words are being combined, there are
+several different ways that they might be called!
+
+One word can be used as a function and the second as an argument:
+
+>>> goto(building)
+YOU ARE INSIDE A BUILDING, A WELL HOUSE FOR A LARGE SPRING.
+<BLANKLINE>
+THERE ARE SOME KEYS ON THE GROUND HERE.
+<BLANKLINE>
+THERE IS A SHINY BRASS LAMP NEARBY.
+<BLANKLINE>
+THERE IS FOOD HERE.
+<BLANKLINE>
+THERE IS A BOTTLE OF WATER HERE.
+<BLANKLINE>
+
+Or, a period can be used to separate the words.  Note that nouns and
+verbs can be in either order.
+
+>>> get.keys
+OK
+<BLANKLINE>
+>>> lamp.get
+OK
+<BLANKLINE>
+
+Why do we support putting the noun and verb in either order?  Because
+some users think of verbs as methods supported by the game's nouns, and
+will format their commands like method calls:
+
+>>> food.get()
+OK
+<BLANKLINE>

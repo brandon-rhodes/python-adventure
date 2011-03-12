@@ -21,6 +21,9 @@ class ReprTriggeredPhrase(object):
         words = arg.words if isinstance(arg, ReprTriggeredPhrase) else (arg,)
         return ReprTriggeredPhrase(self.game, self.words + words)
 
+    def __getattr__(self, name):
+        return ReprTriggeredPhrase(self.game, self.words + (name,))
+
 
 def install_words(game):
     # stack()[0] is this; stack()[1] is adventure.play(); so, stack()[2]

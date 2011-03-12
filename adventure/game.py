@@ -515,7 +515,7 @@ class Game(Data):
                 self.write_message(43)
             return self.finish_turn()
 
-        if word1 == 'enter' and word2:
+        if (word1 == 'enter' or word1 == 'walk') and word2:
             #2800  'enter house' becomes simply 'house' and so forth
             word1, word2 = word2, None
 
@@ -547,6 +547,8 @@ class Game(Data):
             verb, noun = word1, None
         elif kinds == ('verb', 'noun'):
             verb, noun = word1, word2
+        elif kinds == ('noun', 'verb'):
+            noun, verb = word1, word2
         else:
             return self.dont_understand()
 
