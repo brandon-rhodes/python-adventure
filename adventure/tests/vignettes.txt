@@ -60,7 +60,7 @@ move the caller into that room, and the second when it calls look().
 ...     adventure.resume(savefile, quiet=True)
 ...     game = adventure._game
 ...     if room is not None:
-...         _goto(room)
+...         _go_to(room)
 ...     room = game.loc
 ...     if not dwarves:
 ...         game.dwarf_stage = 2
@@ -72,17 +72,17 @@ move the caller into that room, and the second when it calls look().
 ...     if randoms is not None:
 ...         game.random = list(randoms).pop
 
->>> class goto(object):
+>>> class go_to(object):
 ...     """Special command that warps us directly to a location."""
 ...
 ...     def __init__(self, room):
 ...         self.room = room
 ...     def __repr__(self):
 ...         game.output = ''
-...         _goto(self.room)
+...         _go_to(self.room)
 ...         return game.output.rstrip('\n') + '\n'
 
->>> def _goto(room):
+>>> def _go_to(room):
 ...     game.move_to(game.rooms[room] if isinstance(room, int) else room)
 
 >>> def quiet(*args):
@@ -174,7 +174,7 @@ WITH THAT, HE VANISHES INTO THE GLOOM.
 <BLANKLINE>
 YOU ARE IN A SECRET N/S CANYON ABOVE A LARGE ROOM.
 <BLANKLINE>
->>> goto(game.chest_room)
+>>> go_to(game.chest_room)
 DEAD END
 <BLANKLINE>
 THE PIRATE'S TREASURE CHEST IS HERE!
@@ -210,7 +210,7 @@ turns left.
 ...     t.drop(game.loc)
 >>> quiet(look)
 >>> game.bird.carry()
->>> goto(119)
+>>> go_to(119)
 YOU ARE IN A SECRET CANYON WHICH EXITS TO THE NORTH AND EAST.
 <BLANKLINE>
 A HUGE GREEN FIERCE DRAGON BARS THE WAY!
@@ -221,7 +221,7 @@ GETS BURNT TO A CINDER.  THE ASHES BLOW AWAY.
 <BLANKLINE>
 >>> game.lamp_turns
 326
->>> goto(28)
+>>> go_to(28)
 YOU ARE IN A LOW N/S PASSAGE AT A HOLE IN THE FLOOR.  THE HOLE GOES
 DOWN TO AN E/W PASSAGE.
 <BLANKLINE>
@@ -325,8 +325,8 @@ MACHINE IN THE MAZE.  BRING SOME COINS WITH YOU.
 <BLANKLINE>
 YOU ARE IN A JUMBLE OF ROCK, WITH CRACKS EVERYWHERE.
 <BLANKLINE>
->>> quiet(goto(30), get(coins))
->>> goto(140)
+>>> quiet(go_to(30), get(coins))
+>>> go_to(140)
 DEAD END
 <BLANKLINE>
 THERE IS A MASSIVE VENDING MACHINE HERE.  THE INSTRUCTIONS ON IT READ:
@@ -359,7 +359,7 @@ YOUR LAMP HAS RUN OUT OF POWER.
 <BLANKLINE>
 IT IS NOW PITCH DARK.  IF YOU PROCEED YOU WILL LIKELY FALL INTO A PIT.
 <BLANKLINE>
->>> goto(5)
+>>> go_to(5)
 YOU'RE IN FOREST.
 <BLANKLINE>
 >>> w
@@ -378,7 +378,7 @@ If the batteries are in the user's inventory when replaced, then the old
 ones are tossed on the ground rather than remaining in the inventory.
 
 >>> restart(room=30)
->>> quiet(get(coins), goto(140), drop(coins))
+>>> quiet(get(coins), go_to(140), drop(coins))
 >>> get(batteries)
 OK
 <BLANKLINE>
@@ -399,7 +399,7 @@ SOME WORN-OUT BATTERIES HAVE BEEN DISCARDED NEARBY.
 Finally, if you leave the batteries in the maze, you are warned to go
 back and get them.
 
->>> quiet(restart(room=34), goto(30), get(coins), goto(140), drop(coins), n)
+>>> quiet(restart(room=34), go_to(30), get(coins), go_to(140), drop(coins), n)
 >>> game.lamp_turns = 30
 >>> look
 YOUR LAMP IS GETTING DIM.  YOU'D BEST GO BACK FOR THOSE BATTERIES.
@@ -417,7 +417,7 @@ Various complaints are associated with poorly-chosen requests.
 >>> enter(water)
 WHERE?
 <BLANKLINE>
->>> quiet(goto(7))
+>>> quiet(go_to(7))
 >>> enter(water)
 YOUR FEET ARE NOW WET.
 <BLANKLINE>
@@ -448,7 +448,7 @@ THE WAY NORTH IS BARRED BY A MASSIVE, RUSTY, IRON DOOR.
 >>> oil(door)
 I SEE NO OIL HERE.
 <BLANKLINE>
->>> goto(25)
+>>> go_to(25)
 YOU'RE IN WEST PIT.
 <BLANKLINE>
 THERE IS A TINY LITTLE PLANT IN THE PIT, MURMURING "WATER, WATER, ..."
@@ -475,7 +475,7 @@ YOU'RE OUTSIDE GRATE.
 <BLANKLINE>
 THE GRATE IS LOCKED.
 <BLANKLINE>
->>> goto(12)
+>>> go_to(12)
 YOU ARE IN AN AWKWARD SLOPING EAST/WEST CANYON.
 <BLANKLINE>
 >>> grate
@@ -488,7 +488,7 @@ THE GRATE IS LOCKED.
 I SEE NO DWARF HERE.
 <BLANKLINE>
 
->>> quiet(goto(3))
+>>> quiet(go_to(3))
 >>> get(water)
 OK
 <BLANKLINE>
@@ -504,7 +504,7 @@ WATER IN THE BOTTLE
 I SEE NO KNIFE HERE.
 <BLANKLINE>
 >>> game.dwarf_stage = 2
->>> goto(27)
+>>> go_to(27)
 THERE IS A THREATENING LITTLE DWARF IN THE ROOM WITH YOU!
 <BLANKLINE>
 ONE SHARP NASTY KNIFE IS THROWN AT YOU!
@@ -568,9 +568,9 @@ TO EXPLORE AT RANDOM SELECT NORTH, SOUTH, UP, OR DOWN.
 While testing "back" on the beanstalk, we also test for whether we can
 run a command like "get" on the plant as seen from outside the pits.
 
->>> quiet(restart(), get(bottle), goto(25), pour(water))
->>> quiet(goto(113), get(water), goto(25), pour(water))
->>> goto(88)
+>>> quiet(restart(), get(bottle), go_to(25), pour(water))
+>>> quiet(go_to(113), get(water), go_to(25), pour(water))
+>>> go_to(88)
 YOU'RE IN NARROW CORRIDOR.
 <BLANKLINE>
 >>> d
@@ -583,7 +583,7 @@ YOU CLAMBER UP THE PLANT AND SCURRY THROUGH THE HOLE AT THE TOP.
 <BLANKLINE>
 YOU'RE IN NARROW CORRIDOR.
 <BLANKLINE>
->>> goto(23)
+>>> go_to(23)
 YOU'RE AT WEST END OF TWOPIT ROOM.
 <BLANKLINE>
 THERE IS A HUGE BEANSTALK GROWING OUT OF THE WEST PIT UP TO THE HOLE.
@@ -591,13 +591,13 @@ THERE IS A HUGE BEANSTALK GROWING OUT OF THE WEST PIT UP TO THE HOLE.
 >>> find(beanstalk)
 I BELIEVE WHAT YOU WANT IS RIGHT HERE WITH YOU.
 <BLANKLINE>
->>> goto(67)
+>>> go_to(67)
 YOU'RE AT EAST END OF TWOPIT ROOM.
 <BLANKLINE>
 THERE IS A HUGE BEANSTALK GROWING OUT OF THE WEST PIT UP TO THE HOLE.
 <BLANKLINE>
 
->>> goto(91)
+>>> go_to(91)
 YOU'RE AT STEEP INCLINE ABOVE LARGE ROOM.
 <BLANKLINE>
 >>> d
@@ -619,7 +619,7 @@ bridge, the items would be permanently lost!  (We also try feeding the
 bear a few times, to test some special cases in the feed() logic while
 we are at it.)
 
->>> quiet(restart(), get(keys), goto(123))
+>>> quiet(restart(), get(keys), go_to(123))
 >>> game.bear.carry()
 >>> game.bear.prop = 2
 >>> game.bear.is_fixed = False
@@ -655,7 +655,7 @@ HELP YOU OUT, BUT I'VE NEVER REALLY DONE THIS BEFORE.  DO YOU WANT ME
 TO TRY TO REINCARNATE YOU?
 <BLANKLINE>
 >>> quiet(yes, leave, get(lamp), on)
->>> goto(117)
+>>> go_to(117)
 YOU'RE ON SW SIDE OF CHASM.
 <BLANKLINE>
 THERE ARE SOME KEYS ON THE GROUND HERE.
@@ -734,11 +734,11 @@ CARRY WHAT?
 THE PLANT HAS EXCEPTIONALLY DEEP ROOTS AND CANNOT BE PULLED FREE.
 <BLANKLINE>
 
->>> quiet(restart(), goto(24))
+>>> quiet(restart(), go_to(24))
 >>> get(oil)
 YOU HAVE NOTHING IN WHICH TO CARRY IT.
 <BLANKLINE>
->>> quiet(goto(3), get(bottle), goto(24))
+>>> quiet(go_to(3), get(bottle), go_to(24))
 >>> get(oil)
 YOUR BOTTLE IS ALREADY FULL.
 <BLANKLINE>
@@ -807,11 +807,11 @@ THE DOOR IS EXTREMELY RUSTY AND REFUSES TO OPEN.
 >>> unlock(keys)
 YOU CAN'T UNLOCK THE KEYS.
 <BLANKLINE>
->>> quiet(get(keys), get(food), goto(10))
+>>> quiet(get(keys), get(food), go_to(10))
 >>> unlock(cage)
 IT HAS NO LOCK.
 <BLANKLINE>
->>> quiet(goto(130))
+>>> quiet(go_to(130))
 >>> lock(chain)
 IT WAS ALREADY LOCKED.
 <BLANKLINE>
@@ -884,7 +884,7 @@ possibly be designating as a target.
 >>> attack
 THERE IS NOTHING HERE TO ATTACK.
 <BLANKLINE>
->>> quiet(goto(117))
+>>> quiet(go_to(117))
 >>> attack
 TROLLS ARE CLOSE RELATIVES WITH THE ROCKS AND HAVE SKIN AS TOUGH AS
 THAT OF A RHINOCEROS.  THE TROLL FENDS OFF YOUR BLOWS EFFORTLESSLY.
@@ -897,7 +897,7 @@ ATTACK WHAT?
 >>> attack(dwarf)
 WITH WHAT?  YOUR BARE HANDS?
 <BLANKLINE>
->>> quiet(goto(103), get(clam), goto(13))
+>>> quiet(go_to(103), get(clam), go_to(13))
 >>> attack                      # cannot decide between oyster and bird
 ATTACK WHAT?
 <BLANKLINE>
@@ -914,7 +914,7 @@ FROM EAST AND WEST SIDES OF THE CHAMBER.
 >>> attack
 THE SHELL IS VERY STRONG AND IS IMPERVIOUS TO ATTACK.
 <BLANKLINE>
->>> quiet(goto(119))
+>>> quiet(go_to(119))
 >>> attack(dragon)
 WITH WHAT?  YOUR BARE HANDS?
 <BLANKLINE>
@@ -930,11 +930,11 @@ YOUR BOTTLE IS EMPTY AND THE GROUND IS WET.
 >>> pour
 POUR WHAT?
 <BLANKLINE>
->>> quiet(goto(24), get(oil), goto(25))
+>>> quiet(go_to(24), get(oil), go_to(25))
 >>> pour(bottle)
 THE PLANT INDIGNANTLY SHAKES THE OIL OFF ITS LEAVES AND ASKS, "WATER?"
 <BLANKLINE>
->>> quiet(goto(24), get(oil))
+>>> quiet(go_to(24), get(oil))
 >>> pour
 YOUR BOTTLE IS EMPTY AND THE GROUND IS WET.
 <BLANKLINE>
@@ -952,7 +952,7 @@ THANK YOU, IT WAS DELICIOUS!
 >>> eat
 EAT WHAT?
 <BLANKLINE>
->>> quiet(goto(13))
+>>> quiet(go_to(13))
 >>> eat(bird)
 I THINK I JUST LOST MY APPETITE.
 <BLANKLINE>
@@ -996,7 +996,7 @@ DOWN A GULLY.
 <BLANKLINE>
 THERE IS A LAMP SHINING NEARBY.
 <BLANKLINE>
->>> quiet(get(lamp), goto(130))
+>>> quiet(get(lamp), go_to(130))
 >>> throw(axe)
 THE AXE MISSES AND LANDS NEAR THE BEAR WHERE YOU CAN'T GET AT IT.
 <BLANKLINE>
@@ -1044,7 +1044,7 @@ YOU ARE ALREADY CARRYING IT!
 I BELIEVE WHAT YOU WANT IS RIGHT HERE WITH YOU.
 <BLANKLINE>
 
->>> quiet(restart(), get(food), get(keys), goto(130), throw(food), unlock)
+>>> quiet(restart(), get(food), get(keys), go_to(130), throw(food), unlock)
 >>> get(bear)
 OK
 <BLANKLINE>
@@ -1056,16 +1056,16 @@ BRASS LANTERN
 YOU ARE BEING FOLLOWED BY A VERY LARGE, TAME BEAR.
 <BLANKLINE>
 
->>> quiet(restart(dwarves=True), goto(10), get(cage), goto(13))
+>>> quiet(restart(dwarves=True), go_to(10), get(cage), go_to(13))
 >>> feed(bird)
 IT'S NOT HUNGRY (IT'S MERELY PININ' FOR THE FJORDS).  BESIDES, YOU
 HAVE NO BIRD SEED.
 <BLANKLINE>
->>> quiet(get(bird), goto(117))
+>>> quiet(get(bird), go_to(117))
 >>> feed(troll)
 GLUTTONY IS NOT ONE OF THE TROLL'S VICES.  AVARICE, HOWEVER, IS.
 <BLANKLINE>
->>> quiet(goto(119))
+>>> quiet(go_to(119))
 >>> feed(dragon)
 THERE'S NOTHING HERE IT WANTS TO EAT (EXCEPT PERHAPS YOU).
 <BLANKLINE>
@@ -1073,7 +1073,7 @@ THERE'S NOTHING HERE IT WANTS TO EAT (EXCEPT PERHAPS YOU).
 >>> feed(dragon)
 DON'T BE RIDICULOUS!
 <BLANKLINE>
->>> quiet(goto(19))
+>>> quiet(go_to(19))
 >>> feed(snake)
 THE SNAKE HAS NOW DEVOURED YOUR BIRD.
 <BLANKLINE>
@@ -1089,7 +1089,7 @@ THERE IS NOTHING HERE TO EAT.
 >>> feed(dwarf)
 YOU FOOL, DWARVES EAT ONLY COAL!  NOW YOU'VE MADE HIM *REALLY* MAD!!
 <BLANKLINE>
->>> quiet(goto(129), drop(food), e)
+>>> quiet(go_to(129), drop(food), e)
 >>> feed(bear)
 THERE'S NOTHING HERE IT WANTS TO EAT (EXCEPT PERHAPS YOU).
 <BLANKLINE>
@@ -1108,7 +1108,7 @@ YOUR BOTTLE IS ALREADY FULL.
 >>> fill
 THERE IS NOTHING HERE WITH WHICH TO FILL THE BOTTLE.
 <BLANKLINE>
->>> quiet(drop(bottle), goto(97))
+>>> quiet(drop(bottle), go_to(97))
 >>> fill(vase)
 YOU CAN'T FILL THAT.
 <BLANKLINE>
@@ -1116,7 +1116,7 @@ YOU CAN'T FILL THAT.
 >>> fill(vase)
 THERE IS NOTHING HERE WITH WHICH TO FILL THE VASE.
 <BLANKLINE>
->>> quiet(goto(38))
+>>> quiet(go_to(38))
 >>> fill(vase)
 THE SUDDEN CHANGE IN TEMPERATURE HAS DELICATELY SHATTERED THE VASE.
 <BLANKLINE>
@@ -1158,11 +1158,11 @@ YOUR SCORE QUALIFIES YOU AS A NOVICE CLASS ADVENTURER.
 TO ACHIEVE THE NEXT HIGHER RATING, YOU NEED 70 MORE POINTS
 <BLANKLINE>
 
->>> quiet(restart(), goto(92), fee, fie, foe)
+>>> quiet(restart(), go_to(92), fee, fie, foe)
 >>> foo                         # does nothing obvious since the eggs are here
 OK
 <BLANKLINE>
->>> quiet(get(eggs), goto(117))
+>>> quiet(get(eggs), go_to(117))
 >>> throw(eggs)
 THE TROLL CATCHES YOUR TREASURE AND SCURRIES AWAY OUT OF SIGHT.
 <BLANKLINE>
@@ -1182,7 +1182,7 @@ A BURLY TROLL STANDS BY THE BRIDGE AND INSISTS YOU THROW HIM A
 TREASURE BEFORE YOU MAY CROSS.
 <BLANKLINE>
 
->>> quiet(restart(), goto(106))
+>>> quiet(restart(), go_to(106))
 >>> read
 I'M AFRAID THE MAGAZINE IS WRITTEN IN DWARVISH.
 <BLANKLINE>
@@ -1190,14 +1190,14 @@ I'M AFRAID THE MAGAZINE IS WRITTEN IN DWARVISH.
 >>> read(magazine)
 I SEE NO MAGAZINE HERE.
 <BLANKLINE>
->>> quiet(on, get(magazine), goto(101))
+>>> quiet(on, get(magazine), go_to(101))
 >>> read                        # confused by two choices
 READ WHAT?
 <BLANKLINE>
 >>> read(tablet)
 "CONGRATULATIONS ON BRINGING LIGHT INTO THE DARK-ROOM!"
 <BLANKLINE>
->>> quiet(goto(95), get(trident), goto(103), unlock(clam), get(oyster))
+>>> quiet(go_to(95), get(trident), go_to(103), unlock(clam), get(oyster))
 >>> read(oyster)
 HMMM, THIS LOOKS LIKE A CLUE, WHICH MEANS IT'LL COST YOU 10 POINTS TO
 READ IT.  SHOULD I GO AHEAD AND READ IT ANYWAY?
@@ -1209,7 +1209,7 @@ OF THE WORDS I'VE ALWAYS KNOWN NOW HAS A NEW EFFECT."
 >>> read(oyster)
 IT SAYS THE SAME THING IT DID BEFORE.
 <BLANKLINE>
->>> quiet(goto(29), get(gold), goto(112))
+>>> quiet(go_to(29), get(gold), go_to(112))
 >>> game.pirate.room = game.rooms[112]
 >>> look
 OUT FROM THE SHADOWS BEHIND YOU POUNCES A BEARDED PIRATE!  "HAR, HAR,"
@@ -1235,14 +1235,14 @@ THERE IS A MASSIVE VENDING MACHINE HERE.  THE INSTRUCTIONS ON IT READ:
 I'M AFRAID I DON'T UNDERSTAND.
 <BLANKLINE>
 
->>> quiet(restart(), goto(97))
+>>> quiet(restart(), go_to(97))
 >>> smash(vase)
 YOU HAVE TAKEN THE VASE AND HURLED IT DELICATELY TO THE GROUND.
 <BLANKLINE>
 >>> get(vase)
 YOU CAN'T BE SERIOUS!
 <BLANKLINE>
->>> quiet(restart(), goto(97))
+>>> quiet(restart(), go_to(97))
 >>> get(vase)                   # can we also break it while carrying it?
 OK
 <BLANKLINE>
@@ -1261,7 +1261,7 @@ PASSAGE LEADS SE, AND A HANDS AND KNEES CRAWL LEADS WEST.
 <BLANKLINE>
 THE FLOOR IS LITTERED WITH WORTHLESS SHARDS OF POTTERY.
 <BLANKLINE>
->>> quiet(goto(109))
+>>> quiet(go_to(109))
 >>> smash(mirror)
 IT IS TOO FAR UP FOR YOU TO REACH.
 <BLANKLINE>
@@ -1287,7 +1287,7 @@ Finally, there are a few situations we need to test that relate
 specifically to the end-game.  For example, dying while the cave is
 closing causes a very abrupt ending to the game.
 
->>> quiet(restart(), drop(lamp), goto(13))
+>>> quiet(restart(), drop(lamp), go_to(13))
 >>> game.is_closing = 1
 >>> game.start_closing_cave()
 >>> w
@@ -1307,7 +1307,7 @@ TO ACHIEVE THE NEXT HIGHER RATING, YOU NEED 53 MORE POINTS
 Now we reload our saved game one last time, take it through the ending,
 and then save anew so that we can do several tests in the repository.
 
->>> quiet(restart(), get(keys), goto(9))
+>>> quiet(restart(), get(keys), go_to(9))
 >>> game.is_closing = 1
 >>> game.start_closing_cave()
 >>> unlock

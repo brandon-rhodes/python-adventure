@@ -96,13 +96,9 @@ Notes
 =====
 
 * Several Adventure commands conflict with standard Python built-in
-  functions.  The function “exit” is so important that I refused to
-  overwrite it, so you will have to use one of the synonyms “out,”
-  “outside,” or “leave” instead.  Similarly, use “unlock” instead of
-  “open.”
-
-* I use the Python functions “quit” and “help” less often, so I allow
-  the game to replace them with Colossal Cave commands.
+  functions.  If you want to run the normal Python function ``exit()``,
+  ``open()``, ``quit()``, or ``help()``, then import the ``builtin``
+  module and run the copy of the function stored there.
 
 * The word “break” is a Python keyword, so there was no possibility of
   using it in the game.  Instead, use one of the two synonyms defined by
@@ -111,6 +107,6 @@ Notes
 Changelog
 =========
 
-| 1.1 — 2011 March 12 — “-m” traditional prompt
+| 1.1 — 2011 March 12 — “-m” traditional mode; more flexible Python syntax
 | 1.0 — 2011 February 15 — 100% test coverage, feature-complete
 | 0.3 — 2011 January 31 — first public release

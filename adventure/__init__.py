@@ -21,11 +21,11 @@ def play(seed=None):
     global _game
 
     from .game import Game
-    from .prompt import install_builtins
+    from .prompt import install_words
 
     _game = Game(seed)
     load_advent_dat(_game)
-    install_builtins(_game)
+    install_words(_game)
     _game.start()
     print(_game.output[:-1])
 
@@ -33,9 +33,9 @@ def resume(savefile, quiet=False):
     global _game
 
     from .game import Game
-    from .prompt import install_builtins
+    from .prompt import install_words
 
     _game = Game.resume(savefile)
-    install_builtins(_game)
+    install_words(_game)
     if not quiet:
         print('GAME RESTORED\n')

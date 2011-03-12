@@ -1,5 +1,6 @@
 """Routines that install Adventure commands for the Python prompt."""
 
+import inspect
 
 class ReprTriggeredPhrase(object):
     """Command that happens when Python calls repr() to print them."""
@@ -21,16 +22,14 @@ class ReprTriggeredPhrase(object):
         return ReprTriggeredPhrase(self.game, self.words + words)
 
 
-def install_builtins(game):
-    import sys
-    module = sys.modules['builtins']
+def install_words(game):
+    # stack()[0] is this; stack()[1] is adventure.play(); so, stack()[2]
+    namespace = inspect.stack()[2][0].f_globals
     words = [ k for k in game.vocabulary if isinstance(k, str) ]
     words.append('yes')
     words.append('no')
     for word in words:
-        if word in ('exit', 'open'):
-            continue
         identifier = ReprTriggeredPhrase(game, [ word ])
-        setattr(module, word, identifier)
+        namespace[word] = identifier
         if len(word) > 5:
-            setattr(module, word[:5], identifier)
+            namespace[word[:5]] = identifier
