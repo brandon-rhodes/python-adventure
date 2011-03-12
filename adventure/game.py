@@ -107,7 +107,7 @@ class Game(Data):
 
     @property
     def is_finished(self):
-        return self.is_dead and not self.yesno_callback
+        return (self.is_dead or self.is_done) and not self.yesno_callback
 
     # Game startup
 
