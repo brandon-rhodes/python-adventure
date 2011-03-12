@@ -40,7 +40,7 @@ as ``inven``.  This package defines a symbol for both versions of every
 long word, so you can type the long or short version as you please.
 
 You can save your game at any time by calling the ``save()`` command
-with a filename, and then can resume it later at any time::
+with a filename, and then can resume it later::
 
     >>> save('advent.save')
     GAME SAVED
@@ -107,6 +107,6 @@ Notes
 Changelog
 =========
 
-| 1.1 — 2011 March 12 — “-m” traditional mode; more flexible Python syntax
+| 1.1 — 2011 March 12 — traditional mode; more flexible Python syntax
 | 1.0 — 2011 February 15 — 100% test coverage, feature-complete
 | 0.3 — 2011 January 31 — first public release

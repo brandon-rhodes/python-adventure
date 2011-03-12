@@ -7,7 +7,7 @@ with open(README_PATH) as f:
 
 setup(
     name='adventure',
-    version='1.0',
+    version='1.1',
     description='Colossal Cave adventure game at the Python prompt',
     long_description=README_TEXT,
     author='Brandon Craig Rhodes',
