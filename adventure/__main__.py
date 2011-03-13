@@ -14,12 +14,19 @@ def baudout(s):
         stdout.write(c)
         stdout.flush()
 
-game = Game()
-load_advent_dat(game)
-game.start()
-baudout(game.output)
-while not game.is_finished:
-    line = input('> ')
-    words = re.findall(r'\w+', line)
-    if words:
-        baudout(game.do_command(words))
+def loop():
+    game = Game()
+    load_advent_dat(game)
+    game.start()
+    baudout(game.output)
+
+    while not game.is_finished:
+        line = input('> ')
+        words = re.findall(r'\w+', line)
+        if words:
+            baudout(game.do_command(words))
+
+try:
+    loop()
+except EOFError:
+    pass
