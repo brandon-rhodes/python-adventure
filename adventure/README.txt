@@ -34,7 +34,7 @@ be valid Python)::
     YOU ARE IN A VALLEY IN THE FOREST BESIDE A STREAM TUMBLING ALONG A
     ROCKY BED.
 
-The original Adventure payed attention to only the first five letters of
+The original Adventure paid attention to only the first five letters of
 each command, so a long command like ``inventory`` could simply be typed
 as ``inven``.  This package defines a symbol for both versions of every
 long word, so you can type the long or short version as you please.
