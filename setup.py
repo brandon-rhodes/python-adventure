@@ -1,5 +1,10 @@
 import os
+import sys
 from distutils.core import setup
+
+if sys.version_info < (3,):
+    print('\nSorry, but Adventure can only be installed under Python 3.\n')
+    sys.exit(1)
 
 README_PATH = os.path.join(os.path.dirname(__file__), 'adventure', 'README.txt')
 with open(README_PATH) as f:
