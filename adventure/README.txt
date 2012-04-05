@@ -72,6 +72,9 @@ that does not require its input to be valid Python.  Use your operating
 system command line to run the package::
 
     $ python -m adventure
+    WELCOME TO ADVENTURE!!  WOULD YOU LIKE INSTRUCTIONS?
+
+    >
 
 At the prompt that will appear, two-word commands can simply be
 separated by a space::
@@ -89,8 +92,22 @@ Why is the game better at 1200 baud?  When a paragraph of text is
 allowed to appear on the screen all at once, your eyes scan the entire
 paragraph for important information, often ruining any surprises before
 you can then settle down and read it from the beginning.  But at 1200
-baud, you wind up scanning the text in order as it appears, which
-unfolds the narrative sequentially as the author of Adventure intended.
+baud, you wind up reading the text in order as it appears, which unfolds
+the narrative sequentially as the author of Adventure intended.
+
+If you created a file with the in-game ``save`` command, you can restore
+it later by naming it on the command line::
+
+    > save mygame
+    GAME SAVED
+    > quit
+    DO YOU REALLY WANT TO QUIT NOW?
+    > y
+    OK
+
+    $ python -m adventure mygame
+    GAME RESTORED
+    >
 
 Notes
 =====
@@ -107,6 +124,7 @@ Notes
 Changelog
 =========
 
+| 1.2 — 2012 April 5 — traditional mode: restoring saves, 5-letter commands
 | 1.1 — 2011 March 12 — traditional mode; more flexible Python syntax
 | 1.0 — 2011 February 15 — 100% test coverage, feature-complete
 | 0.3 — 2011 January 31 — first public release
