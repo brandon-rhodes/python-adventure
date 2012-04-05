@@ -113,6 +113,16 @@ class Game(Data):
 
     def start(self):
         """Start the game."""
+
+        # For old-fashioned players, accept five-letter truncations like
+        # "inven" instead of insisting on full words like "inventory".
+
+        for key, value in list(self.vocabulary.items()):
+            if isinstance(key, str) and len(key) > 5:
+                self.vocabulary[key[:5]] = value
+
+        # Set things going.
+
         self.chest_room = self.rooms[114]
         self.bottle.contents = self.water
         self.yesno(self.messages[65], self.start2)  # want instructions?
