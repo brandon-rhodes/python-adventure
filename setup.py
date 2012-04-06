@@ -7,7 +7,7 @@ if sys.version_info < (3,):
     sys.exit(1)
 
 README_PATH = os.path.join(os.path.dirname(__file__), 'adventure', 'README.txt')
-with open(README_PATH) as f:
+with open(README_PATH, encoding="utf-8") as f:
     README_TEXT = f.read()
 
 setup(
