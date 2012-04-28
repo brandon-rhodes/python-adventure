@@ -71,7 +71,7 @@ You can also use this package to play Adventure at a traditional prompt
 that does not require its input to be valid Python.  Use your operating
 system command line to run the package::
 
-    $ python -m adventure
+    $ python3 -m adventure
     WELCOME TO ADVENTURE!!  WOULD YOU LIKE INSTRUCTIONS?
 
     >
@@ -105,7 +105,7 @@ it later by naming it on the command line::
     > y
     OK
 
-    $ python -m adventure mygame
+    $ python3 -m adventure mygame
     GAME RESTORED
     >
 
@@ -124,7 +124,8 @@ Notes
 Changelog
 =========
 
-| 1.2 — 2012 April 5 — traditional mode: restoring saves, 5-letter commands
+| 1.3 — 2012 April 27 — installs on Windows; fixed undefined commands
+| 1.2 — 2012 April 5 — restoring saves from command line; 5-letter commands
 | 1.1 — 2011 March 12 — traditional mode; more flexible Python syntax
 | 1.0 — 2011 February 15 — 100% test coverage, feature-complete
 | 0.3 — 2011 January 31 — first public release
