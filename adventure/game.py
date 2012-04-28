@@ -322,8 +322,6 @@ class Game(Data):
 
     def describe_location(self):  #2000
 
-        # check for whether they already have died? or do as sep func?
-
         loc = self.loc
 
         could_fall = self.is_dark and self.could_fall_in_pit
@@ -375,7 +373,7 @@ class Game(Data):
 
         self.finish_turn()
 
-    def say_okay_and_finish(self):  #2009
+    def say_okay_and_finish(self, *ignored):  #2009
         self.write_message(54)
         self.finish_turn()
 
@@ -808,16 +806,30 @@ class Game(Data):
         self.write('{} What?\n'.format(verb.text))
         self.finish_turn()
 
+    i_walk = ask_verb_what
     i_drop = ask_verb_what
     i_say = ask_verb_what
+    i_nothing = say_okay_and_finish
     i_wave = ask_verb_what
     i_calm = ask_verb_what
     i_rub = ask_verb_what
-    i_toss = ask_verb_what
+    i_throw = ask_verb_what
     i_find = ask_verb_what
     i_feed = ask_verb_what
     i_break = ask_verb_what
     i_wake = ask_verb_what
+
+    def write_default_message(self, verb, *args):
+        self.write(verb.default_message)
+        self.finish_turn()
+
+    t_nothing = say_okay_and_finish
+    t_calm = write_default_message
+    t_quit = write_default_message
+    t_score = write_default_message
+    t_fee = write_default_message
+    t_brief = write_default_message
+    t_hours = write_default_message
 
     def i_carry(self, verb):  #8010
         is_dwarf_here = any( dwarf.room == self.loc for dwarf in self.dwarves )
@@ -1547,6 +1559,9 @@ class Game(Data):
             if savefile is not obj:
                 savefile.close()
         self.write('Game saved')
+
+    def i_hours(self, verb):
+        self.write('Open all day')
 
     @classmethod
     def resume(self, obj):
