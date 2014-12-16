@@ -11,11 +11,8 @@ def load_advent_dat(data):
 def play(seed=None):
     """Turn the Python prompt into an Adventure game.
 
-    With `seed` the caller can supply an integer to start the random
-    number generator at a known state.  When `quiet` is true, no output
-    is printed as the game is played; the caller of a command has to
-    manually check `_game.output` for the result, which makes it
-    possible to write very quiet tests.
+    With optional the `seed` argument the caller can supply an integer
+    to start the Python random number generator at a known state.
 
     """
     global _game
