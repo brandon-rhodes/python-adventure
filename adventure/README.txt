@@ -55,9 +55,9 @@ with a filename, and then can resume it later::
 
 You can find two complete, working walkthroughs of the game in its
 ``tests`` directory, which you can run using the ``discover`` module that
-comes built-in with Python 3.2::
+comes built-in with Python 3::
 
-    $ python3.2 -m unittest discover adventure
+    $ python3 -m unittest discover adventure
 
 I wrote most of this package over Christmas vacation 2010, to learn more
 about the workings of the game that so enthralled me as a child; the
