@@ -24,7 +24,7 @@ setup(
         'Development Status :: 6 - Mature',
         'Environment :: Console',
         'Intended Audience :: End Users/Desktop',
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.2',
         'Topic :: Games/Entertainment',
