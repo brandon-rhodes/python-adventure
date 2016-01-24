@@ -3,6 +3,7 @@
 import argparse
 import os
 import re
+import readline
 from sys import executable, stdout
 from time import sleep
 from . import load_advent_dat
