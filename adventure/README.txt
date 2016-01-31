@@ -150,6 +150,7 @@ limitations under the License.
 Changelog
 =========
 
+| 1.4 — 2016 January 31 — readline editing; added license; bug fix; test fix.
 | 1.3 — 2012 April 27 — installs on Windows; fixed undefined commands
 | 1.2 — 2012 April 5 — restoring saves from command line; 5-letter commands
 | 1.1 — 2011 March 12 — traditional mode; more flexible Python syntax
