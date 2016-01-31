@@ -17,7 +17,7 @@ setup(
     long_description=README_TEXT,
     author='Brandon Craig Rhodes',
     author_email='brandon@rhodesmill.org',
-    url='https://bitbucket.org/brandon/adventure/overview',
+    url='https://github.com/brandon-rhodes/python-adventure',
     packages=['adventure', 'adventure/tests'],
     package_data={'adventure': ['README.txt', '*.dat', 'tests/*.txt']},
     classifiers=[
