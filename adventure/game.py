@@ -1,5 +1,9 @@
-"""How we keep track of the state of the game."""
+"""How we keep track of the state of the game.
 
+Copyright 2010-2015 Brandon Rhodes.  Licensed as free software under the
+Apache License, Version 2.0 as detailed in the accompanying README.txt.
+
+"""
 # Numeric comments scattered through this file refer to FORTRAN line
 # numbers, for those comparing this file and `advent.for`; so "#2012"
 # refers to FORTRAN line number 2012 (which you can find easily in the

@@ -1,5 +1,9 @@
-"""Offer Adventure at a custom command prompt."""
+"""Offer Adventure at a custom command prompt.
 
+Copyright 2010-2015 Brandon Rhodes.  Licensed as free software under the
+Apache License, Version 2.0 as detailed in the accompanying README.txt.
+
+"""
 import argparse
 import os
 import re

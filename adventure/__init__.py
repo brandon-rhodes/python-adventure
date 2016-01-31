@@ -1,5 +1,9 @@
-"""The Adventure game."""
+"""The Adventure game.
 
+Copyright 2010-2015 Brandon Rhodes.  Licensed as free software under the
+Apache License, Version 2.0 as detailed in the accompanying README.txt.
+
+"""
 def load_advent_dat(data):
     import os
     from .data import parse

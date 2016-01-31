@@ -121,6 +121,32 @@ Notes
   using it in the game.  Instead, use one of the two synonyms defined by
   the PDP version of Adventure: “shatter” or “smash.”
 
+Copyright
+=========
+
+The ``advent.dat`` game data file distributed with this Python package,
+like the rest of the original source code for Adventure, is a public
+domain work.  Phrases from the original work that have been copied into
+my source code from the FORTRAN source (the famous phrase “You have
+gotten yourself killed” and so forth) remain public domain and can be
+used without attribution.
+
+My own Python code that re-implements the game engine is:
+
+Copyright 2010–2015 Brandon Rhodes
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
 Changelog
 =========
 

@@ -1,5 +1,9 @@
-"""Classes representing Adventure game components."""
+"""Classes representing Adventure game components.
 
+Copyright 2010-2015 Brandon Rhodes.  Licensed as free software under the
+Apache License, Version 2.0 as detailed in the accompanying README.txt.
+
+"""
 class Move(object):
     """An entry in the travel table."""
 
