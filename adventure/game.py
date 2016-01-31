@@ -328,6 +328,9 @@ class Game(Data):
 
         loc = self.loc
 
+        if loc.n == 0:
+            self.die()
+
         could_fall = self.is_dark and self.could_fall_in_pit
         if could_fall and not loc.is_forced and self.random() < .35:
             self.die_here()

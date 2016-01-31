@@ -1,3 +1,2 @@
 
-* Test whether climbing down the dome with the gold nugget breaks your neck.
 * Test dropping into the secret canyon from the direction that gets no dragon.
