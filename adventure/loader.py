@@ -15,6 +15,8 @@ from data import parse
 user_saves = {}
 save_dir = "saves/"
 
+def user_exists(user_id):
+    return user_id in iser_saves.keys()
 
 def new_game(user_id, seed=None):
     """Create new game"""

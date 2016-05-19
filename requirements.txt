@@ -1,1 +1,7 @@
--e git://github.com/whatsahoy/smooch-python.git@master#egg=smooch
+Flask==0.10.1
+itsdangerous==0.24
+Jinja2==2.8
+MarkupSafe==0.23
+PyJWT==1.4.0
+u-msgpack-python==2.1
+Werkzeug==0.11.9
