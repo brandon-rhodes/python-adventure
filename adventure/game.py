@@ -1550,9 +1550,6 @@ class Game(Data):
 
     def t_suspend(self, verb, obj):
         if isinstance(obj, str):
-            if os.path.exists(obj):  # pragma: no cover
-                self.write('I refuse to overwrite an existing file.')
-                return
             savefile = open(obj, 'wb')
         else:
             savefile = obj

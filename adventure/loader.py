@@ -5,60 +5,57 @@ Apache License, Version 2.0 as detailed in the accompanying README.txt.
 
 """
 
-import argparse
+#------------------------------------------
+from game import Game
+from time import sleep
 import os
 import re
-import readline
-from sys import executable, stdout
-from time import sleep
-from game import Game
+from data import parse
 
-def loop():
-    """Main Game Loop"""
-    if args.savefile is None:
-        game = Game()
-        load_advent_dat(game)
-        game.start()
-        baudout(game.output)
-    else:
-        game = Game.resume(args.savefile)
-        baudout('GAME RESTORED\n')
+user_saves = {}
+save_dir = "./saves/"
 
-    while not game.is_finished:
-        line = input('> ')
-        words = re.findall(r'\w+', line)
-        if words:
-            baudout(game.do_command(words))
+
+def new_game(user_id, seed=None):
+    """Create new game"""
+    game = Game(seed)
+    user_saves[user_id] = game
+    load_advent_dat(game)
+    game.start()
+    return game.output
+
+def respond(user_id, user_response):
+    """Gets the game response for a specific user_id and user_response"""
+    game = user_saves[user_id]
+    return game.do_command(user_response)
+
+def reset_game(user_id, seed=None):
+    """Clears the game for a specific user_id, need to wipe memory and file game"""
+    new_game(user_id)
+
+def db_load(database=user_saves):
+    """Set up database files"""
+    for dir_name, sub_dir_list, file_list in os.walk(save_dir):
+        for fname in file_list:
+            user_saves[fname] = Game.resume(fname)
+
+def db_save(database=user_saves):
+    """Saves the database files to disk"""
+    for user_id, save in user_saves.items():
+        save.t_suspend(None, save_dir + user_id)
+    pass
 
 def load_advent_dat(data):
-    import os
-    from .data import parse
-
+    """Called for each came object"""
     datapath = os.path.join(os.path.dirname(__file__), 'advent.dat')
     with open(datapath, 'r', encoding='ascii') as datafile:
         parse(data, datafile)
 
-def play(seed=None):
-    """Turn the Python prompt into an Adventure game.
 
-    With optional the `seed` argument the caller can supply an integer
-    to start the Python random number generator at a known state.
-
-    """
-    global _game
-
-    from game import Game
-
-    _game = Game(seed)
-    load_advent_dat(_game)
-    _game.start()
-    print(_game.output[:-1])
-
-def resume(savefile, quiet=False):
-    global _game
-
-    from game import Game
-
-    _game = Game.resume(savefile)
-    if not quiet:
-        print('GAME RESTORED\n')
+if __name__ == "__main__":
+    print(new_game("mark12"))
+    print(respond("mark12", "no"))
+    print(new_game("john12"))
+    print(respond("john12", "yes"))
+    db_save()
+    print(respond("mark12", "road"))
