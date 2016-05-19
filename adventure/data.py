@@ -5,7 +5,7 @@ Apache License, Version 2.0 as detailed in the accompanying README.txt.
 
 """
 from operator import attrgetter
-from .model import Hint, Message, Move, Object, Room, Word
+from model import Hint, Message, Move, Object, Room, Word
 
 # The Adventure data file knows only the first five characters of each
 # word in the game, so we have to know the full verion of each word.
