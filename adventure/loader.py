@@ -13,7 +13,7 @@ import re
 from data import parse
 
 user_saves = {}
-save_dir = "./saves/"
+save_dir = "saves/"
 
 
 def new_game(user_id, seed=None):
@@ -27,7 +27,8 @@ def new_game(user_id, seed=None):
 def respond(user_id, user_response):
     """Gets the game response for a specific user_id and user_response"""
     game = user_saves[user_id]
-    return game.do_command(user_response)
+    user_tupl_resp = tuple(user_response.split(" "))
+    return game.do_command(user_tupl_resp)
 
 def reset_game(user_id, seed=None):
     """Clears the game for a specific user_id, need to wipe memory and file game"""
