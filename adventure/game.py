@@ -15,8 +15,8 @@ import pickle
 import random
 import zlib
 from operator import attrgetter
-from .data import Data
-from .model import Room, Message, Dwarf, Pirate
+from data import Data
+from model import Room, Message, Dwarf, Pirate
 
 YESNO_ANSWERS = {'y': True, 'yes': True, 'n': False, 'no': False}
 
@@ -1550,9 +1550,6 @@ class Game(Data):
 
     def t_suspend(self, verb, obj):
         if isinstance(obj, str):
-            if os.path.exists(obj):  # pragma: no cover
-                self.write('I refuse to overwrite an existing file.')
-                return
             savefile = open(obj, 'wb')
         else:
             savefile = obj
