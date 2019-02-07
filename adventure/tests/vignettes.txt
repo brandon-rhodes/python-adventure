@@ -275,7 +275,7 @@ THERE ARE BARS OF SILVER HERE!
 
 We should not be able to pick up a dwarf! (#21)
 
->>> restart(room=75, dwarves=True, randoms=(.05,.05,.05,.05,.05,.05))
+>>> restart(room=75, dwarves=True, randoms=(.05,.05,.05,.05,.05,.05,.3))
 >>> game.dwarf_stage = 3
 >>> for _dwarf in game.dwarves:
 ...     _dwarf.room = game.rooms[75]

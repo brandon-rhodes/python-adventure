@@ -848,7 +848,7 @@ class Game(Data):
 
     def t_carry(self, verb, obj):  #9010
         if obj is self.dwarf:
-            return self.write_message(13)
+            return self.dont_understand()
         if obj.is_toting:
             self.write(verb.default_message)
             self.finish_turn()
