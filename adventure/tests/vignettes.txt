@@ -273,6 +273,16 @@ THERE ARE BARS OF SILVER HERE!
 >>> game.lamp_turns
 35
 
+We should not be able to pick up a dwarf!
+
+>>> restart(room=75, dwarves=True, randoms=(.05,.05,.05,.05,.05,.05))
+>>> game.dwarf_stage = 3
+>>> for _dwarf in game.dwarves:
+...     _dwarf.room = game.rooms[75]
+>>> take(dwarf)
+I DON'T UNDERSTAND THAT!
+<BLANKLINE>
+
 ----------------------------------
 Making sure that hints are offered
 ----------------------------------
