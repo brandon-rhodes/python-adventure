@@ -147,17 +147,16 @@ def section6(data, n, *etc):
     message = make_object(data.messages, Message, n)
     message.text += expand_tabs(etc) + '\n'
 
-def section7(data, n, room_n, *etc):
-    if not room_n:
-        return
+def section7(data, n, room_n, fixed=None):
     obj = make_object(data.objects, Object, n)
-    room = make_object(data.rooms, Room, room_n)
-    obj.drop(room)
-    if len(etc):
-        if etc[0] == -1:
+    if room_n:
+        room = make_object(data.rooms, Room, room_n)
+        obj.drop(room)
+    if fixed is not None:
+        if fixed == -1:
             obj.is_fixed = True
         else:
-            room2 = make_object(data.rooms, Room, etc[0])
+            room2 = make_object(data.rooms, Room, fixed)
             obj.rooms.append(room2)  # exists two places, like grate
     obj.starting_rooms = list(obj.rooms)  # remember where things started
 
