@@ -2,11 +2,20 @@ This is a faithful port of the “Adventure” game to Python 3 from the
 original 1977 FORTRAN code by Crowther and Woods (it is driven by the
 same ``advent.dat`` file!) that lets you explore Colossal Cave, where
 others have found fortunes in treasure and gold, though it is rumored
-that some who enter are never seen again.  To encourage the use of
-Python 3, the game is designed to be played right at the Python prompt.
-Single-word commands can be typed by themselves, but two-word commands
-should be written as a function call (since a two-word command would not
-be valid Python)::
+that some who enter are never seen again.
+
+This page:
+
+http://rickadams.org/adventure/e_downloads.html
+
+offers the original PHP source code at this link:
+
+http://www.ifarchive.org/if-archive/games/source/advent-original.tar.gz
+
+To encourage the use of Python 3, the game is designed to be played
+right at the Python prompt.  Single-word commands can be typed by
+themselves, but two-word commands should be written as a function call
+(since a two-word command would not be valid Python)::
 
     >>> import adventure
     >>> adventure.play()
