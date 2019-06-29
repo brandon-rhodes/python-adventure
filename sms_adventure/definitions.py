@@ -1,11 +1,11 @@
 import abc
 import io
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
 
 class SavesGateway(abc.ABC):
     @abc.abstractmethod
-    def fetch_save(self, sms_number: str) -> io.BytesIO:
+    def fetch_save(self, sms_number: str) -> Optional[io.BytesIO]:
         ...
 
     @abc.abstractmethod
