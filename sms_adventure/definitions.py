@@ -19,7 +19,7 @@ class GameGateway(abc.ABC):
         ...
 
     @abc.abstractmethod
-    def start(self) -> None:
+    def start(self) -> str:
         ...
 
     @abc.abstractmethod
