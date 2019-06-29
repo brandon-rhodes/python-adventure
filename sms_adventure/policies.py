@@ -1,5 +1,5 @@
 import re
-from typing import Iterable, Optional
+from typing import Callable, Iterable, Optional
 
 
 class command:
@@ -24,5 +24,5 @@ class command:
         return None
 
     @staticmethod
-    def _policies():
+    def _policies() -> Iterable[Callable[[str], Optional[str]]]:
         return (command._one_line_policy, command._includes_words_policy)

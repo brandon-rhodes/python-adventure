@@ -11,7 +11,7 @@ from sms_adventure.definitions import GameGateway as GameGatewayABC
 class GameGateway(GameGatewayABC):
     game: Optional[Game]
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.game = None
 
     def start(self) -> str:
