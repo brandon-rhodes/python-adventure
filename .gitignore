@@ -7,3 +7,4 @@ __pycache__/
 build/
 dist/
 *.egg-info
+sms_adventure_file_saves

@@ -12,7 +12,7 @@ class GameGateway(GameGatewayABC):
     game: Optional[Game]
 
     def __init__(self):
-        self.game: None
+        self.game = None
 
     def start(self) -> str:
         if self.game:
@@ -34,14 +34,14 @@ class GameGateway(GameGatewayABC):
             raise GameNotStartedError
 
         words = re.findall(r'\w+', command)
-        return game.do_command(words)
+        return self.game.do_command(words)
 
     def save(self) -> io.BytesIO:
         if not self.game:
             raise GameNotStartedError
 
         save_data_stream = io.BytesIO()
-        game.t_suspend(verb=None, obj=save_data_stream)
+        self.game.t_suspend(verb=None, obj=save_data_stream)
         return save_data_stream
 
 

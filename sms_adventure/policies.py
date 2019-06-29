@@ -1,13 +1,11 @@
 import re
-from typing import Func, Iterable, Optional
+from typing import Iterable, Optional
 
 
 class command:
-    policies = (command._one_line_policy, command._includes_words_policy)
-
     @staticmethod
     def invalid_reason(command_text: str) -> Optional[str]:
-        for policy in command.policies:
+        for policy in command._policies():
             out = policy(command_text)
             if out:
                 return out
@@ -21,6 +19,10 @@ class command:
 
     @staticmethod
     def _includes_words_policy(command_text: str) -> Optional[str]:
-        if not re.findall(r'\w+', command)
+        if not re.findall(r'\w+', command_text):
             return 'COMMAND MUST CONTAIN AT LEAST ONE WORD.'
         return None
+
+    @staticmethod
+    def _policies():
+        return (command._one_line_policy, command._includes_words_policy)
