@@ -16,6 +16,6 @@ command = sys.argv[2]
 try:
     output = do_sms_command(context, command, sms_number)
 except CommandPolicyViolationError as e:
-    print(f'*COMMAND POLICY VIOLATION ERROR: {str(e)}*')
+    print(f"*COMMAND POLICY VIOLATION ERROR: {str(e)}*")
 else:
     print(output)

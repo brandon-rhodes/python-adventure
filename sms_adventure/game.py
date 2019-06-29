@@ -33,7 +33,7 @@ class GameGateway(GameGatewayABC):
         if not self.game:
             raise GameNotStartedError
 
-        words = re.findall(r'\w+', command)
+        words = re.findall(r"\w+", command)
         return self.game.do_command(words)
 
     def save(self) -> io.BytesIO:
@@ -46,8 +46,8 @@ class GameGateway(GameGatewayABC):
 
 
 class GameNotStartedError(Exception):
-    message = 'Game has not been started'
+    message = "Game has not been started"
 
 
 class GameAlreadyStartedError(Exception):
-    message = 'Game already started'
+    message = "Game already started"

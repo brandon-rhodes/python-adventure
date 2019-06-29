@@ -13,14 +13,14 @@ class command:
 
     @staticmethod
     def _one_line_policy(command_text: str) -> Optional[str]:
-        if '\n' in command_text:
-            return 'COMMAND CAN ONLY BE ONE LINE.'
+        if "\n" in command_text:
+            return "COMMAND CAN ONLY BE ONE LINE."
         return None
 
     @staticmethod
     def _includes_words_policy(command_text: str) -> Optional[str]:
-        if not re.findall(r'\w+', command_text):
-            return 'COMMAND MUST CONTAIN AT LEAST ONE WORD.'
+        if not re.findall(r"\w+", command_text):
+            return "COMMAND MUST CONTAIN AT LEAST ONE WORD."
         return None
 
     @staticmethod
