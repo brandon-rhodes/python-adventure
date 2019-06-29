@@ -1,20 +1,21 @@
 import abc
+import io
 from typing import NamedTuple
 
 
 class SavesGateway(abc.ABC):
     @abc.abstractmethod
-    def fetch_save(self, sms_number: str) -> bytes:
+    def fetch_save(self, sms_number: str) -> io.BytesIO:
         ...
 
     @abc.abstractmethod
-    def update_save(self, sms_number: str, save: bytes) -> None:
+    def update_save(self, sms_number: str, save: io.BytesIO) -> None:
         ...
 
 
 class GameGateway(abc.ABC):
     @abc.abstractmethod
-    def resume(self, save: bytes) -> None:
+    def resume(self, save: io.BytesIO) -> None:
         ...
 
     @abc.abstractmethod
@@ -26,7 +27,7 @@ class GameGateway(abc.ABC):
         ...
 
     @abc.abstractmethod
-    def save(self) -> str:
+    def save(self) -> io.BytesIO:
         ...
 
 
