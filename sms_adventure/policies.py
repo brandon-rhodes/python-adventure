@@ -3,11 +3,11 @@ from typing import Func, Iterable, Optional
 
 
 class command:
-    policies = (self._one_line_policy, self._includes_words_policy)
+    policies = (command._one_line_policy, command._includes_words_policy)
 
     @staticmethod
     def invalid_reason(command_text: str) -> Optional[str]:
-        for policy in self.policies:
+        for policy in command.policies:
             out = policy(command_text)
             if out:
                 return out
