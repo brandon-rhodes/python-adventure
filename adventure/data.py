@@ -65,12 +65,11 @@ def accumulate_message(dictionary, n, line):
 def section1(data, n, *etc):
     """Handle record from “Section 1: long form descriptions”.
 
-        Section 1: long form descriptions. Each line contains a
-        location number, a TAB, and a line of text. The set of
-        (necessarily adjacent) lines whose numbers are X form the long
-        description of location X.
+    Section 1: long form descriptions. Each line contains a location
+    number, a TAB, and a line of text. The set of (necessarily adjacent)
+    lines whose numbers are X form the long description of location X.
 
-        """
+    """
     room = make_object(data.rooms, Room, n)
     if not etc[0].startswith('>$<'):
         room.long_description += expand_tabs(etc) + '\n'
@@ -78,64 +77,63 @@ def section1(data, n, *etc):
 def section2(data, n, line):
     """Handle record from “Section 2: short form descriptions”.
 
-        Section 2: short form descriptions. Same format as long form.
-        Not all places have short descriptions.
+    Section 2: short form descriptions. Same format as long form.  Not
+    all places have short descriptions.
 
-        """
+    """
     make_object(data.rooms, Room, n).short_description += line + '\n'
 
 def section3(data, x, y, *verbs):
     """Handle record from “Section 3: travel table”.
 
-        Section 3: travel table. Each line contains a location number
-        (X), a second location number (Y), and a list of motion
-        numbers (see section 4).
+    Section 3: travel table. Each line contains a location number (X), a
+    second location number (Y), and a list of motion numbers (see
+    section 4).
 
-        Each motion represents a verb which will go to Y if currently
-        at X. Y, in turn, is interpreted as follows. Let M=Y/1000, N=Y
-        MOD 1000.
+    Each motion represents a verb which will go to Y if currently at
+    X. Y, in turn, is interpreted as follows. Let M=Y/1000, N=Y MOD
+    1000.
 
-            If N<=300: it is the location to go to.
+        If N<=300: it is the location to go to.
 
-            If 300<N<=500: N-300 is used in a computed GOTO to a
-            section of special code.
+        If 300<N<=500: N-300 is used in a computed GOTO to a
+        section of special code.
 
-            If N>500: message N-500 from section 6 is printed, and he
-            stays wherever he is.
+        If N>500: message N-500 from section 6 is printed, and he
+        stays wherever he is.
 
-        Meanwhile, M specifies the conditions on the motion.
+    Meanwhile, M specifies the conditions on the motion.
 
-            If M=0: it's unconditional.
-            If 0<M<100: it is done with M% probability.
-            If M=100: unconditional, but forbidden to dwarves.
-            If 100<M<=200: he must be carrying object M-100.
-            If 200<M<=300: must be carrying or in same room as M-200.
-            If 300<M<=400: PROP(M MOD 100) must *not* be 0.
-            If 400<M<=500: PROP(M MOD 100) must *not* be 1.
-            If 500<M<=600: PROP(M MOD 100) must *not* be 2, etc.
+        If M=0: it's unconditional.
+        If 0<M<100: it is done with M% probability.
+        If M=100: unconditional, but forbidden to dwarves.
+        If 100<M<=200: he must be carrying object M-100.
+        If 200<M<=300: must be carrying or in same room as M-200.
+        If 300<M<=400: PROP(M MOD 100) must *not* be 0.
+        If 400<M<=500: PROP(M MOD 100) must *not* be 1.
+        If 500<M<=600: PROP(M MOD 100) must *not* be 2, etc.
 
-        If the condition (if any) is not met, then the next
-        *different* "destination" value is used (unless it fails to
-        meet *its* conditions, in which case the next is found, etc.).
-        Typically, the next dest will be for one of the same verbs, so
-        that its only use is as the alternate destination for those
-        verbs. For instance:
+    If the condition (if any) is not met, then the next *different*
+    "destination" value is used (unless it fails to meet *its*
+    conditions, in which case the next is found, etc.).  Typically, the
+    next dest will be for one of the same verbs, so that its only use is
+    as the alternate destination for those verbs. For instance:
 
-            15	110022	29	31	34	35	23	43
-            15	14	29
+        15	110022	29	31	34	35	23	43
+        15	14	29
 
-        This says that, from LOC 15, any of the verbs 29, 31, etc.,
-        will take him to 22 if he's carrying object 10, and otherwise
-        will go to 14.
+    This says that, from LOC 15, any of the verbs 29, 31, etc., will
+    take him to 22 if he's carrying object 10, and otherwise will go to
+    14.
 
-            11	303008	49
-            11	9	50
+        11	303008	49
+        11	9	50
 
-        This says that, from 11, 49 takes him to 8 unless PROP(3)=0,
-        in which case he goes to 9. Verb 50 takes him to 9 regardless
-        of PROP(3).
+    This says that, from 11, 49 takes him to 8 unless PROP(3)=0, in
+    which case he goes to 9. Verb 50 takes him to 9 regardless of
+    PROP(3).
 
-        """
+    """
     last_travel = data._last_travel
     if last_travel[0] == x and last_travel[1][0] == verbs[0]:
         verbs = last_travel[1]  # same first verb implies use whole list
@@ -178,16 +176,16 @@ def section3(data, x, y, *verbs):
 def section4(data, n, text, *etc):
     """Handle record from “Section 4: vocabulary”.
 
-        Section 4: vocabulary. Each line contains a number (N), a TAB,
-        and a five-letter word. Call M=N/1000. If M=0, then the word
-        is a motion verb for use in travelling (see section 3). Else,
-        if M=1, the word is an object. Else, if M=2, the word is an
-        action verb (such as "CARRY" or "ATTACK"). Else, if M=3, the
-        word is a special case verb (such as "DIG") and N MOD 1000 is
-        an index into section 6. Objects from 50 to (currently,
-        anyway) 79 are considered treasures (for pirate, closeout).
+    Section 4: vocabulary. Each line contains a number (N), a TAB, and a
+    five-letter word. Call M=N/1000. If M=0, then the word is a motion
+    verb for use in travelling (see section 3). Else, if M=1, the word
+    is an object. Else, if M=2, the word is an action verb (such as
+    "CARRY" or "ATTACK"). Else, if M=3, the word is a special case verb
+    (such as "DIG") and N MOD 1000 is an index into section 6. Objects
+    from 50 to (currently, anyway) 79 are considered treasures (for
+    pirate, closeout).
 
-        """
+    """
     text = text.lower()
     text = long_words.get(text, text)
     word = make_object(data.vocabulary, Word, n)
@@ -212,18 +210,17 @@ def section4(data, n, text, *etc):
 def section5(data, n, *etc):
     """Handle record from “Section 5: object descriptions”.
 
-        Section 5: object descriptions. Each line contains a number
-        (N), a TAB, and a message. If N is from 1 to 100, the message
-        is the "inventory" message for object N. Otherwise, N should
-        be 000, 100, 200, etc., and the message should be the
-        description of the preceding object when its PROP value is
-        N/100. The N/100 is used only to distinguish multiple messages
-        from multi-line messages; the PROP info actually requires all
-        messages for an object to be present and consecutive.
-        Properties which produce no message should be given the
-        message ">$<".
+    Section 5: object descriptions. Each line contains a number (N), a
+    TAB, and a message. If N is from 1 to 100, the message is the
+    "inventory" message for object N. Otherwise, N should be 000, 100,
+    200, etc., and the message should be the description of the
+    preceding object when its PROP value is N/100. The N/100 is used
+    only to distinguish multiple messages from multi-line messages; the
+    PROP info actually requires all messages for an object to be present
+    and consecutive.  Properties which produce no message should be
+    given the message ">$<".
 
-        """
+    """
     if 1 <= n <= 99:
         data._object = make_object(data.objects, Object, n)
         data._object.inventory_message = expand_tabs(etc)
@@ -239,25 +236,24 @@ def section5(data, n, *etc):
 def section6(data, n, *etc):
     """Handle record from “Section 6: arbitrary messages”.
 
-        Section 6: arbitrary messages. Same format as sections 1, 2,
-        and 5, except the numbers bear no relation to anything (except
-        for special verbs in section 4).
+    Section 6: arbitrary messages. Same format as sections 1, 2, and 5,
+    except the numbers bear no relation to anything (except for special
+    verbs in section 4).
 
-        """
+    """
     message = make_object(data.messages, Message, n)
     message.text += expand_tabs(etc) + '\n'
 
 def section7(data, n, room_n, fixed=None):
     """Handle record from “Section 7: object locations”.
 
-        Section 7: object locations. Each line contains an object
-        number and its initial location (zero (or omitted) if none).
-        If the object is immovable, the location is followed by a
-        "-1". If it has two locations (e.g. the grate) the first
-        location is followed with the second, and the object is
-        assumed to be immovable.
+    Section 7: object locations. Each line contains an object number and
+    its initial location (zero (or omitted) if none).  If the object is
+    immovable, the location is followed by a "-1". If it has two
+    locations (e.g. the grate) the first location is followed with the
+    second, and the object is assumed to be immovable.
 
-        """
+    """
     obj = make_object(data.objects, Object, n)
     if room_n:
         room = make_object(data.rooms, Room, room_n)
@@ -273,11 +269,11 @@ def section7(data, n, room_n, fixed=None):
 def section8(data, word_n, message_n):
     """Handle record from “Section 8: action defaults”.
 
-        Section 8: action defaults. Each line contains an
-        "action-verb" number and the index (in section 6) of the
-        default message for the verb.
+    Section 8: action defaults. Each line contains an "action-verb"
+    number and the index (in section 6) of the default message for the
+    verb.
 
-        """
+    """
     if not message_n:
         return
     word = make_object(data.vocabulary, Word, word_n + 2000)
@@ -288,30 +284,30 @@ def section8(data, word_n, message_n):
 def section9(data, bit, *nlist):
     """Handle record from “Section 9: liquid assets, etc.”.
 
-        Section 9: liquid assets, etc. Each line contains a number (N)
-        and up to 20 location numbers. Bit N (where 0 is the units
-        bit) is set in COND(LOC) for each LOC given. The COND bits
-        currently assigned are:
+    Section 9: liquid assets, etc. Each line contains a number (N) and
+    up to 20 location numbers. Bit N (where 0 is the units bit) is set
+    in COND(LOC) for each LOC given. The COND bits currently assigned
+    are:
 
-            0: light
-            1: if bit 2 is on: on for oil, off for water
-            2: liquid asset, see bit 1
-            3: pirate doesn't go here unless following player
+        0: light
+        1: if bit 2 is on: on for oil, off for water
+        2: liquid asset, see bit 1
+        3: pirate doesn't go here unless following player
 
-        Other bits are used to indicate areas of interest to "hint"
-        routines:
+    Other bits are used to indicate areas of interest to "hint"
+    routines:
 
-            4: trying to get into cave
-            5: trying to catch bird
-            6: trying to deal with snake
-            7: lost in maze
-            8: pondering dark room
-            9: at Witt's End
+        4: trying to get into cave
+        5: trying to catch bird
+        6: trying to deal with snake
+        7: lost in maze
+        8: pondering dark room
+        9: at Witt's End
 
-        COND(LOC) is set to 2, overriding all other bits, if LOC has forced
-        motion.
+    COND(LOC) is set to 2, overriding all other bits, if LOC has forced
+    motion.
 
-        """
+    """
     for n in nlist:
         room = make_object(data.rooms, Room, n)
         if bit == 0:
@@ -329,34 +325,34 @@ def section9(data, bit, *nlist):
 def section10(data, score, line, *etc):
     """Handle record from “Section 10: class messages”.
 
-        Section 10: class messages. Each line contains a number (N), a
-        TAB, and a message describing a classification of player. The
-        scoring section selects the appropriate message, where each
-        message is considered to apply to players whose scores are
-        higher than the previous N but not higher than this N. Note
-        that these scores probably change with every modification (and
-        particularly expansion) of the program.
+    Section 10: class messages. Each line contains a number (N), a TAB,
+    and a message describing a classification of player. The scoring
+    section selects the appropriate message, where each message is
+    considered to apply to players whose scores are higher than the
+    previous N but not higher than this N. Note that these scores
+    probably change with every modification (and particularly expansion)
+    of the program.
 
-        """
+    """
     data.class_messages.append((score, line))
 
 def section11(data, n, turns_needed, penalty, question_n, message_n):
     """Handle record from “Section 11: hints”.
 
-        Section 11: hints. Each line contains a hint number
-        (corresponding to a COND bit, see section 9), the number of
-        turns he must be at the right LOC(s) before triggering the
-        hint, the points deducted for taking the hint, the message
-        number (section 6) of the question, and the message number of
-        the hint. These values are stashed in the "HINTS" array.
+    Section 11: hints. Each line contains a hint number (corresponding
+    to a COND bit, see section 9), the number of turns he must be at the
+    right LOC(s) before triggering the hint, the points deducted for
+    taking the hint, the message number (section 6) of the question, and
+    the message number of the hint. These values are stashed in the
+    "HINTS" array.
 
-        HNTMAX is set to the max hint number (<= HNTSIZ). Numbers 1-3
-        are unusable since COND bits are otherwise assigned, so 2 is
-        used to remember if he's read the clue in the repository, and
-        3 is used to remember whether he asked for instructions (gets
-        more turns, but loses points).
+    HNTMAX is set to the max hint number (<= HNTSIZ). Numbers 1-3 are
+    unusable since COND bits are otherwise assigned, so 2 is used to
+    remember if he's read the clue in the repository, and 3 is used to
+    remember whether he asked for instructions (gets more turns, but
+    loses points).
 
-        """
+    """
     hint = make_object(data.hints, Hint, n)
     hint.turns_needed = turns_needed
     hint.penalty = penalty
@@ -366,11 +362,11 @@ def section11(data, n, turns_needed, penalty, question_n, message_n):
 def section12(data, n, line):
     """Handle record from “Section 12: magic messages”.
 
-        Section 12: magic messages. Identical to section 6 except put
-        in a separate section for easier reference. Magic messages are
-        used by the startup, maintenance mode, and related routines.
+    Section 12: magic messages. Identical to section 6 except put in a
+    separate section for easier reference. Magic messages are used by
+    the startup, maintenance mode, and related routines.
 
-        """
+    """
     accumulate_message(data.magic_messages, n, line)
 
 # Process every section of the file in turn.
