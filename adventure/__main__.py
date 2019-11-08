@@ -45,7 +45,8 @@ def loop(args):
         if words:
             baudout(game.do_command(words))
 
-try:
-    loop(sys.argv[1:])
-except EOFError:
-    pass
+if __name__ == '__main__':
+    try:
+        loop(sys.argv[1:])
+    except EOFError:
+        pass
