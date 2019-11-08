@@ -63,7 +63,7 @@ def accumulate_message(dictionary, n, line):
 # Knowledge of what each section contains.
 
 def section1(data, n, *etc):
-    """ Handle record from “Section 1: long form descriptions”.
+    """Handle record from “Section 1: long form descriptions”.
 
         Section 1: long form descriptions. Each line contains a
         location number, a TAB, and a line of text. The set of
@@ -76,7 +76,7 @@ def section1(data, n, *etc):
         room.long_description += expand_tabs(etc) + '\n'
 
 def section2(data, n, line):
-    """ Handle record from “Section 2: short form descriptions”.
+    """Handle record from “Section 2: short form descriptions”.
 
         Section 2: short form descriptions. Same format as long form.
         Not all places have short descriptions.
@@ -85,7 +85,7 @@ def section2(data, n, line):
     make_object(data.rooms, Room, n).short_description += line + '\n'
 
 def section3(data, x, y, *verbs):
-    """ Handle record from “Section 3: travel table”.
+    """Handle record from “Section 3: travel table”.
 
         Section 3: travel table. Each line contains a location number
         (X), a second location number (Y), and a list of motion
@@ -176,7 +176,7 @@ def section3(data, x, y, *verbs):
     data.rooms[x].travel_table.append(move)
 
 def section4(data, n, text, *etc):
-    """ Handle record from “Section 4: vocabulary”.
+    """Handle record from “Section 4: vocabulary”.
 
         Section 4: vocabulary. Each line contains a number (N), a TAB,
         and a five-letter word. Call M=N/1000. If M=0, then the word
@@ -210,7 +210,7 @@ def section4(data, n, text, *etc):
         data.vocabulary[text] = word
 
 def section5(data, n, *etc):
-    """ Handle record from “Section 5: object descriptions”.
+    """Handle record from “Section 5: object descriptions”.
 
         Section 5: object descriptions. Each line contains a number
         (N), a TAB, and a message. If N is from 1 to 100, the message
@@ -237,7 +237,7 @@ def section5(data, n, *etc):
         messages[n] = messages.get(n, '') + more
 
 def section6(data, n, *etc):
-    """ Handle record from “Section 6: arbitrary messages”.
+    """Handle record from “Section 6: arbitrary messages”.
 
         Section 6: arbitrary messages. Same format as sections 1, 2,
         and 5, except the numbers bear no relation to anything (except
@@ -248,7 +248,7 @@ def section6(data, n, *etc):
     message.text += expand_tabs(etc) + '\n'
 
 def section7(data, n, room_n, fixed=None):
-    """ Handle record from “Section 7: object locations”.
+    """Handle record from “Section 7: object locations”.
 
         Section 7: object locations. Each line contains an object
         number and its initial location (zero (or omitted) if none).
@@ -271,7 +271,7 @@ def section7(data, n, room_n, fixed=None):
     obj.starting_rooms = list(obj.rooms)  # remember where things started
 
 def section8(data, word_n, message_n):
-    """ Handle record from “Section 8: action defaults”.
+    """Handle record from “Section 8: action defaults”.
 
         Section 8: action defaults. Each line contains an
         "action-verb" number and the index (in section 6) of the
@@ -286,7 +286,7 @@ def section8(data, word_n, message_n):
         word2.default_message = message
 
 def section9(data, bit, *nlist):
-    """ Handle record from “Section 9: liquid assets, etc.”.
+    """Handle record from “Section 9: liquid assets, etc.”.
 
         Section 9: liquid assets, etc. Each line contains a number (N)
         and up to 20 location numbers. Bit N (where 0 is the units
@@ -327,7 +327,7 @@ def section9(data, bit, *nlist):
             hint.rooms.append(room)
 
 def section10(data, score, line, *etc):
-    """ Handle record from “Section 10: class messages”.
+    """Handle record from “Section 10: class messages”.
 
         Section 10: class messages. Each line contains a number (N), a
         TAB, and a message describing a classification of player. The
@@ -341,7 +341,7 @@ def section10(data, score, line, *etc):
     data.class_messages.append((score, line))
 
 def section11(data, n, turns_needed, penalty, question_n, message_n):
-    """ Handle record from “Section 11: hints”.
+    """Handle record from “Section 11: hints”.
 
         Section 11: hints. Each line contains a hint number
         (corresponding to a COND bit, see section 9), the number of
@@ -364,7 +364,7 @@ def section11(data, n, turns_needed, penalty, question_n, message_n):
     hint.message = make_object(data.messages, Message, message_n)
 
 def section12(data, n, line):
-    """ Handle record from “Section 12: magic messages”.
+    """Handle record from “Section 12: magic messages”.
 
         Section 12: magic messages. Identical to section 6 except put
         in a separate section for easier reference. Magic messages are
