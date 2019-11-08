@@ -8,7 +8,7 @@ import argparse
 import os
 import re
 import readline
-from sys import executable, stdout
+import sys
 from time import sleep
 from . import load_advent_dat
 from .game import Game
@@ -16,18 +16,19 @@ from .game import Game
 BAUD = 1200
 
 def baudout(s):
+    out = sys.stdout
     for c in s:
         sleep(9. / BAUD)  # 8 bits + 1 stop bit @ the given baud rate
-        stdout.write(c)
-        stdout.flush()
+        out.write(c)
+        out.flush()
 
-def loop():
+def loop(args):
     parser = argparse.ArgumentParser(
         description='Adventure into the Colossal Caves.',
-        prog='{} -m adventure'.format(os.path.basename(executable)))
+        prog='{} -m adventure'.format(os.path.basename(sys.executable)))
     parser.add_argument(
         'savefile', nargs='?', help='The filename of game you have saved.')
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     if args.savefile is None:
         game = Game()
@@ -45,6 +46,6 @@ def loop():
             baudout(game.do_command(words))
 
 try:
-    loop()
+    loop(sys.argv[1:])
 except EOFError:
     pass
