@@ -4,6 +4,11 @@ Copyright 2010-2015 Brandon Rhodes.  Licensed as free software under the
 Apache License, Version 2.0 as detailed in the accompanying README.txt.
 
 """
+import sys
+
+if sys.version_info <= (3,):
+    raise RuntimeError('Alas, Adventure requires Python 3 or later')
+
 def load_advent_dat(data):
     import os
     from .data import parse
