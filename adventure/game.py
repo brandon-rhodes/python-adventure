@@ -837,6 +837,7 @@ class Game(Data):
     t_fee = write_default_message
     t_brief = write_default_message
     t_hours = write_default_message
+    t_walk = write_default_message
 
     def i_carry(self, verb):  #8010
         is_dwarf_here = any( dwarf.room == self.loc for dwarf in self.dwarves )
