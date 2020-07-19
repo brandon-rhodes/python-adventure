@@ -12,7 +12,7 @@ with open(README_PATH, encoding="utf-8") as f:
 
 setup(
     name='adventure',
-    version='1.4',
+    version='1.5',
     description='Colossal Cave adventure game at the Python prompt',
     long_description=README_TEXT,
     author='Brandon Craig Rhodes',
@@ -28,5 +28,5 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.2',
         'Topic :: Games/Entertainment',
-        ],
-    )
+    ],
+)
