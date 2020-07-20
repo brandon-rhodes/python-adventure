@@ -541,6 +541,9 @@ class Game(Data):
 
         if word1 == 'say':
             return self.t_say(word1, word2) if word2 else self.i_say(word1)
+        
+        if word2 == 'say':
+            return self.t_say(word2, word1)     
 
         kinds = (word1.kind, word2.kind if word2 else None)
 
