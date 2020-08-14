@@ -101,13 +101,13 @@ class Game(Data):
         return self.objects_at(self.loc)
 
     def objects_at(self, room):
-        return [ obj for obj in self.object_list if room in obj.rooms ]
+        return [obj for obj in self.object_list if obj.is_at(room)]
 
     def is_here(self, obj):
         if isinstance(obj, Dwarf):
             return self.loc is obj.room
         else:
-            return obj.is_toting or (self.loc in obj.rooms)
+            return obj.is_toting or obj.is_at(self.loc)
 
     @property
     def is_finished(self):
