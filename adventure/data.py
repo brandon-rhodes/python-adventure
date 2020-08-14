@@ -225,7 +225,7 @@ def section5(data, n, *etc):
         data._object = make_object(data.objects, Object, n)
         data._object.inventory_message = expand_tabs(etc)
     else:
-        n /= 100
+        n //= 100
         messages = data._object.messages
         if etc[0].startswith('>$<'):
             more = ''
