@@ -215,7 +215,7 @@ class Game(Data):
 
         for dwarf in self.dwarves + [ self.pirate ]:
 
-            locations = { move.action for move in dwarf.room.travel_table 
+            locations = { move.action for move in dwarf.room.travel_table
                           if dwarf.can_move(move)
                           and move.action is not dwarf.old_room
                           and move.action is not dwarf.room }
@@ -541,9 +541,9 @@ class Game(Data):
 
         if word1 == 'say':
             return self.t_say(word1, word2) if word2 else self.i_say(word1)
-        
+
         if word2 == 'say':
-            return self.t_say(word2, word1)     
+            return self.t_say(word2, word1)
 
         kinds = (word1.kind, word2.kind if word2 else None)
 
