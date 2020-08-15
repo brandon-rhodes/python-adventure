@@ -1409,6 +1409,7 @@ class Game(Data):
                 self.write_message(105)
             else:
                 self.bottle.contents = liquid
+                self.bottle.prop = 0 if (liquid is self.water) else 2
                 if self.bottle.is_toting:
                     liquid.is_toting = True
                 if liquid is self.oil:
