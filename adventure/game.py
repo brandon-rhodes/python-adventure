@@ -798,7 +798,8 @@ class Game(Data):
             if yes:
                 self.write_message(80 + self.deaths * 2)
                 if self.deaths < self.max_deaths:
-                    self.bottle.contents.hide()
+                    if self.bottle.contents is not None:
+                        self.bottle.contents.hide()
                     self.is_dead = False
                     if self.lamp.is_toting:
                         self.lamp.prop = 0
