@@ -18,6 +18,7 @@ def load_tests(loader, tests, pattern):
     tests.addTests(doctest.DocFileSuite('vignettes.txt'))
     tests.addTests(doctest.DocFileSuite('walkthrough1.txt'))
     tests.addTests(doctest.DocFileSuite('walkthrough2.txt'))
+    tests.addTests(doctest.DocFileSuite('walkthrough3.txt'))
     return tests
 
 class ChdirTemp(object):

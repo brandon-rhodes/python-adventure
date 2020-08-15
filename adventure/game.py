@@ -356,6 +356,12 @@ class Game(Data):
         if loc.n == 33 and self.random() < .25 and not self.is_closing:
             self.write_message(8)
 
+        # for obj in self.objects.values():
+        #     if obj.rooms and [room.n for room in obj.rooms] != [115]:
+        #         if (len(obj.messages) == 0) or (0 not in obj.messages):
+        #             raise ValueError('%r %r' % (obj, obj.rooms))
+        #             print(obj, obj.rooms)
+
         if not self.is_dark:
             for obj in self.objects_here:
 
@@ -792,7 +798,7 @@ class Game(Data):
             if yes:
                 self.write_message(80 + self.deaths * 2)
                 if self.deaths < self.max_deaths:
-                    # do water and oil thing
+                    self.bottle.contents.hide()
                     self.is_dead = False
                     if self.lamp.is_toting:
                         self.lamp.prop = 0
