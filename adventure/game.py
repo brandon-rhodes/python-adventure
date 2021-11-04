@@ -410,15 +410,9 @@ class Game(Data):
                         hint.turn_counter = 0
                     if self.should_offer_hint(hint, obj):
                         hint.turn_counter = 0
+                        self.current_hint = hint
 
-                        def callback(yes):
-                            if yes:
-                                self.write(hint.message)
-                                hint.used = True
-                            else:
-                                self.write_message(54)
-
-                        self.yesno(hint.question, callback)
+                        self.yesno(hint.question, self.hint_callback)
                         return
             else:
                 hint.turn_counter = 0
@@ -433,6 +427,14 @@ class Game(Data):
         self.could_fall_in_pit = self.is_dark  #2605
         if self.knife_location and self.knife_location is not self.loc:
             self.knife_location = None
+
+    def hint_callback(self, yes):
+        if yes:
+            self.write(self.current_hint.message)
+            self.current_hint.used = True
+        else:
+            self.write_message(54)
+        self.current_hint = None
 
     # The central do_command() method, that should be called over and
     # over again with words supplied by the user.
@@ -794,28 +796,28 @@ class Game(Data):
             self.score_and_exit()
             return
 
-        def callback(yes):
-            if yes:
-                self.write_message(80 + self.deaths * 2)
-                if self.deaths < self.max_deaths:
-                    if self.bottle.contents is not None:
-                        self.bottle.contents.hide()
-                    self.is_dead = False
-                    if self.lamp.is_toting:
-                        self.lamp.prop = 0
-                    for obj in self.inventory:
-                        if obj is self.lamp:
-                            obj.drop(self.rooms[1])
-                        else:
-                            obj.drop(self.oldloc2)
-                    self.loc = self.rooms[3]
-                    self.describe_location()
-                    return
-            else:
-                self.write_message(54)
-            self.score_and_exit()
+        self.yesno(self.messages[79 + self.deaths * 2], self.dead_callback)
 
-        self.yesno(self.messages[79 + self.deaths * 2], callback)
+    def dead_callback(self, yes):
+        if yes:
+            self.write_message(80 + self.deaths * 2)
+            if self.deaths < self.max_deaths:
+                if self.bottle.contents is not None:
+                    self.bottle.contents.hide()
+                self.is_dead = False
+                if self.lamp.is_toting:
+                    self.lamp.prop = 0
+                for obj in self.inventory:
+                    if obj is self.lamp:
+                        obj.drop(self.rooms[1])
+                    else:
+                        obj.drop(self.oldloc2)
+                self.loc = self.rooms[3]
+                self.describe_location()
+                return
+        else:
+            self.write_message(54)
+        self.score_and_exit()
 
     # Verbs.
 
@@ -1153,22 +1155,7 @@ class Game(Data):
             if self.dragon.prop != 0:
                 self.write_message(167)
             else:
-                def callback(yes):
-                    self.write(obj.messages[1])
-                    obj.prop = 2
-                    obj.is_fixed = True
-                    oldroom1 = obj.rooms[0]
-                    oldroom2 = obj.rooms[1]
-                    newroom = self.rooms[ (oldroom1.n + oldroom2.n) // 2 ]
-                    obj.drop(newroom)
-                    self.rug.prop = 0
-                    self.rug.is_fixed = False
-                    self.rug.drop(newroom)
-                    for oldroom in (oldroom1, oldroom2):
-                        for o in self.objects_at(oldroom):
-                            o.drop(newroom)
-                    self.move_to(newroom)
-                self.yesno(self.messages[49], callback, casual=True)
+                self.yesno(self.messages[49], self.dragon_callback, casual=True)
                 return
         elif obj is self.troll:
             self.write_message(157)
@@ -1177,6 +1164,22 @@ class Game(Data):
         else:
             self.write_message(44)
         self.finish_turn()
+
+    def dragon_callback(self, yes):
+        self.write(self.dragon.messages[1])
+        self.dragon.prop = 2
+        self.dragon.is_fixed = True
+        oldroom1 = self.dragon.rooms[0]
+        oldroom2 = self.dragon.rooms[1]
+        newroom = self.rooms[ (oldroom1.n + oldroom2.n) // 2 ]
+        self.dragon.drop(newroom)
+        self.rug.prop = 0
+        self.rug.is_fixed = False
+        self.rug.drop(newroom)
+        for oldroom in (oldroom1, oldroom2):
+            for o in self.objects_at(oldroom):
+                o.drop(newroom)
+        self.move_to(newroom)
 
     def i_pour(self, verb):  #9130
         if self.bottle.contents is None:
@@ -1319,11 +1322,12 @@ class Game(Data):
         self.t_attack(verb, None)
 
     def i_quit(self, verb):  #8180
-        def callback(yes):
-            self.write_message(54)
-            if yes:
-                self.score_and_exit()
-        self.yesno(self.messages[22], callback)
+        self.yesno(self.messages[22], self.quit_callback)
+
+    def quit_callback(self, yes):
+        self.write_message(54)
+        if yes:
+            self.score_and_exit()
 
     def t_find(self, verb, obj):  #9190
         if obj.is_toting:
@@ -1453,11 +1457,7 @@ class Game(Data):
         score, max_score = self.compute_score(for_score_command=True)
         self.write('If you were to quit now, you would score {}'
                    ' out of a possible {}.\n'.format(score, max_score))
-        def callback(yes):
-            self.write_message(54)
-            if yes:
-                self.score_and_exit()
-        self.yesno(self.messages[143], callback)
+        self.yesno(self.messages[143], self.quit_callback)
 
     def i_fee(self, verb):  #8250
         for n in range(5):
@@ -1511,13 +1511,7 @@ class Game(Data):
             return self.i_see_no(obj.names[0])
         elif (obj is self.oyster and not self.hints[2].used and
               self.oyster.is_toting):
-            def callback(yes):
-                if yes:
-                    self.hints[2].used = True
-                    self.write_message(193)
-                else:
-                    self.write_message(54)
-            self.yesno(self.messages[192], callback)
+            self.yesno(self.messages[192], self.oyster_callback)
         elif obj is self.oyster and self.hints[2].used:
             self.write_message(194)
         elif obj is self.message:
@@ -1529,6 +1523,13 @@ class Game(Data):
         else:
             self.write(verb.default_message)
         self.finish_turn()
+
+    def oyster_callback(self, yes):
+        if yes:
+            self.hints[2].used = True
+            self.write_message(193)
+        else:
+            self.write_message(54)
 
     def t_break(self, verb, obj):  #9280
         if obj is self.vase and self.vase.prop == 0:
