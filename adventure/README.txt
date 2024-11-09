@@ -4,6 +4,11 @@ same ``advent.dat`` file!) that lets you explore Colossal Cave, where
 others have found fortunes in treasure and gold, though it is rumored
 that some who enter are never seen again.
 
+You can run the game right at your command line if you have `uv
+<https://docs.astral.sh/uv/>`_ installed::
+
+    uvx adventure
+
 This page:
 
 http://rickadams.org/adventure/e_downloads.html
@@ -159,6 +164,7 @@ limitations under the License.
 Changelog
 =========
 
+| 1.7 — 2024 November 9 — add an ``adventure`` console script so this package can be run with ``uvx adventure``.
 | 1.6 — 2020 August 15 — add support for upper-case commands typed at the terminal; and fix exception if user dies with water in their bottle `(see #26) <https://github.com/brandon-rhodes/python-adventure/issues/26>`_.
 | 1.5 — 2020 July 18 — fix for fatal exception when “lamp turn” is entered.
 | 1.4 — 2016 January 31 — readline editing; added license; bug fix; test fix.
